@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Music Store</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<header>
+    <h1>Welcome to Music Store 🎵</h1>
+    <p>Your one-stop shop for music, instruments, and courses!</p>
+</header>
+
+<main>
+    <p>
+        Discover amazing music collections, buy instruments, and even learn from expert artists.
+        Join our community today and explore endless possibilities!
+    </p>
+
+    <div>
+        <a th:href="@{/users/register}">
+            <button>Sign Up</button>
+        </a>
+        <a th:href="@{/users/login}">
+            <button>Login</button>
+        </a>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2025 Music Store. All rights reserved.</p>
+</footer>
+</body>
+</html>

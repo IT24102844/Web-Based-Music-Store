@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>User Dashboard</title>
+</head>
+<body>
+<h2>Welcome, <span th:text="${user.name}"></span>!</h2>
+
+<p>Email: <span th:text="${user.email}"></span></p>
+<p>Role: <span th:text="${user.role}"></span></p>
+<p>Status: <span th:text="${user.status}"></span></p>
+
+<a th:href="@{/users/edit-profile}">Update Profile</a> |
+<a th:href="@{/users/logout}">Logout</a>
+</body>
+</html>

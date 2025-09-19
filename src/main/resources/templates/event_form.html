@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${event.id} == null ? 'Create Event' : 'Edit Event'">Event Form</title>
+</head>
+<body>
+<h1 th:text="${event.id} == null ? 'Create New Event' : 'Edit Event'">Event Form</h1>
+
+<form th:action="${event.id} == null ? @{/artist/event/save} : @{/artist/event/update/{id}(id=${event.id})}" 
+      th:object="${event}" method="post">
+
+    <label>Title:</label>
+    <input type="text" th:field="*{title}" /><br/><br/>
+
+    <label>Description:</label>
+    <textarea th:field="*{description}"></textarea><br/><br/>
+
+    <label>Date:</label>
+    <input type="date" th:field="*{date}" /><br/><br/>
+
+    <label>Venue:</label>
+    <input type="text" th:field="*{venue}" /><br/><br/>
+
+    <label>Ticket Price:</label>
+    <input type="number" step="0.01" th:field="*{ticketPrice}" /><br/><br/>
+
+    <button type="submit" th:text="${event.id} == null ? 'Create Event' : 'Update Event'">Submit</button>
+</form>
+
+<a href="/events">View All Events</a>
+
+</body>
+</html>

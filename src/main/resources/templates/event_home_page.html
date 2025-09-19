@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My Events</title>
+</head>
+<body>
+<h1 th:text="'Welcome ' + ${artist.username} + '!'"></h1>
+<h2>Your Created Events</h2>
+
+<table border="1">
+    <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Date</th>
+        <th>Venue</th>
+        <th>Ticket Price</th>
+    </tr>
+    <tr th:each="event : ${events}">
+        <td th:text="${event.title}"></td>
+        <td th:text="${event.description}"></td>
+        <td th:text="${event.date}"></td>
+        <td th:text="${event.venue}"></td>
+        <td th:text="${event.ticketPrice}"></td>
+    </tr>
+</table>
+
+<br/>
+<a href="/artist/event/new">Create Another Event</a> |
+<a href="/events">View All Events</a>
+</body>
+</html>

@@ -48,19 +48,36 @@ public class UserService {
     }
 
     public User updateUser(Long id, User updatedUser) {
-        User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (id == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+        if (updatedUser == null) {
+            throw new IllegalArgumentException("Updated user data cannot be null");
+        }
 
-        existingUser.setName(updatedUser.getName());
-        existingUser.setPassword(updatedUser.getPassword());
-        existingUser.setRole(updatedUser.getRole());
-        existingUser.setStatus(updatedUser.getStatus());
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+
+        // Update fields with null checks
+        if (updatedUser.getName() != null) {
+            existingUser.setName(updatedUser.getName());
+        }
+
+        if (updatedUser.getPassword() != null) {
+            existingUser.setPassword(updatedUser.getPassword());
+        }
+
+        if (updatedUser.getRole() != null) {
+            existingUser.setRole(updatedUser.getRole());
+        }
+
+        if (updatedUser.getStatus() != null) {
+            existingUser.setStatus(updatedUser.getStatus());
+        }
+
         existingUser.setUpdatedAt(LocalDateTime.now());
 
-        return userRepository.save(existingUser); // <-- this will trigger UPDATE not INSERT
-    }
-    public User updateUser(User user) {
-        return userRepository.save(user);
+        return userRepository.save(existingUser);
     }
 
     public void deleteUser(Long id) {

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.Optional;
 
 @Controller
@@ -19,18 +18,6 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-
-    @GetMapping("/dashboard")
-    public String dashboard(HttpSession session, Model model) {
-        User sessionUser = (User) session.getAttribute("loggedInUser");
-        if (sessionUser == null) {
-            return "redirect:/users/login";
-        }
-
-        model.addAttribute("user", sessionUser);
-        return "dashboard"; // this should point to dashboard.html
-    }
-
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
@@ -55,15 +42,30 @@ public class UserController {
                         Model model,
                         HttpSession session) {
         Optional<User> user = userService.login(email, password);
+
         if (user.isPresent()) {
-            session.setAttribute("loggedInUser", user.get()); // save user in session
-            model.addAttribute("user", user.get());
-            return "dashboard";
+            User loggedInUser = user.get();
+            session.setAttribute("loggedInUser", loggedInUser);
+            model.addAttribute("user", loggedInUser);
+
+            switch (loggedInUser.getRole().name()) {
+                case "ADMIN":
+                    return "redirect:/dashboard/admin";
+                case "ARTIST":
+                    return "redirect:/dashboard/artist";
+                case "ITEM_SELLER":
+                    return "redirect:/dashboard/item-seller";
+                case "COURSE_SELLER":
+                    return "redirect:/dashboard/course-seller";
+                default: // CUSTOMER or anything else
+                    return "redirect:/dashboard/customer";
+            }
         } else {
             model.addAttribute("error", "Invalid credentials");
             return "login";
         }
     }
+
 
     @GetMapping("/edit-profile")
     public String editProfileForm(HttpSession session, Model model) {
@@ -90,16 +92,29 @@ public class UserController {
 
         userService.updateUser(sessionUser.getUserId(), user);
 
-        // refresh session with updated user
-        session.setAttribute("loggedInUser",
-                userService.getUserById(sessionUser.getUserId()).get());
+        User updatedUser = userService.getUserById(sessionUser.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found after update"));
+        session.setAttribute("loggedInUser", updatedUser);
 
-        return "redirect:/users/dashboard";
+        switch (updatedUser.getRole().name()) {
+            case "ADMIN":
+                return "redirect:/dashboard/admin";
+            case "ARTIST":
+                return "redirect:/dashboard/artist";
+            case "ITEM_SELLER":
+                return "redirect:/dashboard/item-seller";
+            case "COURSE_SELLER":
+                return "redirect:/dashboard/course-seller";
+            default:
+                return "redirect:/dashboard/customer";
+        }
     }
 
 
+
     @GetMapping("/logout")
-    public String logout() {
+    public String logout(HttpSession session) {
+        session.invalidate();
         return "redirect:/users/login";
     }
 

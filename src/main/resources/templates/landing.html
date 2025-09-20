@@ -1,33 +1,73 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <title>Music Store</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TuneWave - Music, Instruments & Courses</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Monospace:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/landing.css}"/>
 </head>
+
 <body>
-<header>
-    <h1>Welcome to Music Store 🎵</h1>
-    <p>Your one-stop shop for music, instruments, and courses!</p>
-</header>
+<div class="container">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">TuneWave</div>
+        <ul class="nav-links">
+            <li><a href="#music">Music</a></li>
+            <li><a href="#instruments">Instruments</a></li>
+            <li><a href="#courses">Courses</a></li>
+            <li><a href="#about">About</a></li>
+        </ul>
+        <div class="auth-buttons">
+            <a th:href="@{/users/login}" class="btn btn-login">Login</a>
+            <a th:href="@{/users/register}" class="btn btn-signup">Sign Up</a>
+        </div>
+    </nav>
 
-<main>
-    <p>
-        Discover amazing music collections, buy instruments, and even learn from expert artists.
-        Join our community today and explore endless possibilities!
-    </p>
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Your Sound, Your Wave</h1>
+        <p>Discover premium music, professional instruments, and expert courses all in one place. Join thousands of
+            musicians who trust TuneWave for their musical journey.</p>
+        <a th:href="@{/users/register}" class="cta-button">Start Your Journey</a>
+    </section>
 
-    <div>
-        <a th:href="@{/users/register}">
-            <button>Sign Up</button>
-        </a>
-        <a th:href="@{/users/login}">
-            <button>Login</button>
-        </a>
-    </div>
-</main>
+    <!-- Features Section -->
+    <section class="features">
+        <h2>Everything Music</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">🎵</span>
+                <h3>Premium Music</h3>
+                <p>Access thousands of high-quality tracks from emerging and established artists. Stream, download,
+                    and discover your next favorite song.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🎸</span>
+                <h3>Professional Instruments</h3>
+                <p>Shop from our curated collection of guitars, keyboards, drums, and more. Quality instruments for
+                    every skill level and budget.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🎓</span>
+                <h3>Expert Courses</h3>
+                <p>Learn from industry professionals with our comprehensive music courses. From beginner basics to
+                    advanced techniques.</p>
+            </div>
+        </div>
+    </section>
 
-<footer>
-    <p>&copy; 2025 Music Store. All rights reserved.</p>
-</footer>
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 TuneWave. All rights reserved.</p>
+        <div class="social-links">
+            <a>♪</a>
+            <a>♫</a>
+            <a>♬</a>
+        </div>
+    </footer>
+</div>
 </body>
 </html>

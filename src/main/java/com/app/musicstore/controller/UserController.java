@@ -22,7 +22,7 @@ public class UserController {
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
         model.addAttribute("user", new User());
-        return "register"; // templates/register.html
+        return "register";
     }
 
     @PostMapping("/register")
@@ -33,7 +33,7 @@ public class UserController {
 
     @GetMapping("/login")
     public String showLoginForm() {
-        return "login"; // templates/login.html
+        return "login";
     }
 
     @PostMapping("/login")
@@ -57,7 +57,7 @@ public class UserController {
                     return "redirect:/dashboard/item-seller";
                 case "COURSE_SELLER":
                     return "redirect:/dashboard/course-seller";
-                default: // CUSTOMER or anything else
+                default:
                     return "redirect:/dashboard/customer";
             }
         } else {
@@ -74,12 +74,11 @@ public class UserController {
             return "redirect:/users/login";
         }
 
-        // Fetch latest user details from DB
         User user = userService.getUserById(sessionUser.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         model.addAttribute("user", user);
-        return "edit-profile"; // points to edit-profile.html
+        return "edit-profile";
     }
 
 
@@ -110,12 +109,10 @@ public class UserController {
         }
     }
 
-
-
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/users/login";
+        return "redirect:/";
     }
 
 }

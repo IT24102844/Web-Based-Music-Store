@@ -1,6 +1,7 @@
 package com.app.musicstore.service;
 
 import com.app.musicstore.model.Role;
+import com.app.musicstore.model.Status;
 import com.app.musicstore.model.User;
 import com.app.musicstore.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,22 +30,13 @@ public class UserService {
         return userRepository.save(user);
     }
 
-
     public Optional<User> login(String email, String password) {
         return userRepository.findByEmail(email)
                 .filter(u -> u.getPassword().equals(password)); // later → BCrypt
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
-    }
-
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
     }
 
     public User updateUser(Long id, User updatedUser) {
@@ -58,7 +50,6 @@ public class UserService {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
 
-        // Update fields with null checks
         if (updatedUser.getName() != null) {
             existingUser.setName(updatedUser.getName());
         }
@@ -80,7 +71,26 @@ public class UserService {
         return userRepository.save(existingUser);
     }
 
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
+
+    public void deleteUser(Long userId) {
+        userRepository.deleteById(userId);
+    }
+
+    public void changeUserRole(Long userId, String newRole) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setRole(Role.valueOf(newRole));
+        userRepository.save(user);
+    }
+
+    public void changeUserStatus(Long userId, String status) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setStatus(Status.valueOf(status)); // e.g. ACTIVE, INACTIVE, SUSPENDED
+        userRepository.save(user);
+    }
+
 }

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Customer Dashboard</title>
+</head>
+<body>
+
+<h1>Welcome, <span th:text="${user.name}"></span>!</h1>
+
+<p>You are logged in as a Customer.</p>
+
+<p>Email: <span th:text="${user.email}"></span></p>
+<p>Role: <span th:text="${user.role}"></span></p>
+<p>Status: <span th:text="${user.status}"></span></p>
+
+<a th:href="@{/users/edit-profile}">Update Profile</a>
+<a th:href="@{/users/logout}">Logout</a>
+
+</body>
+</html>

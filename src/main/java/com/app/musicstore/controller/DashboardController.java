@@ -1,7 +1,9 @@
 package com.app.musicstore.controller;
 
 import com.app.musicstore.model.User;
-import jakarta.servlet.http.HttpSession;
+import com.app.musicstore.security.CustomUserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,8 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class DashboardController {
 
     @GetMapping("/dashboard/admin")
-    public String adminDashboard(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("loggedInUser");
+    public String adminDashboard(Model model) {
+        User user = getAuthenticatedUser();
         if (user == null) {
             return "redirect:/users/login";
         }
@@ -20,8 +22,8 @@ public class DashboardController {
     }
 
     @GetMapping("/dashboard/artist")
-    public String artistDashboard(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("loggedInUser");
+    public String artistDashboard(Model model) {
+        User user = getAuthenticatedUser();
         if (user == null) {
             return "redirect:/users/login";
         }
@@ -30,8 +32,8 @@ public class DashboardController {
     }
 
     @GetMapping("/dashboard/item-seller")
-    public String itemSellerDashboard(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("loggedInUser");
+    public String itemSellerDashboard(Model model) {
+        User user = getAuthenticatedUser();
         if (user == null) {
             return "redirect:/users/login";
         }
@@ -40,8 +42,8 @@ public class DashboardController {
     }
 
     @GetMapping("/dashboard/course-seller")
-    public String courseSellerDashboard(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("loggedInUser");
+    public String courseSellerDashboard(Model model) {
+        User user = getAuthenticatedUser();
         if (user == null) {
             return "redirect:/users/login";
         }
@@ -50,12 +52,29 @@ public class DashboardController {
     }
 
     @GetMapping("/dashboard/customer")
-    public String customerDashboard(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("loggedInUser");
+    public String customerDashboard(Model model) {
+        User user = getAuthenticatedUser();
         if (user == null) {
             return "redirect:/users/login";
         }
         model.addAttribute("user", user);
         return "customer-dashboard";
+    }
+
+    /**
+     * Helper method to get the authenticated user from SecurityContext
+     */
+    private User getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null &&
+                authentication.isAuthenticated() &&
+                authentication.getPrincipal() instanceof CustomUserDetails) {
+
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            return userDetails.getUser(); // This will return the User object from CustomUserDetails
+        }
+
+        return null;
     }
 }

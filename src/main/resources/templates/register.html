@@ -1,32 +1,327 @@
 <!DOCTYPE html>
-        <html xmlns:th="http://www.thymeleaf.org" lang="en">
-        <head>
-        <title>User Registration</title>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Music Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .form-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        .form-section h5 {
+            color: #495057;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .required::after {
+            content: " *";
+            color: #dc3545;
+        }
+        .role-fields {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .btn-register {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #6c757d;
+        }
+        .login-link a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
-<body>
-<h2>Register</h2>
-<form th:action="@{/users/register}" method="post" th:object="${user}">
-    <label>Name:</label>
-    <input type="text" th:field="*{name}" required><br>
+<body class="bg-light">
+<div class="container">
+    <div class="text-center mb-4">
+        <h2 class="text-primary">🎵 Join Music Store</h2>
+        <p class="text-muted">Create your account and start your musical journey</p>
+    </div>
 
-    <label>Email:</label>
-    <input type="email" th:field="*{email}" required><br>
+    <!-- Error/Success Messages -->
+    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show">
+        <strong>Error!</strong> <span th:text="${param.error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 
-    <label>Password:</label>
-    <input type="password" th:field="*{password}" required><br>
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
+        <strong>Success!</strong> <span th:text="${param.success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 
-    <label>Role:</label>
-    <select th:field="*{role}">
-        <option value="CUSTOMER">Customer</option>
-        <option value="ARTIST">Artist</option>
-        <option value="ITEM_SELLER">Item Seller</option>
-        <option value="COURSE_SELLER">Course Seller</option>
-    </select><br>
+    <form th:action="@{/users/register}" method="post" th:object="${user}" class="needs-validation" novalidate>
 
-    <button type="submit">Register</button>
-</form>
+        <!-- Basic Information Section -->
+        <div class="form-section">
+            <h5>📝 Basic Information</h5>
 
-<a th:href="@{/users/login}">Already have an account? Login</a>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label required">Full Name</label>
+                    <input type="text" class="form-control" id="name" th:field="*{name}"
+                           placeholder="Enter your full name" required>
+                    <div class="invalid-feedback">Please enter your name.</div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label required">Email Address</label>
+                    <input type="email" class="form-control" id="email" th:field="*{email}"
+                           placeholder="your.email@example.com" required>
+                    <div class="invalid-feedback">Please enter a valid email address.</div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="password" class="form-label required">Password</label>
+                    <input type="password" class="form-control" id="password" th:field="*{password}"
+                           placeholder="At least 6 characters" minlength="6" required>
+                    <div class="invalid-feedback">Password must be at least 6 characters long.</div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="confirmPassword" class="form-label required">Confirm Password</label>
+                    <input type="password" class="form-control" id="confirmPassword"
+                           placeholder="Confirm your password" required>
+                    <div class="invalid-feedback">Passwords must match.</div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="phoneNo" class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" id="phoneNo" th:field="*{phoneNo}"
+                           placeholder="+1 (555) 123-4567">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="role" class="form-label required">Account Type</label>
+                    <select class="form-select" id="role" th:field="*{role}" required onchange="showRoleFields(this.value)">
+                        <option value="">Select your role...</option>
+                        <option value="CUSTOMER">🎧 Music Fan (Customer)</option>
+                        <option value="ARTIST">🎤 Performing Artist</option>
+                        <option value="COURSE_SELLER">📚 Music Instructor</option>
+                        <option value="ITEM_SELLER">🎸 Instrument Seller</option>
+                    </select>
+                    <div class="invalid-feedback">Please select your account type.</div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="address" class="form-label">Address</label>
+                <textarea class="form-control" id="address" th:field="*{address}"
+                          placeholder="Enter your full address" rows="2"></textarea>
+            </div>
+        </div>
+
+        <!-- Role-Specific Fields -->
+
+        <!-- Artist Fields -->
+        <div id="artistFields" class="form-section role-fields">
+            <h5>🎤 Artist Profile</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="stageName" class="form-label required">Stage Name</label>
+                    <input type="text" class="form-control" id="stageName" name="stageName"
+                           placeholder="Your artist name" required>
+                    <div class="invalid-feedback">Please enter your stage name.</div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="genre" class="form-label">Music Genre</label>
+                    <input type="text" class="form-control" id="genre" name="genre"
+                           placeholder="e.g., Rock, Jazz, Pop">
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Fields -->
+        <div id="customerFields" class="form-section role-fields">
+            <h5>🎧 Music Preferences</h5>
+            <div class="mb-3">
+                <label for="preferences" class="form-label">Favorite Music Genres/Artists</label>
+                <input type="text" class="form-control" id="preferences" name="preferences"
+                       placeholder="e.g., Rock, Classical, Jazz, Beatles, Mozart">
+                <div class="form-text">Tell us what kind of music you enjoy!</div>
+            </div>
+        </div>
+
+        <!-- Course Seller Fields -->
+        <div id="courseSellerFields" class="form-section role-fields">
+            <h5>📚 Teaching Profile</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="expertise" class="form-label required">Area of Expertise</label>
+                    <input type="text" class="form-control" id="expertise" name="expertise"
+                           placeholder="e.g., Guitar, Piano, Vocal" required>
+                    <div class="invalid-feedback">Please enter your area of expertise.</div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="expYears" class="form-label required">Years of Experience</label>
+                    <input type="number" class="form-control" id="expYears" name="expYears"
+                           min="0" max="50" placeholder="0" required>
+                    <div class="invalid-feedback">Please enter your years of experience.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item Seller (Instrument Seller) Fields -->
+        <div id="itemSellerFields" class="form-section role-fields">
+            <h5>🎸 Business Information</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="storeName" class="form-label required">Store Name</label>
+                    <input type="text" class="form-control" id="storeName" name="storeName"
+                           placeholder="Your business name" required>
+                    <div class="invalid-feedback">Please enter your store name.</div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="location" class="form-label required">Business Location</label>
+                    <input type="text" class="form-control" id="location" name="location"
+                           placeholder="City, State" required>
+                    <div class="invalid-feedback">Please enter your business location.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terms and Submit -->
+        <div class="form-section">
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="terms" required>
+                <label class="form-check-label" for="terms">
+                    I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                </label>
+                <div class="invalid-feedback">You must agree before submitting.</div>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-register">
+                    🎵 Create Account
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div class="login-link">
+        <p>Already have an account? <a th:href="@{/users/login}">Sign in here</a></p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Show/hide role-specific fields
+    function showRoleFields(role) {
+        // Hide all role fields
+        document.querySelectorAll('.role-fields').forEach(field => {
+            field.style.display = 'none';
+            // Clear required attributes when hidden
+            field.querySelectorAll('[required]').forEach(input => {
+                input.removeAttribute('required');
+            });
+        });
+
+        // Show fields for selected role and set required attributes
+        if (role === 'ARTIST') {
+            const artistFields = document.getElementById('artistFields');
+            artistFields.style.display = 'block';
+            artistFields.querySelectorAll('input').forEach(input => {
+                if (input.id === 'stageName') input.setAttribute('required', 'true');
+            });
+        } else if (role === 'CUSTOMER') {
+            document.getElementById('customerFields').style.display = 'block';
+        } else if (role === 'COURSE_SELLER') {
+            const courseFields = document.getElementById('courseSellerFields');
+            courseFields.style.display = 'block';
+            courseFields.querySelectorAll('input').forEach(input => {
+                if (input.id === 'expertise' || input.id === 'expYears') input.setAttribute('required', 'true');
+            });
+        } else if (role === 'ITEM_SELLER') {
+            const itemFields = document.getElementById('itemSellerFields');
+            itemFields.style.display = 'block';
+            itemFields.querySelectorAll('input').forEach(input => {
+                if (input.id === 'storeName' || input.id === 'location') input.setAttribute('required', 'true');
+            });
+        }
+    }
+
+    // Password confirmation validation
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+        const password = document.getElementById('password');
+        const confirmPassword = this;
+
+        if (password.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity('Passwords must match');
+        } else {
+            confirmPassword.setCustomValidity('');
+        }
+    });
+
+    // Form validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+
+        // Show appropriate fields based on selected role
+        const roleSelect = document.getElementById('role');
+        if (roleSelect.value) {
+            showRoleFields(roleSelect.value);
+        }
+    });
+
+    // Real-time validation
+    document.querySelectorAll('input, select').forEach(input => {
+        input.addEventListener('blur', function() {
+            this.checkValidity();
+        });
+    });
+</script>
 </body>
 </html>

@@ -13,8 +13,10 @@
 <p>Role: <span th:text="${user.role}"></span></p>
 <p>Status: <span th:text="${user.status}"></span></p>
 
-<a th:href="@{/users/edit-profile}">Update Profile</a>
-<a th:href="@{/users/logout}">Logout</a>
+<!-- Links -->
+<a th:href="@{/users/edit-profile}">Update Profile</a> |
+<a th:href="@{/users/logout}">Logout</a> |
+<a th:href="@{/admin/users}">Manage Users</a>  <!-- ✅ Added Manage Users button -->
 
 </body>
 </html>

@@ -1,125 +1,86 @@
 package com.app.musicstore.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "Users")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    private Long userId;
 
-    @Column(name = "email", unique = true, nullable = false, length = 255)
-    private String email;
+    @NotBlank(message = "Name is required")
+    @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
+    private String name;
 
-    @Column(name = "password", length = 255)
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
-    @Column(name = "role", length = 50)
-    private String role;
+    private String phoneNo;
 
-    @Column(name = "status", length = 20)
-    private String status;
+    @Email(message = "Email should be valid")
+    @NotBlank(message = "Email is required")
+    @Column(unique = true, nullable = false)
+    private String email;
 
-    @Column(name = "createdAt")
-    private LocalDateTime createdAt;
+    private String address;
 
-    @Column(name = "updatedAt")
-    private LocalDateTime updatedAt;
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.CUSTOMER;
+
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.ACTIVE;
+
+    @Column(updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     // Constructors
-    public User() {
-    }
+    public User() {}
 
-    public User(String email, String password, String role, String status) {
+    public User(String name, String email, String password, Role role) {
+        this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
-        this.status = status;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
     }
 
     // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public String getPhoneNo() { return phoneNo; }
+    public void setPhoneNo(String phoneNo) { this.phoneNo = phoneNo; }
 
-    public String getPassword() {
-        return password;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public String getRole() {
-        return role;
-    }
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 
-    public void setRole(String role) {
-        this.role = role;
-    }
+    public Status getStatus() { return status; }
+    public void setStatus(Status status) { this.status = status; }
 
-    public String getStatus() {
-        return status;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    // Simple role checks (no Spring Security)
-    public boolean isArtist() {
-        return "ARTIST".equals(role);
-    }
-
-    public boolean isAdmin() {
-        return "ADMIN".equals(role);
-    }
-
-    public boolean isActive() {
-        return "ACTIVE".equals(status);
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", email='" + email + '\'' +
-                ", role='" + role + '\'' +
-                ", status='" + status + '\'' +
-                '}';
-    }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

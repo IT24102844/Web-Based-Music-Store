@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>User Management</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<h2>Manage Users</h2>
+<table border="1">
+    <tr>
+        <th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th>
+    </tr>
+    <tr th:each="user : ${users}">
+        <td th:text="${user.userId}"></td>
+        <td th:text="${user.name}"></td>
+        <td th:text="${user.email}"></td>
+        <td th:text="${user.role}"></td>
+        <td th:text="${user.status}"></td>
+        <td>
+            <a th:href="@{'/admin/users/delete/' + ${user.userId}}">Delete</a>
+            <form th:action="@{'/admin/users/role/' + ${user.userId}}" method="post" style="display:inline;">
+                <select name="role">
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="CUSTOMER">CUSTOMER</option>
+                    <option value="ARTIST">ARTIST</option>
+                    <option value="ITEM_SELLER">ITEM_SELLER</option>
+                    <option value="COURSE_SELLER">COURSE_SELLER</option>
+                </select>
+                <button type="submit">Change Role</button>
+            </form>
+            <form th:action="@{'/admin/users/status/' + ${user.userId}}" method="post" style="display:inline;">
+                <select name="status">
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="INACTIVE">INACTIVE</option>
+                    <option value="SUSPENDED">SUSPENDED</option>
+                </select>
+                <button type="submit">Change Status</button>
+            </form>
+        </td>
+    </tr>
+</table>
+<a th:href="@{/dashboard/admin}">
+    <button type="button">⬅ Back to Dashboard</button>
+</a>
+
+</body>
+</html>

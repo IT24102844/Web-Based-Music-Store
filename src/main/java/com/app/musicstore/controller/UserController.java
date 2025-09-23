@@ -1,105 +1,129 @@
 package com.app.musicstore.controller;
 
-import com.app.musicstore.model.entity.Event;
-import com.app.musicstore.model.entity.User;
-import com.app.musicstore.service.EventService;
+import com.app.musicstore.model.*;
+import com.app.musicstore.security.CustomUserDetails;
 import com.app.musicstore.service.UserService;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private EventService eventService;
-
-    // Artist Dashboard
-    @GetMapping("/dashboard")
-    public String artistDashboard(Model model, HttpSession session) {
-        User currentUser = (User) session.getAttribute("currentUser");
-        if (currentUser == null || !"ARTIST".equals(currentUser.getRole())) {
-            return "redirect:/login?error=artistRequired";
-        }
-
-        List<Event> userEvents = eventService.getArtistEvents(currentUser);
-        model.addAttribute("user", currentUser);
-        model.addAttribute("events", userEvents);
-        return "artist-dashboard";
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
-    // User list (admin only)
-    @GetMapping("/list")
-    public String listUsers(Model model, HttpSession session) {
-        User currentUser = (User) session.getAttribute("currentUser");
-
-        if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
-            return "redirect:/events?error=adminRequired";
-        }
-
-        List<User> allUsers = userService.getAllUsers();
-        model.addAttribute("users", allUsers);
-        return "home";
+    @GetMapping("/register")
+    public String showRegisterForm(Model model) {
+        model.addAttribute("user", new User());
+        return "register";
     }
 
-    // Profile view
-    @GetMapping("/profile")
-    public String showProfile(Model model, HttpSession session) {
-        User currentUser = (User) session.getAttribute("currentUser");
-        if (currentUser == null) {
-            return "redirect:/login?error=loginRequired";
-        }
-
-        model.addAttribute("user", currentUser);
-        return "user_profile";
-    }
-
-    // Profile update
-    @PostMapping("/profile/update")
-    public String updateProfile(@ModelAttribute User user,
-            HttpSession session,
-            RedirectAttributes redirectAttributes) {
-
-        User currentUser = (User) session.getAttribute("currentUser");
-        if (currentUser == null) {
-            return "redirect:/login?error=loginRequired";
-        }
-
+    @PostMapping("/register")
+    public String registerUser(@ModelAttribute User user,
+                               @RequestParam Map<String, String> allParams) {
         try {
-            if (user.getEmail() != null && !user.getEmail().trim().isEmpty()) {
-                if (!user.getEmail().equals(currentUser.getEmail()) &&
-                        userService.findByEmail(user.getEmail()).isPresent()) {
-                    redirectAttributes.addFlashAttribute("error", "Email already in use");
-                    return "redirect:/users/profile";
-                }
-                currentUser.setEmail(user.getEmail());
-            }
-
-            if (user.getPassword() != null && !user.getPassword().trim().isEmpty()) {
-                currentUser.setPassword(user.getPassword());
-            }
-
-            currentUser.setUpdatedAt(java.time.LocalDateTime.now());
-            User updatedUser = userService.saveUser(currentUser);
-
-            // FIXED: Update session with updated user
-            session.setAttribute("currentUser", updatedUser);
-
-            redirectAttributes.addFlashAttribute("success", "Profile updated successfully!");
-            return "redirect:/users/profile";
-
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to update profile: " + e.getMessage());
-            return "redirect:/users/profile";
+            userService.registerUserWithDetails(user, allParams);
+            return "redirect:/users/login?success=Registration successful! Please login.";
+        } catch (IllegalArgumentException e) {
+            return "redirect:/users/register?error=" + e.getMessage();
         }
+    }
+
+    @GetMapping("/login")
+    public String showLoginForm(@RequestParam Optional<String> error,
+                                @RequestParam Optional<String> success,
+                                Model model) {
+        error.ifPresent(e -> model.addAttribute("error", e));
+        success.ifPresent(s -> model.addAttribute("success", s));
+        return "login";
+    }
+
+    @GetMapping("/edit-profile")
+    public String editProfileForm(HttpSession session, Model model) {
+        var sessionUser = (User) session.getAttribute("loggedInUser");
+        if (sessionUser == null) {
+            return "redirect:/users/login";
+        }
+
+        var user = userService.getUserById(sessionUser.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        model.addAttribute("user", user);
+        return "edit-profile";
+    }
+
+    @PostMapping("/update-profile")
+    public String updateProfile(@ModelAttribute User user,
+                                HttpSession session,
+                                @RequestParam Map<String, String> allParams) {
+        var sessionUser = (User) session.getAttribute("loggedInUser");
+        if (sessionUser == null) {
+            return "redirect:/users/login";
+        }
+
+        userService.updateUser(sessionUser.getUserId(), user);
+
+        // Update session with latest user data
+        var updatedUser = userService.getUserById(sessionUser.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found after update"));
+        session.setAttribute("loggedInUser", updatedUser);
+
+        return switch (updatedUser.getRole()) {
+            case ADMIN -> "redirect:/dashboard/admin?success=Profile updated successfully";
+            case ARTIST -> "redirect:/dashboard/artist?success=Profile updated successfully";
+            case ITEM_SELLER -> "redirect:/dashboard/item-seller?success=Profile updated successfully";
+            case COURSE_SELLER -> "redirect:/dashboard/course-seller?success=Profile updated successfully";
+            case CUSTOMER -> "redirect:/dashboard/customer?success=Profile updated successfully";
+        };
+    }
+
+    @GetMapping("/complete-profile")
+    public String showCompleteProfileForm(HttpSession session, Model model) {
+        var user = (User) session.getAttribute("loggedInUser");
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+
+        // Use switch expression
+        return switch (user.getRole()) {
+            case ARTIST -> {
+                model.addAttribute("artist", new Artist());
+                yield "complete-artist-profile";
+            }
+            case CUSTOMER -> {
+                model.addAttribute("customer", new Customer());
+                yield "complete-customer-profile";
+            }
+            case COURSE_SELLER -> {
+                model.addAttribute("courseSeller", new CourseSeller());
+                yield "complete-course-seller-profile";
+            }
+            default -> "redirect:/dashboard";
+        };
+    }
+
+    private User getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null &&
+                authentication.isAuthenticated() &&
+                authentication.getPrincipal() instanceof CustomUserDetails) {
+
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            return userDetails.getUser();
+        }
+
+        return null;
     }
 }

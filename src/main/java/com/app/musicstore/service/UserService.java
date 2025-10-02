@@ -19,21 +19,16 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final ArtistService artistService;
     private final CustomerService customerService;
-    private final CourseSellerService courseSellerService;
-    private final InstrumentSellerService instrumentSellerService;
+
 
     public UserService(UserRepository userRepository,
                        BCryptPasswordEncoder passwordEncoder,
                        ArtistService artistService,
-                       CustomerService customerService,
-                       CourseSellerService courseSellerService,
-                       InstrumentSellerService instrumentSellerService) {
+                       CustomerService customerService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.artistService = artistService;
         this.customerService = customerService;
-        this.courseSellerService = courseSellerService;
-        this.instrumentSellerService = instrumentSellerService;
     }
 
     public User registerUser(User user) {
@@ -90,40 +85,6 @@ public class UserService {
                 customer.setPreferences(roleSpecificData.get("preferences"));
 
                 savedUser = customerService.save(customer);
-            }
-            case COURSE_SELLER -> {
-                CourseSeller seller = new CourseSeller();
-                seller.setName(user.getName());
-                seller.setEmail(user.getEmail());
-                seller.setPassword(user.getPassword());
-                seller.setPhoneNo(user.getPhoneNo());
-                seller.setAddress(user.getAddress());
-                seller.setRole(Role.COURSE_SELLER);
-                seller.setStatus(user.getStatus());
-                seller.setCreatedAt(user.getCreatedAt());
-                seller.setUpdatedAt(user.getUpdatedAt());
-
-                seller.setExpertise(roleSpecificData.get("expertise"));
-                seller.setExpYears(Integer.parseInt(roleSpecificData.getOrDefault("expYears", "0")));
-
-                savedUser = courseSellerService.save(seller);
-            }
-            case ITEM_SELLER -> {
-                InstrumentSeller seller = new InstrumentSeller();
-                seller.setName(user.getName());
-                seller.setEmail(user.getEmail());
-                seller.setPassword(user.getPassword());
-                seller.setPhoneNo(user.getPhoneNo());
-                seller.setAddress(user.getAddress());
-                seller.setRole(Role.ITEM_SELLER);
-                seller.setStatus(user.getStatus());
-                seller.setCreatedAt(user.getCreatedAt());
-                seller.setUpdatedAt(user.getUpdatedAt());
-
-                seller.setStoreName(roleSpecificData.get("storeName"));
-                seller.setLocation(roleSpecificData.get("location"));
-
-                savedUser = instrumentSellerService.save(seller);
             }
             case ADMIN -> {
                 // Admin is just a User

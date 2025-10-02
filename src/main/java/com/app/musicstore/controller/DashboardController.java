@@ -1,15 +1,27 @@
 package com.app.musicstore.controller;
 
+import com.app.musicstore.model.Artist;
 import com.app.musicstore.model.User;
 import com.app.musicstore.security.CustomUserDetails;
+import com.app.musicstore.service.EventService;
+import com.app.musicstore.service.ArtistService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.Optional;
+
 @Controller
 public class DashboardController {
+
+    @Autowired
+    private EventService eventService;
+
+    @Autowired
+    private ArtistService artistService;
 
     @GetMapping("/dashboard/admin")
     public String adminDashboard(Model model) {
@@ -27,6 +39,16 @@ public class DashboardController {
         if (user == null) {
             return "redirect:/users/login";
         }
+
+        // Get artist events count using your service method
+        Optional<Artist> artistOpt = artistService.findByUserId(user.getUserId());
+        if (artistOpt.isPresent()) {
+            int eventsCount = eventService.getArtistEvents(artistOpt.get()).size();
+            model.addAttribute("eventsCount", eventsCount);
+        } else {
+            model.addAttribute("eventsCount", 0);
+        }
+
         model.addAttribute("user", user);
         return "artist-dashboard";
     }
@@ -72,7 +94,7 @@ public class DashboardController {
                 authentication.getPrincipal() instanceof CustomUserDetails) {
 
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            return userDetails.getUser(); // This will return the User object from CustomUserDetails
+            return userDetails.getUser();
         }
 
         return null;

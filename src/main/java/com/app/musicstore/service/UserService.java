@@ -150,15 +150,16 @@ public class UserService {
         var existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
 
-        // Update fields using modern null-safe patterns
+        // Only update allowed fields - never update email or role through profile update
         Optional.ofNullable(updatedUser.getName()).ifPresent(existingUser::setName);
         Optional.ofNullable(updatedUser.getPhoneNo()).ifPresent(existingUser::setPhoneNo);
         Optional.ofNullable(updatedUser.getAddress()).ifPresent(existingUser::setAddress);
-        Optional.ofNullable(updatedUser.getRole()).ifPresent(existingUser::setRole);
         Optional.ofNullable(updatedUser.getStatus()).ifPresent(existingUser::setStatus);
 
-        // Handle password separately
-        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
+        // Handle password separately - only update if it's different from current
+        if (updatedUser.getPassword() != null &&
+                !updatedUser.getPassword().isEmpty() &&
+                !updatedUser.getPassword().equals(existingUser.getPassword())) {
             existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         }
 
@@ -172,10 +173,23 @@ public class UserService {
     }
 
     public void deleteUser(Long userId) {
-        var user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setStatus(Status.INACTIVE);
-        userRepository.save(user);
+        try {
+            var user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            System.out.println("DEBUG: Deleting user ID: " + userId + ", Role: " + user.getRole());
+
+            // Simply delete the user - Hibernate will handle the child tables automatically
+            // due to the JOINED inheritance strategy
+            userRepository.delete(user);
+
+            System.out.println("DEBUG: User deletion completed");
+
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error during deletion: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to delete user: " + e.getMessage());
+        }
     }
 
     public void changeUserRole(Long userId, String newRole) {
@@ -192,5 +206,24 @@ public class UserService {
         user.setStatus(Status.valueOf(status));
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
+    }
+
+    public void resetPassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " not found"));
+
+        // Encode the new password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    public long getTotalUsersCount() {
+        return userRepository.count();
+    }
+
+    public long getActiveUsersCount() {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getStatus() == Status.ACTIVE)
+                .count();
     }
 }

@@ -32,4 +32,5 @@ public class CourseSellerService {
         seller.setExpYears(expYears);
         return courseSellerRepository.save(seller);
     }
+
 }

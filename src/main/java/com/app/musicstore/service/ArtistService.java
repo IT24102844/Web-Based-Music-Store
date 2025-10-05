@@ -32,4 +32,5 @@ public class ArtistService {
         artist.setGenre(genre);
         return artistRepository.save(artist);
     }
+
 }

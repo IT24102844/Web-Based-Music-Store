@@ -2,69 +2,54 @@ package com.app.musicstore.controller;
 
 import com.app.musicstore.model.User;
 import com.app.musicstore.security.CustomUserDetails;
+import com.app.musicstore.service.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class DashboardController {
 
-    @GetMapping("/dashboard/admin")
-    public String adminDashboard(Model model) {
-        User user = getAuthenticatedUser();
+    private final UserService userService;
+
+    public DashboardController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping("/dashboard/{role}")
+    public String dashboard(@PathVariable String role, Model model) {
+        User user = getFreshAuthenticatedUser();
         if (user == null) {
             return "redirect:/users/login";
         }
-        model.addAttribute("user", user);
-        return "admin-dashboard";
-    }
 
-    @GetMapping("/dashboard/artist")
-    public String artistDashboard(Model model) {
-        User user = getAuthenticatedUser();
-        if (user == null) {
-            return "redirect:/users/login";
+        model.addAttribute("user", user);
+
+        String normalizedRole = role.toLowerCase();
+
+        switch (normalizedRole) {
+            case "admin":
+                model.addAttribute("totalUsers", userService.getTotalUsersCount());
+                model.addAttribute("activeUsers", userService.getActiveUsersCount());
+                return "admin-dashboard";
+            case "artist":
+                return "artist-dashboard";
+            case "item-seller":
+                return "item-seller-dashboard";
+            case "course-seller":
+                return "course-seller-dashboard";
+            case "customer":
+                return "customer-dashboard";
+            default:
+                // fallback if unknown role
+                return "redirect:/";
         }
-        model.addAttribute("user", user);
-        return "artist-dashboard";
     }
 
-    @GetMapping("/dashboard/item-seller")
-    public String itemSellerDashboard(Model model) {
-        User user = getAuthenticatedUser();
-        if (user == null) {
-            return "redirect:/users/login";
-        }
-        model.addAttribute("user", user);
-        return "item-seller-dashboard";
-    }
-
-    @GetMapping("/dashboard/course-seller")
-    public String courseSellerDashboard(Model model) {
-        User user = getAuthenticatedUser();
-        if (user == null) {
-            return "redirect:/users/login";
-        }
-        model.addAttribute("user", user);
-        return "course-seller-dashboard";
-    }
-
-    @GetMapping("/dashboard/customer")
-    public String customerDashboard(Model model) {
-        User user = getAuthenticatedUser();
-        if (user == null) {
-            return "redirect:/users/login";
-        }
-        model.addAttribute("user", user);
-        return "customer-dashboard";
-    }
-
-    /**
-     * Helper method to get the authenticated user from SecurityContext
-     */
-    private User getAuthenticatedUser() {
+    private User getFreshAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null &&
@@ -72,9 +57,11 @@ public class DashboardController {
                 authentication.getPrincipal() instanceof CustomUserDetails) {
 
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            return userDetails.getUser(); // This will return the User object from CustomUserDetails
-        }
+            Long userId = userDetails.getUser().getUserId();
 
+            return userService.getUserById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+        }
         return null;
     }
 }

@@ -19,7 +19,7 @@
             background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
             background-size: 400% 400%;
             animation: gradientShift 15s ease infinite;
-            color: #e0e0e0;
+            color: #ffffff;
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
@@ -136,16 +136,42 @@
         .user-info {
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: #e0e0e0;
+            gap: 15px;
+        }
+
+        .user-email {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .user-info i {
+        .artist-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .artist-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        .artist-links a:hover {
             color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
         }
 
-        /* Logout Button Specific Styling */
+        /* Logout Button */
         .logout-btn {
             background: rgba(255, 71, 87, 0.2);
             border: 1px solid rgba(255, 71, 87, 0.4);
@@ -155,7 +181,9 @@
             font-weight: 500;
             transition: all 0.3s ease;
             text-decoration: none;
-            margin-left: 20px; /* Added space between user email and logout */
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .logout-btn:hover {
@@ -164,15 +192,6 @@
             color: #ff4757 !important;
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
-        }
-
-        /* User email spacing */
-        .user-email {
-            margin-right: 15px; /* Added space between email and logout */
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         /* Page Title */
@@ -197,16 +216,11 @@
             }
         }
 
-        .page-subtitle {
-            color: #b0b0b0;
-            margin-bottom: 30px;
-        }
-
-        /* Cards */
+        /* Cards - Updated to match event_list.html */
         .card {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
@@ -221,36 +235,26 @@
         }
 
         .card-header {
-            background: rgba(0, 212, 255, 0.1) !important;
+            background: rgba(0, 212, 255, 0.15) !important;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding: 20px;
         }
 
-        .card-header.bg-primary {
-            background: rgba(0, 212, 255, 0.2) !important;
-            border: none;
-        }
-
-        .card-header.bg-info {
-            background: rgba(0, 212, 255, 0.15) !important;
-            border: none;
-        }
-
         .card-body {
             padding: 20px;
-            color: #e0e0e0;
+            color: #e0e0e0; /* Match event_list.html text color */
         }
 
         .card-title {
-            color: #e0e0e0;
+            color: #ffffff; /* White title like event_list.html */
             font-weight: 600;
         }
 
         .card-text {
-            color: #b0b0b0;
+            color: #b0b0b0; /* Light gray text like event_list.html */
         }
 
-        /* Badges */
+        /* Badges - Updated to match event_list.html */
         .badge {
             background: rgba(0, 212, 255, 0.2);
             color: #00d4ff;
@@ -272,23 +276,61 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Buttons */
+        /* Status Badges */
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .status-approved {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .status-rejected {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        /* Buttons - Updated to match event_list.html */
         .btn {
             padding: 10px 20px;
             border: none;
             border-radius: 10px;
-            font-family: 'Roboto', sans-serif;
             font-weight: 500;
-            cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
             text-align: center;
         }
 
+        .btn-success {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+        }
+
         .btn-primary {
             background: linear-gradient(135deg, #00d4ff, #0099cc);
             border: none;
+            border-radius: 10px;
             color: white;
             font-weight: 500;
             transition: all 0.3s ease;
@@ -302,44 +344,16 @@
             color: white;
         }
 
-        .btn-success {
-            background: linear-gradient(135deg, #00d4ff, #0099cc);
-            border: none;
-            color: white;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
-        }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
-            background: linear-gradient(135deg, #00d4ff, #0099cc);
-            color: white;
-        }
-
         .btn-outline-secondary {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             color: #e0e0e0;
         }
 
         .btn-outline-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #00d4ff;
-            color: #00d4ff;
-        }
-
-        .btn-outline-danger {
-            background: transparent;
-            border: 1px solid rgba(255, 71, 87, 0.3);
-            color: #ff4757;
-        }
-
-        .btn-outline-danger:hover {
-            background: rgba(255, 71, 87, 0.1);
-            border-color: #ff4757;
-            color: #ff4757;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: #ffffff;
         }
 
         .btn-outline-primary {
@@ -352,6 +366,19 @@
             background: rgba(0, 212, 255, 0.1);
             border-color: #00d4ff;
             color: #00d4ff;
+        }
+
+        .btn-outline-danger {
+            background: transparent;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            color: #ff4757;
+            border-radius: 10px;
+        }
+
+        .btn-outline-danger:hover {
+            background: rgba(255, 71, 87, 0.1);
+            border-color: #ff4757;
+            color: #ff4757;
         }
 
         /* Alerts */
@@ -375,9 +402,25 @@
             border-color: rgba(0, 212, 255, 0.3);
         }
 
-        /* Text colors */
+        /* Event Cards - Updated to match event_list.html */
+        .event-card-img {
+            height: 180px;
+            object-fit: cover;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .event-placeholder {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px 20px 0 0;
+        }
+
+        /* Text colors - Updated to match event_list.html */
         .text-muted {
-            color: #888 !important;
+            color: #b0b0b0 !important;
         }
 
         .text-primary {
@@ -385,7 +428,16 @@
         }
 
         .text-success {
-            color: #00d4ff !important;
+            color: #2ed573 !important;
+        }
+
+        /* Artist badge - Updated to match event_list.html */
+        .artist-badge {
+            background: rgba(0, 0, 0, 0.7);
+            color: #e0e0e0;
+            border-radius: 10px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
         }
 
         /* List Group */
@@ -408,64 +460,19 @@
             color: #00d4ff;
         }
 
-        .list-group-item-action {
-            color: #e0e0e0;
+        /* Status text colors */
+        .text-warning {
+            color: #ffc107 !important;
         }
 
-        .list-group-item-action:hover {
-            color: #00d4ff;
+        .text-danger {
+            color: #dc3545 !important;
         }
 
-        /* Icons */
-        .fa-user-circle {
-            color: #00d4ff;
+        .text-success {
+            color: #28a745 !important;
         }
 
-        .fa-plus-circle {
-            color: #2ed573 !important;
-        }
-
-        .fa-list {
-            color: #00d4ff !important;
-        }
-
-        .fa-cog {
-            color: #ffa502 !important;
-        }
-
-        .fa-eye {
-            color: #00d4ff !important;
-        }
-
-        .fa-music {
-            color: #00d4ff !important;
-        }
-
-        /* Event Cards */
-        .event-card-img {
-            height: 180px;
-            object-fit: cover;
-        }
-
-        .event-placeholder {
-            height: 180px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        /* Statistics */
-        .stat-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
             .navbar {
                 width: 95%;
@@ -487,16 +494,16 @@
                 justify-content: center;
             }
 
-            .user-email {
-                margin-right: 10px;
-                padding: 6px 10px;
-                font-size: 0.9rem;
+            .user-info {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
             }
 
-            .logout-btn {
-                margin-left: 10px;
-                padding: 6px 12px;
-                font-size: 0.9rem;
+            .artist-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
             }
         }
     </style>
@@ -507,7 +514,7 @@
 <nav class="navbar">
     <div class="logo">TuneWave</div>
     <ul class="nav-links">
-        <li><a href="/events">Home</a></li>
+        <li><a href="/">Home</a></li>
         <li><a href="#">Music</a></li>
         <li><a href="#">Courses</a></li>
         <li><a href="/events">Events</a></li>
@@ -515,16 +522,18 @@
         <li><a href="#">About</a></li>
     </ul>
     <div class="auth-buttons">
-        <div th:if="${currentUser != null}" class="d-flex align-items-center">
-            <span class="nav-link text-white mb-0 user-email">
+        <div th:if="${currentUser != null}" class="user-info">
+            <span class="user-email">
                 <i class="fas fa-user me-1"></i>
                 <span th:text="${currentUser.email}"></span>
             </span>
-            <div th:if="${currentUser.role == 'ARTIST'}" class="d-flex">
-                <a class="nav-link" href="/artist/events">My Events</a>
-                <a class="nav-link" href="/artist/event/new">Create Event</a>
+            <div th:if="${currentUser.role == 'ARTIST'}" class="artist-links">
+                <a href="/artist/events">My Events</a>
+                <a href="/artist/event/new">Create Event</a>
             </div>
-            <a class="nav-link logout-btn" href="/users/logout">Logout</a>
+            <a class="logout-btn" href="/users/logout">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </a>
         </div>
     </div>
 </nav>
@@ -549,7 +558,7 @@
                     <a href="/artist/event/new" class="list-group-item list-group-item-action">
                         <i class="fas fa-plus-circle me-2"></i>Create New Event
                     </a>
-                    <a href="/users/profile" class="list-group-item list-group-item-action">
+                    <a href="/users/edit-artist-profile" class="list-group-item list-group-item-action">
                         <i class="fas fa-cog me-2"></i>Profile Settings
                     </a>
                     <a href="/events" class="list-group-item list-group-item-action">
@@ -599,45 +608,107 @@
                 <div th:each="event : ${events}" class="col-md-6 col-lg-4">
                     <div class="card h-100">
                         <!-- Event Image -->
-                        <div th:if="${event.imagePath != null and !event.imagePath.isEmpty()}"
+                        <div th:if="${event.imagePath != null and event.imagePath != ''}"
                              class="position-relative overflow-hidden">
                             <img th:src="@{${event.imagePath}}" class="card-img-top event-card-img"
                                  alt="Event Image">
+                            <!-- Artist Badge -->
+                            <span class="artist-badge position-absolute top-0 start-0 m-2">
+                                <i class="fas fa-user me-1"></i>
+                                <span th:text="${event.artist != null ? event.artist.stageName : 'Unknown Artist'}"></span>
+                            </span>
                         </div>
-                        <div th:unless="${event.imagePath != null and !event.imagePath.isEmpty()}"
-                             class="event-placeholder">
+                        <div th:unless="${event.imagePath != null and event.imagePath != ''}"
+                             class="event-placeholder position-relative">
                             <i class="fas fa-music fa-3x text-muted"></i>
+                            <!-- Artist Badge -->
+                            <span class="artist-badge position-absolute top-0 start-0 m-2">
+                                <i class="fas fa-user me-1"></i>
+                                <span th:text="${event.artist != null ? event.artist.stageName : 'Unknown Artist'}"></span>
+                            </span>
                         </div>
 
                         <!-- Event Details -->
                         <div class="card-body d-flex flex-column p-3">
-                            <h6 class="card-title fw-bold mb-2" th:text="${event.title}">Event Title</h6>
-
-                            <p class="card-text text-muted small flex-grow-1 mb-2" th:text="${event.description}">
-                                Event description...</p>
-
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="badge bg-secondary" th:text="${event.venue}">Venue</span>
-                                <small class="text-muted" th:text="${event.date}">2024-01-01</small>
+                            <!-- Event Title with Status Badge -->
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title fw-bold mb-0" th:text="${event.title}">Event Title</h6>
+                                <!-- Fixed status display -->
+                                <span th:if="${event.status.name() == 'PENDING'}"
+                                      class="status-badge status-pending">PENDING</span>
+                                <span th:if="${event.status.name() == 'APPROVED'}"
+                                      class="status-badge status-approved">APPROVED</span>
+                                <span th:if="${event.status.name() == 'REJECTED'}"
+                                      class="status-badge status-rejected">REJECTED</span>
                             </div>
 
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="h6 mb-0 text-success fw-bold">
-                                        LKR.<span th:text="${#numbers.formatDecimal(event.ticketPrice, 1, 2)}">0.00</span>
+                            <p class="card-text text-muted small flex-grow-1 mb-3"
+                               th:text="${#strings.length(event.description) > 100 ?
+                                   #strings.substring(event.description, 0, 100) + '...' :
+                                   event.description}">
+                                Event description...
+                            </p>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        <span th:text="${event.venue}">Venue</span>
                                     </span>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        <span th:text="${event.date}">2024-01-01</span>
+                                    </small>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-primary">
+                                        <i class="fas fa-music me-1"></i>
+                                        <span th:text="${event.artist != null ? event.artist.genre : 'Unknown Genre'}"></span>
+                                    </small>
+                                </div>
                             </div>
 
-                            <!-- Action Buttons -->
-                            <div class="btn-group w-100" role="group">
-                                <a th:href="@{/artist/event/edit/{id}(id=${event.id})}"
-                                   class="btn btn-outline-primary btn-sm flex-fill me-1">
-                                    <i class="fas fa-edit me-1"></i>Edit
-                                </a>
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="h5 mb-0 text-success fw-bold">
+                                    LKR.<span th:text="${#numbers.formatDecimal(event.ticketPrice, 1, 2)}">0.00</span>
+                                </span>
+
+                                <!-- Action Buttons -->
+                                <div class="btn-group" role="group">
+                                    <a th:href="@{/artist/event/edit/{id}(id=${event.id})}"
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Delete button (separate for safety) -->
+                            <div class="mt-2">
                                 <a th:href="@{/artist/event/delete/{id}(id=${event.id})}"
-                                   class="btn btn-outline-danger btn-sm flex-fill"
+                                   class="btn btn-outline-danger btn-sm w-100"
                                    onclick="return confirm('Are you sure you want to delete this event?')">
-                                    <i class="fas fa-trash me-1"></i>Delete
+                                    <i class="fas fa-trash me-1"></i>Delete Event
                                 </a>
+                            </div>
+
+                            <!-- Status Information -->
+                            <div th:if="${event.status.name() == 'PENDING'}" class="mt-2">
+                                <small class="text-warning">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Waiting for admin approval
+                                </small>
+                            </div>
+                            <div th:if="${event.status.name() == 'REJECTED'}" class="mt-2">
+                                <small class="text-danger">
+                                    <i class="fas fa-times-circle me-1"></i>
+                                    Event was rejected by admin
+                                </small>
+                            </div>
+                            <div th:if="${event.status.name() == 'APPROVED'}" class="mt-2">
+                                <small class="text-success">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    Event is live on the platform
+                                </small>
                             </div>
                         </div>
                     </div>
@@ -650,15 +721,21 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="row text-center">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <h4 class="text-primary" th:text="${#lists.size(events)}">0</h4>
-                                    <p class="mb-0">My Events</p>
+                                    <p class="mb-0">Total Events</p>
                                 </div>
-                                <div class="col-md-4">
-                                    <h4 class="text-info"
-                                        th:text="${#temporals.format(#temporals.createNow(), 'MMM yyyy')}">Jan 2024
-                                    </h4>
-                                    <p class="mb-0">This Month</p>
+                                <div class="col-md-3">
+                                    <h4 class="text-warning" th:text="${pendingCount}">0</h4>
+                                    <p class="mb-0">Pending</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4 class="text-success" th:text="${approvedCount}">0</h4>
+                                    <p class="mb-0">Approved</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4 class="text-danger" th:text="${rejectedCount}">0</h4>
+                                    <p class="mb-0">Rejected</p>
                                 </div>
                             </div>
                         </div>

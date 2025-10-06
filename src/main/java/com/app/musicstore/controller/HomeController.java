@@ -8,6 +8,6 @@ public class HomeController {
 
     @GetMapping("/")
     public String landingPage() {
-        return "landing"; // landing.html in templates
+        return "landing";
     }
 }

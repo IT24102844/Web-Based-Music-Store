@@ -1,12 +1,17 @@
 package com.app.musicstore.controller;
 
-import com.app.musicstore.model.User;
+import com.app.musicstore.model.*;
+import com.app.musicstore.security.CustomUserDetails;
 import com.app.musicstore.service.UserService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -14,108 +19,150 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, BCryptPasswordEncoder passwordEncoder) {
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
         model.addAttribute("user", new User());
-        return "register"; // templates/register.html
+        return "register";
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute User user) {
-        userService.registerUser(user);
-        return "redirect:/users/login";
+    public String registerUser(@ModelAttribute User user,
+                               @RequestParam Map<String, String> allParams) {
+        try {
+            userService.registerUserWithDetails(user, allParams);
+            return "redirect:/users/login?success=Registration successful! Please login.";
+        } catch (IllegalArgumentException e) {
+            return "redirect:/users/register?error=" + e.getMessage();
+        }
     }
 
     @GetMapping("/login")
-    public String showLoginForm() {
-        return "login"; // templates/login.html
+    public String showLoginForm(@RequestParam Optional<String> error,
+                                @RequestParam Optional<String> success,
+                                Model model) {
+        error.ifPresent(e -> model.addAttribute("error", e));
+        success.ifPresent(s -> model.addAttribute("success", s));
+        return "login";
     }
-
-    @PostMapping("/login")
-    public String login(@RequestParam String email,
-                        @RequestParam String password,
-                        Model model,
-                        HttpSession session) {
-        Optional<User> user = userService.login(email, password);
-
-        if (user.isPresent()) {
-            User loggedInUser = user.get();
-            session.setAttribute("loggedInUser", loggedInUser);
-            model.addAttribute("user", loggedInUser);
-
-            switch (loggedInUser.getRole().name()) {
-                case "ADMIN":
-                    return "redirect:/dashboard/admin";
-                case "ARTIST":
-                    return "redirect:/dashboard/artist";
-                case "ITEM_SELLER":
-                    return "redirect:/dashboard/item-seller";
-                case "COURSE_SELLER":
-                    return "redirect:/dashboard/course-seller";
-                default: // CUSTOMER or anything else
-                    return "redirect:/dashboard/customer";
-            }
-        } else {
-            model.addAttribute("error", "Invalid credentials");
-            return "login";
-        }
-    }
-
 
     @GetMapping("/edit-profile")
-    public String editProfileForm(HttpSession session, Model model) {
-        User sessionUser = (User) session.getAttribute("loggedInUser");
-        if (sessionUser == null) {
+    public String editProfileForm(Model model) {
+        User authenticatedUser = getAuthenticatedUser();
+        if (authenticatedUser == null) {
             return "redirect:/users/login";
         }
 
-        // Fetch latest user details from DB
-        User user = userService.getUserById(sessionUser.getUserId())
+        var user = userService.getUserById(authenticatedUser.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         model.addAttribute("user", user);
-        return "edit-profile"; // points to edit-profile.html
+        return "edit-profile";
     }
 
-
     @PostMapping("/update-profile")
-    public String updateProfile(@ModelAttribute User user, HttpSession session) {
-        User sessionUser = (User) session.getAttribute("loggedInUser");
-        if (sessionUser == null) {
+    public String updateProfile(@ModelAttribute User user,
+                                HttpSession session,
+                                @RequestParam Map<String, String> allParams) {
+        User authenticatedUser = getAuthenticatedUser();
+        if (authenticatedUser == null) {
             return "redirect:/users/login";
         }
 
-        userService.updateUser(sessionUser.getUserId(), user);
+        // Get current user from database
+        User currentUser = userService.getUserById(authenticatedUser.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        User updatedUser = userService.getUserById(sessionUser.getUserId())
+        // Handle password - if password is empty or null, keep the current one
+        String newPassword = user.getPassword();
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            // Keep current password
+            user.setPassword(currentUser.getPassword());
+        } else {
+            // New password provided - encode it
+            user.setPassword(passwordEncoder.encode(newPassword));
+        }
+
+        // Preserve other fields that shouldn't be changed
+        user.setEmail(currentUser.getEmail()); // Ensure email doesn't change
+        user.setRole(currentUser.getRole()); // Ensure role doesn't change
+        user.setUserId(currentUser.getUserId()); // Ensure ID doesn't change
+
+        userService.updateUser(authenticatedUser.getUserId(), user);
+
+        // Update session with latest user data
+        var updatedUser = userService.getUserById(authenticatedUser.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found after update"));
         session.setAttribute("loggedInUser", updatedUser);
 
-        switch (updatedUser.getRole().name()) {
-            case "ADMIN":
-                return "redirect:/dashboard/admin";
-            case "ARTIST":
-                return "redirect:/dashboard/artist";
-            case "ITEM_SELLER":
-                return "redirect:/dashboard/item-seller";
-            case "COURSE_SELLER":
-                return "redirect:/dashboard/course-seller";
-            default:
-                return "redirect:/dashboard/customer";
+        return switch (updatedUser.getRole()) {
+            case ADMIN -> "redirect:/dashboard/admin?success=Profile updated successfully";
+            case ARTIST -> "redirect:/dashboard/artist?success=Profile updated successfully";
+            case ITEM_SELLER -> "redirect:/dashboard/item-seller?success=Profile updated successfully";
+            case COURSE_SELLER -> "redirect:/dashboard/course-seller?success=Profile updated successfully";
+            case CUSTOMER -> "redirect:/dashboard/customer?success=Profile updated successfully";
+        };
+    }
+
+    @GetMapping("/complete-profile")
+    public String showCompleteProfileForm(HttpSession session, Model model) {
+        var user = (User) session.getAttribute("loggedInUser");
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+
+        return switch (user.getRole()) {
+            case ARTIST -> {
+                model.addAttribute("artist", new Artist());
+                yield "complete-artist-profile";
+            }
+            case CUSTOMER -> {
+                model.addAttribute("customer", new Customer());
+                yield "complete-customer-profile";
+            }
+            case COURSE_SELLER -> {
+                model.addAttribute("courseSeller", new CourseSeller());
+                yield "complete-course-seller-profile";
+            }
+            default -> "redirect:/dashboard";
+        };
+    }
+
+    private User getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null &&
+                authentication.isAuthenticated() &&
+                authentication.getPrincipal() instanceof CustomUserDetails) {
+
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            return userDetails.getUser();
+        }
+
+        return null;
+    }
+
+    @GetMapping("/forgot-password")
+    public String showForgotPasswordForm() {
+        return "forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String processForgotPassword(@RequestParam String email,
+                                        @RequestParam String newPassword,
+                                        Model model) {
+        try {
+            userService.resetPassword(email, newPassword);
+            return "redirect:/users/login?success=Password reset successfully! Please login with your new password.";
+        } catch (RuntimeException e) {
+            model.addAttribute("error", e.getMessage());
+            return "forgot-password";
         }
     }
-
-
-
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/users/login";
-    }
-
 }

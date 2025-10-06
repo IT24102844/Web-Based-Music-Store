@@ -23,7 +23,7 @@ The project follows the **MVC architecture** and uses **Spring Boot** for backen
 * Register/Login for **Listeners, Artists, Admins**
 * Manage user profiles
 * Role-based access control (Spring Security)
-* Help & Support module (FAQs, support tickets, basic live chat option)
+* Help & Support module (FAQs, support supportTickets, basic live chat option)
 
 ### 2. **Song Upload & Management**
 
@@ -46,7 +46,7 @@ The project follows the **MVC architecture** and uses **Spring Boot** for backen
 ### 5. **Event & Ticketing System**
 
 * Organizers can create music events
-* Users can view events and book tickets
+* Users can view events and book supportTickets
 * Ticket availability and booking history management
 
 ### 6. **Admin Dashboard & Notification System**

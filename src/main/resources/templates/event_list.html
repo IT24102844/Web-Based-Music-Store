@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artist Dashboard - Music Store</title>
+    <title>All Events - Music Store</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -62,7 +62,7 @@
             padding: 30px;
         }
 
-        /* Navbar */
+        /* Navbar - FIXED ALIGNMENT */
         .navbar {
             position: fixed;
             top: 20px;
@@ -132,7 +132,7 @@
             align-items: center;
         }
 
-        /* User info styling - FIXED VISIBILITY */
+        /* User info styling - FIXED ALIGNMENT */
         .user-info {
             display: flex;
             align-items: center;
@@ -175,7 +175,44 @@
             background: rgba(0, 212, 255, 0.1);
         }
 
-        /* Logout Button Specific Styling - FIXED VISIBILITY */
+        /* Login/Signup Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-login {
+            background: transparent;
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+
+        .btn-signup {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-signup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        /* Logout Button Specific Styling - FIXED ALIGNMENT */
         .logout-btn {
             background: rgba(255, 71, 87, 0.2);
             border: 1px solid rgba(255, 71, 87, 0.4);
@@ -234,34 +271,12 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
             overflow: hidden;
-            margin-bottom: 20px;
         }
 
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 40px rgba(0, 212, 255, 0.2);
             border-color: rgba(0, 212, 255, 0.3);
-        }
-
-        .card-header {
-            background: rgba(0, 212, 255, 0.15) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 25px;
-        }
-
-        .card-header.bg-primary {
-            background: rgba(0, 212, 255, 0.2) !important;
-            border: none;
-        }
-
-        .card-header.bg-info {
-            background: rgba(0, 212, 255, 0.15) !important;
-            border: none;
-        }
-
-        .card-body {
-            padding: 30px;
-            color: #ffffff;
         }
 
         .card-title {
@@ -273,6 +288,14 @@
             color: #b0b0b0;
         }
 
+        .card-img-top {
+            border-radius: 20px 20px 0 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
         /* Badges */
         .badge {
             background: rgba(0, 212, 255, 0.2);
@@ -280,34 +303,14 @@
             border: 1px solid rgba(0, 212, 255, 0.3);
             border-radius: 10px;
             font-weight: 500;
-            padding: 8px 12px;
-        }
-
-        .badge.bg-success {
-            background: rgba(46, 213, 115, 0.2) !important;
-            color: #2ed573 !important;
-            border: 1px solid rgba(46, 213, 115, 0.3);
+            padding: 5px 10px;
         }
 
         /* Buttons */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 10px;
-            font-family: 'Roboto', sans-serif;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
         .btn-primary {
             background: linear-gradient(135deg, #00d4ff, #0099cc);
             border: none;
+            border-radius: 10px;
             color: white;
             font-weight: 500;
             transition: all 0.3s ease;
@@ -319,6 +322,48 @@
             box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
             background: linear-gradient(135deg, #00d4ff, #0099cc);
             color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #e0e0e0;
+        }
+
+        .btn-outline-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: #ffffff;
+        }
+
+        .btn-outline-danger {
+            background: transparent;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            color: #ff4757;
+            border-radius: 10px;
+        }
+
+        .btn-outline-danger:hover {
+            background: rgba(255, 71, 87, 0.1);
+            border-color: #ff4757;
+            color: #ff4757;
         }
 
         /* Alerts */
@@ -355,60 +400,23 @@
             color: #2ed573 !important;
         }
 
-        /* List Group */
-        .list-group-item {
+        /* Artist badge */
+        .artist-badge {
+            background: rgba(0, 0, 0, 0.7);
+            color: #e0e0e0;
+            border-radius: 10px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+
+        /* No events message */
+        .no-events {
             background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            transition: all 0.3s ease;
-            padding: 20px;
-        }
-
-        .list-group-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(0, 212, 255, 0.3);
-            transform: translateX(5px);
-        }
-
-        .list-group-item-action {
-            color: #ffffff;
-        }
-
-        .list-group-item-action:hover {
-            color: #00d4ff;
-        }
-
-        /* Icons */
-        .fa-user-circle {
-            color: #00d4ff;
-        }
-
-        .fa-plus-circle {
-            color: #2ed573 !important;
-        }
-
-        .fa-list {
-            color: #00d4ff !important;
-        }
-
-        .fa-cog {
-            color: #ffa502 !important;
-        }
-
-        .fa-eye {
-            color: #00d4ff !important;
-        }
-
-        /* Dashboard Stats */
-        .stat-badge {
-            font-size: 1.5rem;
-            padding: 12px 20px;
-        }
-
-        .welcome-section h5 {
-            color: #ffffff;
-            font-size: 1.5rem;
-            margin-bottom: 8px;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
         /* Responsive */
@@ -454,24 +462,12 @@
                 font-size: 0.9rem;
                 padding: 6px 12px;
             }
-
-            .card-body {
-                padding: 20px;
-            }
-
-            .card-header {
-                padding: 20px;
-            }
-
-            .list-group-item {
-                padding: 15px;
-            }
         }
     </style>
 </head>
 
 <body>
-<!-- Navigation -->
+<!-- Navigation - FIXED ALIGNMENT -->
 <nav class="navbar">
     <div class="logo">TuneWave</div>
     <ul class="nav-links">
@@ -483,6 +479,10 @@
         <li><a href="#">About</a></li>
     </ul>
     <div class="auth-buttons">
+        <div th:if="${currentUser == null}">
+            <a class="btn btn-login" href="/users/login">Login</a>
+            <a class="btn btn-signup" href="/users/register">Sign Up</a>
+        </div>
         <div th:if="${currentUser != null}" class="user-info">
             <span class="user-email">
                 <i class="fas fa-user me-1"></i>
@@ -500,89 +500,144 @@
 </nav>
 
 <div class="container">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">
-                        <i class="fas fa-user-circle me-2"></i>
-                        Artist Dashboard
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-6 welcome-section">
-                            <h5>Welcome, Artist!</h5>
-                            <p class="text-muted">Manage your events and profile settings</p>
-                        </div>
-                    </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="page-title">All Music Events</h1>
+            <p class="page-subtitle" th:if="${!#lists.isEmpty(events)}"
+               th:text="'(' + ${#lists.size(events)} + ' events available)'"></p>
+        </div>
+        <div th:if="${currentUser != null and currentUser.role == 'ARTIST'}">
+            <a href="/artist/event/new" class="btn btn-success">
+                <i class="fas fa-plus me-1"></i>Create New Event
+            </a>
+        </div>
+    </div>
 
-                    <hr style="border-color: rgba(255,255,255,0.1);">
+    <!-- Success/Error Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}">Event created successfully!</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 
-                    <div class="row mb-4">
-                        <div class="col-md-6 mb-3">
-                            <strong class="d-block mb-1">Email:</strong>
-                            <span class="text-primary" th:text="${user.email}">artist@example.com</span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <strong class="d-block mb-1">Role:</strong>
-                            <span class="badge bg-success" th:text="${user.role}">ARTIST</span>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <strong class="d-block mb-1">Status:</strong>
-                            <span class="badge bg-success" th:text="${user.status}">ACTIVE</span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <strong class="d-block mb-1">Member Since:</strong>
-                            <span class="text-muted" th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</span>
-                        </div>
-                    </div>
-                </div>
+    <!-- No Events Message -->
+    <div th:if="${#lists.isEmpty(events)}" class="text-center py-5">
+        <div class="no-events">
+            <i class="fas fa-music fa-3x mb-3 text-primary"></i>
+            <h3>No Events Found</h3>
+            <p>No music events are currently available.</p>
+            <div th:if="${currentUser != null and currentUser.role == 'ARTIST'}">
+                <a href="/artist/event/new" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Create the First Event!
+                </a>
+            </div>
+            <div th:if="${currentUser == null}">
+                <a href="/users/login" class="btn btn-outline-secondary">
+                    <i class="fas fa-sign-in-alt me-1"></i>Login to Create Events
+                </a>
             </div>
         </div>
+    </div>
 
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h6 class="mb-0">
-                        <i class="fas fa-bolt me-2"></i>Quick Actions
-                    </h6>
+    <!-- Events List -->
+    <div th:if="${!#lists.isEmpty(events)}" class="row g-4">
+        <div th:each="event : ${events}" class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <!-- Event Image -->
+                <div th:if="${event.imagePath != null and !event.imagePath.isEmpty()}"
+                     class="position-relative overflow-hidden" style="height: 200px;">
+                    <img th:src="@{${event.imagePath}}"
+                         class="card-img-top w-100 h-100 object-fit-cover"
+                         alt="Event Image"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="bg-light d-flex align-items-center justify-content-center position-absolute top-0 start-0 w-100 h-100 d-none">
+                        <i class="fas fa-music fa-3x text-muted"></i>
+                    </div>
+                    <!-- Artist Badge -->
+                    <span class="artist-badge position-absolute top-0 start-0 m-2">
+                        <i class="fas fa-user me-1"></i>
+                        <span th:text="${event.artist != null ? event.artist.stageName : 'Unknown Artist'}"></span>
+                    </span>
                 </div>
-                <div class="list-group list-group-flush">
-                    <a href="/artist/event/new"
-                       class="list-group-item list-group-item-action d-flex align-items-center">
-                        <i class="fas fa-plus-circle fa-lg me-3"></i>
-                        <div>
-                            <div class="fw-bold">Create New Event</div>
-                            <small class="text-muted">Start a new performance</small>
+                <div th:unless="${event.imagePath != null and !event.imagePath.isEmpty()}"
+                     class="bg-light d-flex align-items-center justify-content-center position-relative"
+                     style="height: 200px;">
+                    <i class="fas fa-music fa-3x text-muted"></i>
+                    <!-- Artist Badge -->
+                    <span class="artist-badge position-absolute top-0 start-0 m-2">
+                        <i class="fas fa-user me-1"></i>
+                        <span th:text="${event.artist != null ? event.artist.stageName : 'Unknown Artist'}"></span>
+                    </span>
+                </div>
+
+                <!-- Event Details -->
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title fw-bold" th:text="${event.title}">Event Title</h5>
+
+                    <p class="card-text text-muted small flex-grow-1 mb-3"
+                       th:text="${#strings.length(event.description) > 100 ?
+                           #strings.substring(event.description, 0, 100) + '...' :
+                           event.description}">
+                        Event description...
+                    </p>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge">
+                                <i class="fas fa-map-marker-alt me-1"></i>
+                                <span th:text="${event.venue}">Venue</span>
+                            </span>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>
+                                <span th:text="${event.date}">2024-01-01</span>
+                            </small>
                         </div>
-                    </a>
-                    <a href="/artist/events"
-                       class="list-group-item list-group-item-action d-flex align-items-center">
-                        <i class="fas fa-list fa-lg me-3"></i>
-                        <div>
-                            <div class="fw-bold">Manage Events</div>
-                            <small class="text-muted">View your events</small>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-primary">
+                                <i class="fas fa-music me-1"></i>
+                                <span th:text="${event.artist != null ? event.artist.genre : 'Unknown Genre'}"></span>
+                            </small>
                         </div>
-                    </a>
-                    <a href="/users/profile"
-                       class="list-group-item list-group-item-action d-flex align-items-center">
-                        <i class="fas fa-cog fa-lg me-3"></i>
-                        <div>
-                            <div class="fw-bold">Profile Settings</div>
-                            <small class="text-muted">Update your information</small>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                        <span class="h5 mb-0 text-success fw-bold">
+                            LKR.<span th:text="${#numbers.formatDecimal(event.ticketPrice, 1, 2)}">0.00</span>
+                        </span>
+
+                        <!-- Action Buttons -->
+                        <div class="btn-group" role="group">
+                            <a th:href="@{/events/{id}/tickets(id=${event.id})}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-ticket-alt me-1"></i>Get Tickets
+                            </a>
+                            <!-- Show edit/delete only if current user owns this event -->
+                            <div th:if="${currentUser != null and currentUser.role == 'ARTIST' and
+                                         event.artist != null and
+                                         event.artist.userId == currentUser.userId}">
+                                <a th:href="@{/artist/event/edit/{id}(id=${event.id})}"
+                                   class="btn btn-outline-secondary btn-sm ms-1">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </a>
+                            </div>
                         </div>
-                    </a>
-                    <a href="/events" class="list-group-item list-group-item-action d-flex align-items-center">
-                        <i class="fas fa-eye fa-lg me-3"></i>
-                        <div>
-                            <div class="fw-bold">Browse All Events</div>
-                            <small class="text-muted">See what others are doing</small>
-                        </div>
-                    </a>
+                    </div>
+
+                    <!-- Delete button (separate for safety) -->
+                    <div th:if="${currentUser != null and currentUser.role == 'ARTIST' and
+                                 event.artist != null and
+                                 event.artist.userId == currentUser.userId}"
+                         class="mt-2">
+                        <a th:href="@{/artist/event/delete/{id}(id=${event.id})}"
+                           class="btn btn-outline-danger btn-sm w-100"
+                           onclick="return confirm('Are you sure you want to delete this event?')">
+                            <i class="fas fa-trash me-1"></i>Delete Event
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

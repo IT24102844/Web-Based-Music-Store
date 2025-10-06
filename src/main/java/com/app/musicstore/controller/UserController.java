@@ -126,10 +126,6 @@ public class UserController {
                 model.addAttribute("customer", new Customer());
                 yield "complete-customer-profile";
             }
-            case COURSE_SELLER -> {
-                model.addAttribute("courseSeller", new CourseSeller());
-                yield "complete-course-seller-profile";
-            }
             default -> "redirect:/dashboard";
         };
     }

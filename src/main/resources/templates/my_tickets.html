@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artist Dashboard - Music Store</title>
+    <title>My Tickets - Music Store</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -132,50 +131,17 @@
             align-items: center;
         }
 
-        /* User info styling - FIXED VISIBILITY */
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
+        /* User info styling */
         .user-email {
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .user-email i {
-            color: #00d4ff;
-        }
-
-        .artist-links {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .artist-links a {
-            color: #e0e0e0;
-            text-decoration: none;
-            font-weight: 400;
-            transition: all 0.3s ease;
-            padding: 6px 12px;
+            margin-right: 15px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
         }
 
-        .artist-links a:hover {
-            color: #00d4ff;
-            background: rgba(0, 212, 255, 0.1);
-        }
-
-        /* Logout Button Specific Styling - FIXED VISIBILITY */
+        /* Logout Button Specific Styling */
         .logout-btn {
             background: rgba(255, 71, 87, 0.2);
             border: 1px solid rgba(255, 71, 87, 0.4);
@@ -185,9 +151,7 @@
             font-weight: 500;
             transition: all 0.3s ease;
             text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            margin-left: 20px;
         }
 
         .logout-btn:hover {
@@ -202,7 +166,7 @@
         .page-title {
             font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 30px;
             background: linear-gradient(135deg, #00d4ff, #ffffff, #00d4ff);
             background-size: 200% 200%;
             -webkit-background-clip: text;
@@ -218,11 +182,6 @@
             50% {
                 background-position: 100% 50%;
             }
-        }
-
-        .page-subtitle {
-            color: #b0b0b0;
-            margin-bottom: 30px;
         }
 
         /* Cards */
@@ -246,47 +205,53 @@
         .card-header {
             background: rgba(0, 212, 255, 0.15) !important;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 25px;
-        }
-
-        .card-header.bg-primary {
-            background: rgba(0, 212, 255, 0.2) !important;
-            border: none;
-        }
-
-        .card-header.bg-info {
-            background: rgba(0, 212, 255, 0.15) !important;
-            border: none;
+            padding: 20px;
+            color: #ffffff;
         }
 
         .card-body {
-            padding: 30px;
+            padding: 25px;
             color: #ffffff;
         }
 
-        .card-title {
-            color: #ffffff;
-            font-weight: 600;
-        }
-
-        .card-text {
+        .card-footer {
+            background: rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
             color: #b0b0b0;
+        }
+
+        /* Text Colors */
+        .text-muted {
+            color: #b0b0b0 !important;
+        }
+
+        .text-success {
+            color: #2ed573 !important;
+        }
+
+        .text-primary {
+            color: #00d4ff !important;
         }
 
         /* Badges */
         .badge {
-            background: rgba(0, 212, 255, 0.2);
-            color: #00d4ff;
-            border: 1px solid rgba(0, 212, 255, 0.3);
             border-radius: 10px;
             font-weight: 500;
-            padding: 8px 12px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
         }
 
-        .badge.bg-success {
+        .bg-success {
             background: rgba(46, 213, 115, 0.2) !important;
             color: #2ed573 !important;
             border: 1px solid rgba(46, 213, 115, 0.3);
+        }
+
+        .bg-secondary {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: #b0b0b0 !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         /* Buttons */
@@ -323,92 +288,37 @@
 
         /* Alerts */
         .alert {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
             color: #ffffff;
-        }
-
-        .alert-success {
-            border-color: rgba(46, 213, 115, 0.3);
-        }
-
-        .alert-danger {
-            border-color: rgba(255, 71, 87, 0.3);
+            padding: 30px;
+            text-align: center;
         }
 
         .alert-info {
-            border-color: rgba(0, 212, 255, 0.3);
+            border-color: rgba(0, 212, 255, 0.4);
+            background: rgba(0, 212, 255, 0.1);
         }
 
-        /* Text colors */
-        .text-muted {
-            color: #b0b0b0 !important;
-        }
-
-        .text-primary {
-            color: #00d4ff !important;
-        }
-
-        .text-success {
-            color: #2ed573 !important;
-        }
-
-        /* List Group */
-        .list-group-item {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            transition: all 0.3s ease;
-            padding: 20px;
-        }
-
-        .list-group-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(0, 212, 255, 0.3);
-            transform: translateX(5px);
-        }
-
-        .list-group-item-action {
-            color: #ffffff;
-        }
-
-        .list-group-item-action:hover {
+        /* Ticket Icons */
+        .fa-ticket-alt {
             color: #00d4ff;
         }
 
-        /* Icons */
-        .fa-user-circle {
+        .fa-map-marker-alt, .fa-calendar, .fa-user, .fa-money-bill-wave {
             color: #00d4ff;
+            width: 20px;
         }
 
-        .fa-plus-circle {
-            color: #2ed573 !important;
+        /* Ticket Card Specific Styling */
+        .ticket-card {
+            border-left: 4px solid #00d4ff;
         }
 
-        .fa-list {
-            color: #00d4ff !important;
-        }
-
-        .fa-cog {
-            color: #ffa502 !important;
-        }
-
-        .fa-eye {
-            color: #00d4ff !important;
-        }
-
-        /* Dashboard Stats */
-        .stat-badge {
-            font-size: 1.5rem;
-            padding: 12px 20px;
-        }
-
-        .welcome-section h5 {
-            color: #ffffff;
-            font-size: 1.5rem;
-            margin-bottom: 8px;
+        .ticket-card:hover {
+            border-left-color: #2ed573;
         }
 
         /* Responsive */
@@ -433,43 +343,28 @@
                 justify-content: center;
             }
 
-            .user-info {
-                flex-direction: column;
-                gap: 10px;
-                width: 100%;
-            }
-
-            .artist-links {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 10px;
-            }
-
             .user-email {
+                margin-right: 10px;
+                padding: 6px 10px;
                 font-size: 0.9rem;
-                padding: 6px 12px;
             }
 
             .logout-btn {
-                font-size: 0.9rem;
+                margin-left: 10px;
                 padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
             }
 
             .card-body {
                 padding: 20px;
             }
-
-            .card-header {
-                padding: 20px;
-            }
-
-            .list-group-item {
-                padding: 15px;
-            }
         }
     </style>
 </head>
-
 <body>
 <!-- Navigation -->
 <nav class="navbar">
@@ -483,106 +378,91 @@
         <li><a href="#">About</a></li>
     </ul>
     <div class="auth-buttons">
-        <div th:if="${currentUser != null}" class="user-info">
-            <span class="user-email">
+        <div th:if="${currentUser != null}" class="d-flex align-items-center">
+            <span class="nav-link text-white mb-0 user-email">
                 <i class="fas fa-user me-1"></i>
-                <span th:text="${currentUser.email}">user@example.com</span>
+                <span th:text="${currentUser.email}"></span>
             </span>
-            <div th:if="${currentUser.role == 'ARTIST'}" class="artist-links">
-                <a href="/artist/events">My Events</a>
-                <a href="/artist/event/new">Create Event</a>
-            </div>
-            <a class="logout-btn" href="/users/logout">
-                <i class="fas fa-sign-out-alt me-1"></i>Logout
-            </a>
+            <a class="nav-link logout-btn" href="/users/logout">Logout</a>
         </div>
     </div>
 </nav>
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">
-                        <i class="fas fa-user-circle me-2"></i>
-                        Artist Dashboard
-                    </h3>
+<div class="container mt-4">
+    <h2 class="page-title">
+        <i class="fas fa-ticket-alt me-3"></i>My Tickets
+    </h2>
+
+    <!-- No Tickets Message -->
+    <div th:if="${#lists.isEmpty(tickets)}" class="text-center py-5">
+        <div class="alert alert-info">
+            <i class="fas fa-ticket-alt fa-4x mb-4 text-primary"></i>
+            <h4>No Tickets Yet</h4>
+            <p class="mb-4">You haven't purchased any tickets yet.</p>
+            <a href="/events" class="btn btn-primary">
+                <i class="fas fa-music me-2"></i>Browse Events
+            </a>
+        </div>
+    </div>
+
+    <!-- Tickets List -->
+    <div th:if="${!#lists.isEmpty(tickets)}" class="row g-4">
+        <div th:each="ticket : ${tickets}" class="col-lg-6">
+            <div class="card h-100 ticket-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <strong class="text-primary" th:text="${ticket.ticketNumber}">TKT-123</strong>
+                    <span th:classappend="${ticket.status == 'ACTIVE'} ? 'bg-success' : 'bg-secondary'"
+                          class="badge" th:text="${ticket.status}">ACTIVE</span>
                 </div>
                 <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-6 welcome-section">
-                            <h5>Welcome, Artist!</h5>
-                            <p class="text-muted">Manage your events and profile settings</p>
-                        </div>
-                    </div>
+                    <h6 class="mb-3" th:text="${ticket.event.title}">Event Title</h6>
 
-                    <hr style="border-color: rgba(255,255,255,0.1);">
-
-                    <div class="row mb-4">
-                        <div class="col-md-6 mb-3">
-                            <strong class="d-block mb-1">Email:</strong>
-                            <span class="text-primary" th:text="${user.email}">artist@example.com</span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <strong class="d-block mb-1">Role:</strong>
-                            <span class="badge bg-success" th:text="${user.role}">ARTIST</span>
-                        </div>
+                    <div class="ticket-details">
+                        <p class="mb-2 d-flex align-items-center">
+                            <i class="fas fa-map-marker-alt me-3"></i>
+                            <span th:text="${ticket.event.venue}">Venue</span>
+                        </p>
+                        <p class="mb-2 d-flex align-items-center">
+                            <i class="fas fa-calendar me-3"></i>
+                            <span th:text="${ticket.event.date}">Date</span>
+                        </p>
+                        <p class="mb-2 d-flex align-items-center">
+                            <i class="fas fa-user me-3"></i>
+                            <span th:text="${ticket.event.artist.stageName}">Artist</span>
+                        </p>
+                        <p class="mb-0 d-flex align-items-center">
+                            <i class="fas fa-money-bill-wave me-3"></i>
+                            <span>LKR.<span th:text="${#numbers.formatDecimal(ticket.event.ticketPrice, 1, 2)}">0.00</span></span>
+                        </p>
                     </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <strong class="d-block mb-1">Status:</strong>
-                            <span class="badge bg-success" th:text="${user.status}">ACTIVE</span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <strong class="d-block mb-1">Member Since:</strong>
-                            <span class="text-muted" th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</span>
-                        </div>
-                    </div>
+                </div>
+                <div class="card-footer text-muted small">
+                    <i class="fas fa-clock me-2"></i>
+                    Purchased: <span th:text="${#temporals.format(ticket.purchasedAt, 'dd MMM yyyy HH:mm')}">Date</span>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="col-md-4">
+    <!-- Statistics Card -->
+    <div th:if="${!#lists.isEmpty(tickets)}" class="row mt-5">
+        <div class="col-12">
             <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h6 class="mb-0">
-                        <i class="fas fa-bolt me-2"></i>Quick Actions
-                    </h6>
-                </div>
-                <div class="list-group list-group-flush">
-                    <a href="/artist/event/new"
-                       class="list-group-item list-group-item-action d-flex align-items-center">
-                        <i class="fas fa-plus-circle fa-lg me-3"></i>
-                        <div>
-                            <div class="fw-bold">Create New Event</div>
-                            <small class="text-muted">Start a new performance</small>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h3 class="text-primary mb-2" th:text="${#lists.size(tickets)}">0</h3>
+                            <p class="text-muted mb-0">Total Tickets</p>
                         </div>
-                    </a>
-                    <a href="/artist/events"
-                       class="list-group-item list-group-item-action d-flex align-items-center">
-                        <i class="fas fa-list fa-lg me-3"></i>
-                        <div>
-                            <div class="fw-bold">Manage Events</div>
-                            <small class="text-muted">View your events</small>
+                        <div class="col-md-4">
+                            <h3 class="text-success mb-2" th:text="${#lists.size(tickets.?[status == 'ACTIVE'])}">0</h3>
+                            <p class="text-muted mb-0">Active Tickets</p>
                         </div>
-                    </a>
-                    <a href="/users/profile"
-                       class="list-group-item list-group-item-action d-flex align-items-center">
-                        <i class="fas fa-cog fa-lg me-3"></i>
-                        <div>
-                            <div class="fw-bold">Profile Settings</div>
-                            <small class="text-muted">Update your information</small>
+                        <div class="col-md-4">
+                            <h3 class="text-info mb-2" th:text="${#lists.size(tickets.?[status == 'USED'])}">0</h3>
+                            <p class="text-muted mb-0">Used Tickets</p>
                         </div>
-                    </a>
-                    <a href="/events" class="list-group-item list-group-item-action d-flex align-items-center">
-                        <i class="fas fa-eye fa-lg me-3"></i>
-                        <div>
-                            <div class="fw-bold">Browse All Events</div>
-                            <small class="text-muted">See what others are doing</small>
-                        </div>
-                    </a>
+                    </div>
                 </div>
             </div>
         </div>

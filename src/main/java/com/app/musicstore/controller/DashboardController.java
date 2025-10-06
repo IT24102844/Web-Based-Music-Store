@@ -1,55 +1,92 @@
 package com.app.musicstore.controller;
 
+import com.app.musicstore.model.Artist;
 import com.app.musicstore.model.User;
 import com.app.musicstore.security.CustomUserDetails;
-import com.app.musicstore.service.UserService;
+import com.app.musicstore.service.EventService;
+import com.app.musicstore.service.ArtistService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.Optional;
 
 @Controller
 public class DashboardController {
 
-    private final UserService userService;
+    @Autowired
+    private EventService eventService;
 
-    public DashboardController(UserService userService) {
-        this.userService = userService;
+    @Autowired
+    private ArtistService artistService;
+
+    @GetMapping("/dashboard/admin")
+    public String adminDashboard(Model model) {
+        User user = getAuthenticatedUser();
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+        model.addAttribute("user", user);
+        return "admin-dashboard";
     }
 
-    @GetMapping("/dashboard/{role}")
-    public String dashboard(@PathVariable String role, Model model) {
-        User user = getFreshAuthenticatedUser();
+    @GetMapping("/dashboard/artist")
+    public String artistDashboard(Model model) {
+        User user = getAuthenticatedUser();
         if (user == null) {
             return "redirect:/users/login";
         }
 
-        model.addAttribute("user", user);
-
-        String normalizedRole = role.toLowerCase();
-
-        switch (normalizedRole) {
-            case "admin":
-                model.addAttribute("totalUsers", userService.getTotalUsersCount());
-                model.addAttribute("activeUsers", userService.getActiveUsersCount());
-                return "admin-dashboard";
-            case "artist":
-                return "artist-dashboard";
-            case "item-seller":
-                return "item-seller-dashboard";
-            case "course-seller":
-                return "course-seller-dashboard";
-            case "customer":
-                return "customer-dashboard";
-            default:
-                // fallback if unknown role
-                return "redirect:/";
+        // Get artist events count using your service method
+        Optional<Artist> artistOpt = artistService.findByUserId(user.getUserId());
+        if (artistOpt.isPresent()) {
+            int eventsCount = eventService.getArtistEvents(artistOpt.get()).size();
+            model.addAttribute("eventsCount", eventsCount);
+        } else {
+            model.addAttribute("eventsCount", 0);
         }
+
+        model.addAttribute("user", user);
+        return "artist-dashboard";
     }
 
-    private User getFreshAuthenticatedUser() {
+    @GetMapping("/dashboard/item-seller")
+    public String itemSellerDashboard(Model model) {
+        User user = getAuthenticatedUser();
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+        model.addAttribute("user", user);
+        return "item-seller-dashboard";
+    }
+
+    @GetMapping("/dashboard/course-seller")
+    public String courseSellerDashboard(Model model) {
+        User user = getAuthenticatedUser();
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+        model.addAttribute("user", user);
+        return "course-seller-dashboard";
+    }
+
+    @GetMapping("/dashboard/customer")
+    public String customerDashboard(Model model) {
+        User user = getAuthenticatedUser();
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+        model.addAttribute("user", user);
+        return "customer-dashboard";
+    }
+
+    /**
+     * Helper method to get the authenticated user from SecurityContext
+     */
+    private User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null &&
@@ -57,11 +94,9 @@ public class DashboardController {
                 authentication.getPrincipal() instanceof CustomUserDetails) {
 
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            Long userId = userDetails.getUser().getUserId();
-
-            return userService.getUserById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+            return userDetails.getUser();
         }
+
         return null;
     }
 }

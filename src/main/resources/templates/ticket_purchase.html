@@ -2,35 +2,547 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Purchase Tickets - Music Store</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    .loading { opacity: 0.7; pointer-events: none; }
-    .card-input:focus { border-color: #0d6efd; box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25); }
-    .error-message { display: none; color: #dc3545; font-size: 0.875em; margin-top: 0.25rem; }
-    .payment-option { border: 2px solid #dee2e6; border-radius: 8px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s ease; }
-    .payment-option:hover { border-color: #0d6efd; background-color: #f8f9fa; }
-    .payment-option.selected { border-color: #198754; background-color: #e8f5e8; }
-    .card-logo { font-size: 24px; margin-right: 10px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      color: #ffffff;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      padding-top: 100px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+              radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+              radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+              radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+      background-size: 50px 50px, 80px 80px, 120px 120px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 1200px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo {
+      font-family: 'Monospace', monospace;
+      font-size: 28px;
+      font-weight: 600;
+      color: #00d4ff;
+      text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 30px;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-links a {
+      color: #e0e0e0;
+      text-decoration: none;
+      font-weight: 400;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav-links a:hover {
+      color: #00d4ff;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #00d4ff, #0099cc);
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    /* User info styling */
+    .user-email {
+      margin-right: 15px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    /* Logout Button Specific Styling */
+    .logout-btn {
+      background: rgba(255, 71, 87, 0.2);
+      border: 1px solid rgba(255, 71, 87, 0.4);
+      color: #ff6b81 !important;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      margin-left: 20px;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 71, 87, 0.3);
+      border-color: #ff4757;
+      color: #ff4757 !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 212, 255, 0.2);
+      border-color: rgba(0, 212, 255, 0.3);
+    }
+
+    .card-header {
+      background: rgba(0, 212, 255, 0.15) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      color: #ffffff;
+    }
+
+    .card-header.bg-primary {
+      background: rgba(0, 212, 255, 0.2) !important;
+      border: none;
+    }
+
+    .card-body {
+      padding: 30px;
+      color: #ffffff;
+    }
+
+    /* Text Colors - Improved Contrast */
+    .text-muted {
+      color: #b0b0b0 !important;
+    }
+
+    .text-success {
+      color: #2ed573 !important;
+    }
+
+    .text-primary {
+      color: #00d4ff !important;
+    }
+
+    /* Form Styling */
+    .form-label {
+      color: #ffffff;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .form-control, .form-select {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      color: #ffffff;
+      padding: 12px 15px;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: #00d4ff;
+      color: #ffffff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+    }
+
+    .form-control::placeholder {
+      color: #a0a0a0;
+    }
+
+    .form-text {
+      color: #b0b0b0 !important;
+      font-size: 0.85rem;
+      margin-top: 5px;
+    }
+
+    /* Select Dropdown Styling - Fixed */
+    .form-select {
+      background: rgba(255, 255, 255, 0.08) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23b0b0b0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") no-repeat right 12px center/16px 12px;
+      color: #ffffff;
+    }
+
+    .form-select option {
+      background: #1a1a2e;
+      color: #ffffff;
+      padding: 10px;
+    }
+
+    .form-select:focus {
+      background: rgba(255, 255, 255, 0.12) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2300d4ff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") no-repeat right 12px center/16px 12px;
+    }
+
+    .input-group-text {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #b0b0b0;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+      border: none;
+      color: white;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+      color: white;
+    }
+
+    .btn-outline-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #e0e0e0;
+    }
+
+    .btn-outline-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.4);
+      color: #ffffff;
+    }
+
+    /* Alerts */
+    .alert {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 15px;
+      color: #ffffff;
+      padding: 15px 20px;
+    }
+
+    .alert-success {
+      border-color: rgba(46, 213, 115, 0.4);
+      background: rgba(46, 213, 115, 0.1);
+    }
+
+    .alert-danger {
+      border-color: rgba(255, 71, 87, 0.4);
+      background: rgba(255, 71, 87, 0.1);
+    }
+
+    .alert-info {
+      border-color: rgba(0, 212, 255, 0.4);
+      background: rgba(0, 212, 255, 0.1);
+    }
+
+    .alert-warning {
+      border-color: rgba(255, 193, 7, 0.4);
+      background: rgba(255, 193, 7, 0.1);
+    }
+
+    /* Payment Options */
+    .payment-option {
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+    }
+
+    .payment-option:hover {
+      border-color: #00d4ff;
+      background: rgba(0, 212, 255, 0.08);
+    }
+
+    .payment-option.selected {
+      border-color: #00d4ff;
+      background: rgba(0, 212, 255, 0.15);
+    }
+
+    .payment-option h6 {
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .payment-option .text-muted {
+      color: #b0b0b0 !important;
+    }
+
+    .card-logo {
+      font-size: 24px;
+      margin-right: 10px;
+    }
+
     .visa { color: #1a1f71; }
     .mastercard { color: #eb001b; }
     .amex { color: #2e77bc; }
     .discover { color: #ff6000; }
+
+    /* Form Elements */
+    .card-input:focus {
+      border-color: #00d4ff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+    }
+
+    .error-message {
+      display: none;
+      color: #ff4757;
+      font-size: 0.875em;
+      margin-top: 0.25rem;
+    }
+
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    /* Event Image */
+    .event-image {
+      max-height: 150px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .event-placeholder {
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    /* Modal Styling */
+    .modal-content {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      color: #ffffff;
+    }
+
+    .modal-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 212, 255, 0.15);
+      color: #ffffff;
+    }
+
+    .modal-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Checkbox Styling */
+    .form-check-input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .form-check-input:checked {
+      background-color: #00d4ff;
+      border-color: #00d4ff;
+    }
+
+    .form-check-label {
+      color: #ffffff;
+    }
+
+    .form-check-label a {
+      color: #00d4ff;
+      text-decoration: none;
+    }
+
+    .form-check-label a:hover {
+      color: #00b8e6;
+      text-decoration: underline;
+    }
+
+    /* Headings and Text */
+    h4, h5, h6 {
+      color: #ffffff;
+    }
+
+    h5.text-success {
+      color: #2ed573 !important;
+    }
+
+    /* Border colors for better visibility */
+    .border-bottom {
+      border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    hr {
+      border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar {
+        width: 95%;
+        padding: 12px 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .container {
+        padding: 20px;
+      }
+
+      .auth-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .user-email {
+        margin-right: 10px;
+        padding: 6px 10px;
+        font-size: 0.9rem;
+      }
+
+      .logout-btn {
+        margin-left: 10px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+      }
+
+      .card-body {
+        padding: 20px;
+      }
+    }
   </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-success">
-  <div class="container">
-    <a class="navbar-brand" href="/events">
-      <i class="fas fa-music me-2"></i>Music Store
-    </a>
+<!-- Navigation -->
+<nav class="navbar">
+  <div class="logo">TuneWave</div>
+  <ul class="nav-links">
+    <li><a href="/events">Home</a></li>
+    <li><a href="#">Music</a></li>
+    <li><a href="#">Courses</a></li>
+    <li><a href="/events">Events</a></li>
+    <li><a href="#">Instruments</a></li>
+    <li><a href="#">About</a></li>
+  </ul>
+  <div class="auth-buttons">
+    <div th:if="${currentUser != null}" class="d-flex align-items-center">
+      <span class="nav-link text-white mb-0 user-email">
+        <i class="fas fa-user me-1"></i>
+        <span th:text="${currentUser.email}"></span>
+      </span>
+      <a class="nav-link logout-btn" href="/users/logout">Logout</a>
+    </div>
   </div>
 </nav>
 
 <div class="container mt-4">
   <div class="row justify-content-center">
-    <div class="col-md-8">
+    <div class="col-lg-10">
       <div class="card">
         <div class="card-header bg-primary text-white">
           <h4 class="mb-0">
@@ -42,11 +554,11 @@
           <div class="row mb-4">
             <div class="col-md-4">
               <div th:if="${event?.imagePath != null}" class="text-center">
-                <img th:src="@{${event.imagePath}}" class="img-fluid rounded"
-                     style="max-height: 150px;" alt="Event Image">
+                <img th:src="@{${event.imagePath}}" class="event-image img-fluid"
+                     alt="Event Image">
               </div>
-              <div th:unless="${event?.imagePath != null}" class="text-center">
-                <i class="fas fa-music fa-5x text-muted"></i>
+              <div th:unless="${event?.imagePath != null}" class="event-placeholder">
+                <i class="fas fa-music fa-3x text-muted"></i>
               </div>
             </div>
             <div class="col-md-8">
@@ -148,8 +660,8 @@
                          oninput="formatCardNumber(this)"
                          required>
                   <span class="input-group-text">
-                                        <i class="fas fa-credit-card text-muted"></i>
-                                    </span>
+                    <i class="fas fa-credit-card text-muted"></i>
+                  </span>
                 </div>
                 <div class="form-text">Enter 16-digit card number</div>
                 <div class="error-message" id="cardNumberError">Must be exactly 16 digits</div>
@@ -184,8 +696,8 @@
                            oninput="formatCVV(this)"
                            required>
                     <span class="input-group-text">
-                                            <i class="fas fa-lock text-muted"></i>
-                                        </span>
+                      <i class="fas fa-lock text-muted"></i>
+                    </span>
                   </div>
                   <div class="form-text">3 or 4 digits</div>
                   <div class="error-message" id="cvvError">Must be 3 or 4 digits</div>
@@ -588,6 +1100,6 @@
 </script>
 
 <!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

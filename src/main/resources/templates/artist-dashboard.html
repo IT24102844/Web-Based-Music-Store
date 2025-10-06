@@ -2,26 +2,504 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Artist Dashboard - Music Store</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #ffffff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            padding-top: 100px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px, 120px 120px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-family: 'Monospace', monospace;
+            font-size: 28px;
+            font-weight: 600;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #00d4ff;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00d4ff, #0099cc);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* User info styling - FIXED VISIBILITY */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-email {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-email i {
+            color: #00d4ff;
+        }
+
+        .artist-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .artist-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        .artist-links a:hover {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        /* Logout Button Specific Styling - FIXED VISIBILITY */
+        .logout-btn {
+            background: rgba(255, 71, 87, 0.2);
+            border: 1px solid rgba(255, 71, 87, 0.4);
+            color: #ff6b81 !important;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 71, 87, 0.3);
+            border-color: #ff4757;
+            color: #ff4757 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+        }
+
+        /* Page Title */
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00d4ff, #ffffff, #00d4ff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: textShimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes textShimmer {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .page-subtitle {
+            color: #b0b0b0;
+            margin-bottom: 30px;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .card-header {
+            background: rgba(0, 212, 255, 0.15) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+        }
+
+        .card-header.bg-primary {
+            background: rgba(0, 212, 255, 0.2) !important;
+            border: none;
+        }
+
+        .card-header.bg-info {
+            background: rgba(0, 212, 255, 0.15) !important;
+            border: none;
+        }
+
+        .card-body {
+            padding: 30px;
+            color: #ffffff;
+        }
+
+        .card-title {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .card-text {
+            color: #b0b0b0;
+        }
+
+        /* Badges */
+        .badge {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            font-weight: 500;
+            padding: 8px 12px;
+        }
+
+        .badge.bg-success {
+            background: rgba(46, 213, 115, 0.2) !important;
+            color: #2ed573 !important;
+            border: 1px solid rgba(46, 213, 115, 0.3);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+        }
+
+        /* Alerts */
+        .alert {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: #ffffff;
+        }
+
+        .alert-success {
+            border-color: rgba(46, 213, 115, 0.3);
+        }
+
+        .alert-danger {
+            border-color: rgba(255, 71, 87, 0.3);
+        }
+
+        .alert-info {
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        /* Text colors */
+        .text-muted {
+            color: #b0b0b0 !important;
+        }
+
+        .text-primary {
+            color: #00d4ff !important;
+        }
+
+        .text-success {
+            color: #2ed573 !important;
+        }
+
+        /* List Group */
+        .list-group-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transition: all 0.3s ease;
+            padding: 20px;
+        }
+
+        .list-group-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(0, 212, 255, 0.3);
+            transform: translateX(5px);
+        }
+
+        .list-group-item-action {
+            color: #ffffff;
+        }
+
+        .list-group-item-action:hover {
+            color: #00d4ff;
+        }
+
+        /* Icons */
+        .fa-user-circle {
+            color: #00d4ff;
+        }
+
+        .fa-plus-circle {
+            color: #2ed573 !important;
+        }
+
+        .fa-list {
+            color: #00d4ff !important;
+        }
+
+        .fa-cog {
+            color: #ffa502 !important;
+        }
+
+        .fa-eye {
+            color: #00d4ff !important;
+        }
+
+        /* Dashboard Stats */
+        .stat-badge {
+            font-size: 1.5rem;
+            padding: 12px 20px;
+        }
+
+        .welcome-section h5 {
+            color: #ffffff;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                width: 95%;
+                padding: 12px 20px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .auth-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .user-info {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .artist-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .user-email {
+                font-size: 0.9rem;
+                padding: 6px 12px;
+            }
+
+            .logout-btn {
+                font-size: 0.9rem;
+                padding: 6px 12px;
+            }
+
+            .card-body {
+                padding: 20px;
+            }
+
+            .card-header {
+                padding: 20px;
+            }
+
+            .list-group-item {
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
 
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-success">
-    <div class="container">
-        <a class="navbar-brand" href="/events">
-            <i class="fas fa-music me-2"></i>Music Store
-        </a>
-        <div class="navbar-nav ms-auto">
-            <a class="nav-link active" href="/artist/events">My Events</a>
-            <a class="nav-link" th:href="@{/artist/event/new}">Create Event</a>
-            <a class="nav-link" href="/users/profile">Profile</a>
-            <a class="nav-link" th:href="@{/users/logout}">Logout</a>
+<!-- Navigation -->
+<nav class="navbar">
+    <div class="logo">TuneWave</div>
+    <ul class="nav-links">
+        <li><a href="/events">Home</a></li>
+        <li><a href="#">Music</a></li>
+        <li><a href="#">Courses</a></li>
+        <li><a href="/events">Events</a></li>
+        <li><a href="#">Instruments</a></li>
+        <li><a href="#">About</a></li>
+    </ul>
+    <div class="auth-buttons">
+        <div th:if="${currentUser != null}" class="user-info">
+            <span class="user-email">
+                <i class="fas fa-user me-1"></i>
+                <span th:text="${currentUser.email}">user@example.com</span>
+            </span>
+            <div th:if="${currentUser.role == 'ARTIST'}" class="artist-links">
+                <a href="/artist/events">My Events</a>
+                <a href="/artist/event/new">Create Event</a>
+            </div>
+            <a class="logout-btn" href="/users/logout">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </a>
         </div>
     </div>
 </nav>
 
-<div class="container mt-4">
+<div class="container">
     <div class="row">
         <div class="col-md-8">
             <div class="card">
@@ -32,38 +510,34 @@
                     </h3>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
+                    <div class="row mb-4">
+                        <div class="col-md-6 welcome-section">
                             <h5>Welcome, Artist!</h5>
-                            <p class="text-muted">Manage your events and profile</p>
-                        </div>
-                        <div class="col-md-6 text-end">
-                            <span class="badge bg-success fs-6">0</span>
-                            <small class="text-muted d-block">Total Events</small>
+                            <p class="text-muted">Manage your events and profile settings</p>
                         </div>
                     </div>
 
-                    <hr>
+                    <hr style="border-color: rgba(255,255,255,0.1);">
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <strong>Email:</strong> <span th:text="${user.email}">email@example.com</span>
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <strong class="d-block mb-1">Email:</strong>
+                            <span class="text-primary" th:text="${user.email}">artist@example.com</span>
                         </div>
-                        <div class="col-md-6">
-                            <strong>Role:</strong>
+                        <div class="col-md-6 mb-3">
+                            <strong class="d-block mb-1">Role:</strong>
                             <span class="badge bg-success" th:text="${user.role}">ARTIST</span>
                         </div>
                     </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <strong>Status:</strong>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <strong class="d-block mb-1">Status:</strong>
                             <span class="badge bg-success" th:text="${user.status}">ACTIVE</span>
                         </div>
-                        <div class="col-md-6">
-                            <strong>Member Since:</strong>
-                            <span th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}">Jan 01,
-                                    2024</span>
+                        <div class="col-md-6 mb-3">
+                            <strong class="d-block mb-1">Member Since:</strong>
+                            <span class="text-muted" th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</span>
                         </div>
                     </div>
                 </div>
@@ -73,12 +547,14 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header bg-info text-white">
-                    <h6 class="mb-0">Quick Actions</h6>
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h6>
                 </div>
                 <div class="list-group list-group-flush">
                     <a href="/artist/event/new"
                        class="list-group-item list-group-item-action d-flex align-items-center">
-                        <i class="fas fa-plus-circle text-success me-3"></i>
+                        <i class="fas fa-plus-circle fa-lg me-3"></i>
                         <div>
                             <div class="fw-bold">Create New Event</div>
                             <small class="text-muted">Start a new performance</small>
@@ -86,7 +562,7 @@
                     </a>
                     <a href="/artist/events"
                        class="list-group-item list-group-item-action d-flex align-items-center">
-                        <i class="fas fa-list text-primary me-3"></i>
+                        <i class="fas fa-list fa-lg me-3"></i>
                         <div>
                             <div class="fw-bold">Manage Events</div>
                             <small class="text-muted">View your events</small>
@@ -94,14 +570,14 @@
                     </a>
                     <a href="/users/profile"
                        class="list-group-item list-group-item-action d-flex align-items-center">
-                        <i class="fas fa-cog text-warning me-3"></i>
+                        <i class="fas fa-cog fa-lg me-3"></i>
                         <div>
                             <div class="fw-bold">Profile Settings</div>
                             <small class="text-muted">Update your information</small>
                         </div>
                     </a>
                     <a href="/events" class="list-group-item list-group-item-action d-flex align-items-center">
-                        <i class="fas fa-eye text-info me-3"></i>
+                        <i class="fas fa-eye fa-lg me-3"></i>
                         <div>
                             <div class="fw-bold">Browse All Events</div>
                             <small class="text-muted">See what others are doing</small>
@@ -113,7 +589,6 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

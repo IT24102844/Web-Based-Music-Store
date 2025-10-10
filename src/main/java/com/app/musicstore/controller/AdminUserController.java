@@ -3,10 +3,8 @@ package com.app.musicstore.controller;
 import com.app.musicstore.model.Event;
 import com.app.musicstore.model.Role;
 import com.app.musicstore.model.User;
-import com.app.musicstore.model.EventStatus;
 import com.app.musicstore.security.CustomUserDetails;
 import com.app.musicstore.service.UserService;
-import com.app.musicstore.service.EventService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -106,8 +104,8 @@ public class AdminUserController {
         return "redirect:/admin/events/pending";
     }
 
-    // -------------------- User Management: List all users --------------------
-    @GetMapping("/users")
+    // List all users
+    @GetMapping
     public String listUsers(Model model) {
         User admin = getAuthenticatedUser();
         if (admin == null || admin.getRole() != Role.ADMIN) {
@@ -125,8 +123,8 @@ public class AdminUserController {
         return "admin-user-list";
     }
 
-    // -------------------- User Management: Edit user form --------------------
-    @GetMapping("/users/edit/{id}")
+    // Edit user form
+    @GetMapping("/edit/{id}")
     public String editUserForm(@PathVariable Long id, Model model) {
         User admin = getAuthenticatedUser();
         if (admin == null || admin.getRole() != Role.ADMIN) {
@@ -139,8 +137,8 @@ public class AdminUserController {
         return "admin-edit-user";
     }
 
-    // -------------------- User Management: Update user --------------------
-    @PostMapping("/users/update/{id}")
+    // Update user
+    @PostMapping("/update/{id}")
     public String updateUser(@PathVariable Long id, @ModelAttribute User user) {
         User admin = getAuthenticatedUser();
         if (admin == null || admin.getRole() != Role.ADMIN) {
@@ -151,8 +149,8 @@ public class AdminUserController {
         return "redirect:/admin/users";
     }
 
-    // -------------------- User Management: Delete user --------------------
-    @GetMapping("/users/delete/{id}")
+    // Delete user
+    @GetMapping("/delete/{id}")
     public String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         User admin = getAuthenticatedUser();
         if (admin == null || admin.getRole() != Role.ADMIN) {
@@ -191,8 +189,8 @@ public class AdminUserController {
         return "redirect:/admin/users";
     }
 
-    // -------------------- User Management: Change role --------------------
-    @PostMapping("/users/role/{id}")
+    // Change role
+    @PostMapping("/role/{id}")
     public String changeRole(@PathVariable Long id, @RequestParam String role) {
         User admin = getAuthenticatedUser();
         if (admin == null || admin.getRole() != Role.ADMIN) {
@@ -203,8 +201,8 @@ public class AdminUserController {
         return "redirect:/admin/users";
     }
 
-    // -------------------- User Management: Change status --------------------
-    @PostMapping("/users/status/{id}")
+    // Change status
+    @PostMapping("/status/{id}")
     public String changeStatus(@PathVariable Long id, @RequestParam String status) {
         User admin = getAuthenticatedUser();
         if (admin == null || admin.getRole() != Role.ADMIN) {
@@ -215,7 +213,9 @@ public class AdminUserController {
         return "redirect:/admin/users";
     }
 
-    // Get authenticated user from Spring Security context
+
+    //Get authenticated user from Spring Security context
+
     private User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

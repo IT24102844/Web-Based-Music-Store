@@ -22,17 +22,10 @@ public class UserController {
 
     private final UserService userService;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final ArtistService artistService;
-    private final UserRepository userRepository;
 
-    public UserController(UserService userService,
-                          BCryptPasswordEncoder passwordEncoder,
-                          ArtistService artistService,
-                          UserRepository userRepository) {
+    public UserController(UserService userService, BCryptPasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
-        this.artistService = artistService;
-        this.userRepository = userRepository;
     }
 
     @GetMapping("/register")
@@ -69,11 +62,6 @@ public class UserController {
             return "redirect:/users/login";
         }
 
-        // If user is artist, redirect to artist edit profile
-        if (authenticatedUser.getRole() == Role.ARTIST) {
-            return "redirect:/users/edit-artist-profile";
-        }
-
         var user = userService.getUserById(authenticatedUser.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -86,41 +74,37 @@ public class UserController {
     @PostMapping("/update-profile")
     public String updateProfile(@ModelAttribute User user,
                                 HttpSession session,
-                                @RequestParam Map<String, String> allParams,
-                                Model model) {
+                                @RequestParam Map<String, String> allParams) {
         User authenticatedUser = getAuthenticatedUser();
         if (authenticatedUser == null) {
             return "redirect:/users/login";
         }
 
-        try {
-            System.out.println("🔄 Starting profile update for user: " + authenticatedUser.getEmail());
+        // Get current user from database
+        User currentUser = userService.getUserById(authenticatedUser.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // Get current user from database
-            User currentUser = userService.getUserById(authenticatedUser.getUserId())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+        // Handle password - if password is empty or null, keep the current one
+        String newPassword = user.getPassword();
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            // Keep current password
+            user.setPassword(currentUser.getPassword());
+        } else {
+            // New password provided - encode it
+            user.setPassword(passwordEncoder.encode(newPassword));
+        }
 
-            // Handle password - if password is empty or null, keep the current one
-            String newPassword = user.getPassword();
-            if (newPassword == null || newPassword.trim().isEmpty()) {
-                // Keep current password
-                user.setPassword(currentUser.getPassword());
-            } else {
-                // Validate password length
-                if (newPassword.length() < 6) {
-                    model.addAttribute("error", "Password must be at least 6 characters long");
-                    return editProfileForm(model);
-                }
-                // New password provided - encode it
-                user.setPassword(passwordEncoder.encode(newPassword));
-            }
+        // Preserve other fields that shouldn't be changed
+        user.setEmail(currentUser.getEmail()); // Ensure email doesn't change
+        user.setRole(currentUser.getRole()); // Ensure role doesn't change
+        user.setUserId(currentUser.getUserId()); // Ensure ID doesn't change
 
-            // Preserve other fields that shouldn't be changed
-            user.setEmail(currentUser.getEmail());
-            user.setRole(currentUser.getRole());
-            user.setUserId(currentUser.getUserId());
-            user.setCreatedAt(currentUser.getCreatedAt());
-            user.setStatus(currentUser.getStatus());
+        userService.updateUser(authenticatedUser.getUserId(), user);
+
+        // Update session with latest user data
+        var updatedUser = userService.getUserById(authenticatedUser.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found after update"));
+        session.setAttribute("loggedInUser", updatedUser);
 
             // Update User table
             System.out.println("💾 Updating User table...");

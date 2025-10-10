@@ -555,55 +555,6 @@
         </div>
       </a>
     </div>
-
-    <!-- Add this card after the "Quick Actions" section in admin-dashboard.html -->
-
-    <!-- Event Management -->
-    <div class="dashboard-card">
-      <h3>
-        <i class="fas fa-calendar-check me-2"></i>Event Management
-      </h3>
-      <div class="quick-actions">
-        <a th:href="@{/admin/events/pending}" class="action-btn">
-          <i class="fas fa-clock fa-2x"></i>
-          <div>
-            <strong>Review Pending Events</strong>
-            <div class="small" th:text="'(' + ${pendingEventsCount} + ' events waiting for review)'">
-              (X events waiting for review)
-            </div>
-          </div>
-        </a>
-
-        <a th:href="@{/events}" class="action-btn">
-          <i class="fas fa-eye fa-2x"></i>
-          <div>
-            <strong>View Public Events</strong>
-            <div class="small">Browse all approved events</div>
-          </div>
-        </a>
-      </div>
-    </div>
-
-    <!-- Update the Platform Statistics section to include event stats -->
-    <div class="col-lg-6">
-      <h3>
-        <i class="fas fa-chart-bar me-2"></i>Platform Statistics
-      </h3>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-number" th:text="${totalUsers != null ? totalUsers : '0'}">0</div>
-          <div class="stat-label">Total Users</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" th:text="${activeUsers != null ? activeUsers : '0'}">0</div>
-          <div class="stat-label">Active Users</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" th:text="${pendingEventsCount != null ? pendingEventsCount : '0'}">0</div>
-          <div class="stat-label">Pending Events</div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- Recent Activity -->

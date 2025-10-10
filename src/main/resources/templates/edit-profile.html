@@ -3,7 +3,6 @@
 <head>
   <title>Edit Profile - Tune Wave</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     * {
       margin: 0;
@@ -40,15 +39,23 @@
     }
 
     @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
     }
 
     .container {
       position: relative;
       z-index: 2;
-      max-width: 800px;
+      max-width: 600px;
       margin: 0 auto;
       padding: 30px;
     }
@@ -60,12 +67,6 @@
       border-radius: 20px;
       padding: 40px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      transition: all 0.3s ease;
-    }
-
-    .form-container:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 40px rgba(0, 212, 255, 0.2);
     }
 
     h2 {
@@ -82,8 +83,12 @@
     }
 
     @keyframes textShimmer {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
+      0%, 100% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
     }
 
     .form-label {
@@ -101,7 +106,6 @@
       padding: 12px 15px;
       margin-bottom: 20px;
       width: 100%;
-      transition: all 0.3s ease;
     }
 
     .form-control:focus {
@@ -129,10 +133,8 @@
       font-weight: 600;
       transition: all 0.3s ease;
       text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      display: inline-block;
+      text-align: center;
       cursor: pointer;
     }
 
@@ -145,18 +147,6 @@
     .btn-primary:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
-    }
-
-    .btn-outline-secondary {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #e0e0e0;
-    }
-
-    .btn-outline-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: #00d4ff;
-      color: #00d4ff;
     }
 
     .btn-full {
@@ -194,33 +184,42 @@
     .auth-buttons {
       display: flex;
       gap: 15px;
-      align-items: center;
     }
 
-    .user-email {
-      padding: 8px 16px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #ffffff;
+    .btn-nav {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 25px;
+      font-family: 'Roboto', sans-serif;
       font-weight: 500;
-    }
-
-    .logout-btn {
-      background: rgba(255, 71, 87, 0.2);
-      border: 1px solid rgba(255, 71, 87, 0.4);
-      color: #ff6b81 !important;
-      padding: 8px 16px;
-      border-radius: 10px;
-      font-weight: 500;
+      cursor: pointer;
       transition: all 0.3s ease;
       text-decoration: none;
+      display: inline-block;
+      text-align: center;
     }
 
-    .logout-btn:hover {
-      background: rgba(255, 71, 87, 0.3);
-      border-color: #ff4757;
-      color: #ff4757 !important;
+    .btn-login {
+      background: transparent;
+      color: #e0e0e0;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-login:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #00d4ff;
+      color: #00d4ff;
+    }
+
+    .btn-signup {
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+    }
+
+    .btn-signup:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
     }
 
     .role-badge {
@@ -258,42 +257,6 @@
       color: white;
     }
 
-    .section-title {
-      color: #00d4ff;
-      font-size: 1.3rem;
-      margin: 30px 0 20px 0;
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .artist-fields {
-      background: rgba(0, 212, 255, 0.05);
-      border: 1px solid rgba(0, 212, 255, 0.1);
-      border-radius: 15px;
-      padding: 25px;
-      margin: 25px 0;
-    }
-
-    .alert {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      color: #e0e0e0;
-      padding: 15px;
-      margin-bottom: 20px;
-    }
-
-    .alert-success {
-      border-color: rgba(46, 213, 115, 0.3);
-      background: rgba(46, 213, 115, 0.1);
-    }
-
-    .alert-danger {
-      border-color: rgba(255, 71, 87, 0.3);
-      background: rgba(255, 71, 87, 0.1);
-    }
-
     @media (max-width: 768px) {
       .navbar {
         width: 95%;
@@ -309,28 +272,21 @@
       .form-container {
         padding: 30px 20px;
       }
-
-      .auth-buttons {
-        flex-wrap: wrap;
-        justify-content: center;
-      }
     }
   </style>
 </head>
 <body>
-<!-- Navigation -->
+<!-- Navbar -->
 <nav class="navbar">
   <div class="logo">TuneWave</div>
   <div class="auth-buttons">
-    <div th:if="${currentUser != null}" class="d-flex align-items-center">
-      <span class="user-email me-3">
-        <i class="fas fa-user me-1"></i>
-        <span th:text="${currentUser.email}"></span>
-      </span>
-      <a class="logout-btn" th:href="@{/users/logout}">
-        <i class="fas fa-sign-out-alt me-1"></i>Logout
-      </a>
-    </div>
+    <a th:href="@{/users/logout}" class="btn-nav btn-login">Logout</a>
+
+    <!-- Dynamic Back Button - Convert role to lowercase and replace underscores with hyphens -->
+    <th:block th:with="dashboardRole=${#strings.toLowerCase(#strings.replace(user.role, '_', '-'))}">
+      <a th:href="@{'/dashboard/' + ${dashboardRole}}" class="btn-nav btn-signup">⬅ Back to Dashboard</a>
+    </th:block>
+
   </div>
 </nav>
 
@@ -338,161 +294,63 @@
   <div class="form-container">
     <h2>
       Edit Profile
-      <span th:if="${user.role == 'ARTIST'}" class="role-badge role-artist">
-        <i class="fas fa-music me-1"></i>ARTIST
-      </span>
+      <!-- Display role badge -->
       <span th:if="${user.role == 'ADMIN'}" class="role-badge role-admin">ADMIN</span>
       <span th:if="${user.role == 'CUSTOMER'}" class="role-badge role-customer">CUSTOMER</span>
+      <span th:if="${user.role == 'ARTIST'}" class="role-badge role-artist">ARTIST</span>
       <span th:if="${user.role == 'ITEM_SELLER'}" class="role-badge role-item_seller">ITEM_SELLER</span>
       <span th:if="${user.role == 'COURSE_SELLER'}" class="role-badge role-course_seller">COURSE_SELLER</span>
     </h2>
 
-    <!-- Success/Error Messages -->
-    <div th:if="${param.success}" class="alert alert-success">
-      <i class="fas fa-check-circle me-2"></i>
-      <span th:text="${param.success}"></span>
+    <!-- Debug: Show the actual role value and converted dashboard role -->
+    <div style="display: none; color: #ff6b81; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; margin-bottom: 20px;">
+      Debug - User Role: <span th:text="${user.role}">Unknown</span><br>
+      Debug - Dashboard Role: <span th:text="${#strings.toLowerCase(#strings.replace(user.role, '_', '-'))}">Unknown</span>
     </div>
 
-    <div th:if="${error}" class="alert alert-danger">
-      <i class="fas fa-exclamation-triangle me-2"></i>
-      <span th:text="${error}"></span>
-    </div>
+    <form th:action="@{/users/update-profile}" th:object="${user}" method="post">
+      <input type="hidden" th:field="*{userId}"/>
 
-    <form th:action="@{/users/update-profile}" method="post">
-      <!-- Hidden fields -->
-      <input type="hidden" name="userId" th:value="${user.userId}"/>
-      <input type="hidden" name="email" th:value="${user.email}"/>
-      <input type="hidden" name="role" th:value="${user.role}"/>
-
-      <!-- Basic Information -->
-      <h4 class="section-title">
-        <i class="fas fa-user me-2"></i>Basic Information
-      </h4>
-
-      <div class="row">
-        <div class="col-md-6">
-          <label class="form-label">Full Name:</label>
-          <input type="text" name="name" class="form-control"
-                 th:value="${user.name}"
-                 placeholder="Enter your full name" required/>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Email:</label>
-          <input type="email" th:value="${user.email}" class="form-control" readonly/>
-          <small style="color: #888; font-size: 0.8rem;">Email cannot be changed</small>
-        </div>
+      <div class="mb-3">
+        <label class="form-label">Name:</label>
+        <input type="text" th:field="*{name}" class="form-control" required/>
       </div>
 
-      <!-- Artist Specific Fields -->
-      <div th:if="${user.role == 'ARTIST'}" class="artist-fields">
-        <h4 class="section-title">
-          <i class="fas fa-music me-2"></i>Artist Information
-        </h4>
-
-        <div class="row">
-          <div class="col-md-6">
-            <label class="form-label">Stage Name:</label>
-            <input type="text" name="stageName" class="form-control"
-                   th:value="${stageName}"
-                   placeholder="Enter your stage name" required/>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Music Genre:</label>
-            <input type="text" name="genre" class="form-control"
-                   th:value="${genre}"
-                   placeholder="e.g., Rock, Pop, Jazz, Classical" required/>
-          </div>
-        </div>
+      <div class="mb-3">
+        <label class="form-label">Email:</label>
+        <input type="email" th:field="*{email}" class="form-control" readonly/>
       </div>
 
-      <!-- Security -->
-      <h4 class="section-title">
-        <i class="fas fa-lock me-2"></i>Security
-      </h4>
-
-      <div class="row">
-        <div class="col-12">
-          <label class="form-label">New Password (optional):</label>
-          <input type="password" name="password" class="form-control"
-                 placeholder="Enter new password (leave blank to keep current)"/>
-          <small style="color: #888; font-size: 0.8rem; display: block; margin-top: 5px;">
-            Must be at least 6 characters long. Leave blank if you don't want to change your password.
-          </small>
-        </div>
+      <div class="mb-3">
+        <label class="form-label">Password (leave blank to keep current password):</label>
+        <input type="password" th:field="*{password}" class="form-control" placeholder="Enter new password (optional)"/>
+        <small style="color: #e0e0e0; font-size: 0.85rem; display: block; margin-top: 5px; opacity: 0.9;">
+          Must be at least 6 characters long
+        </small>
       </div>
 
-      <!-- Read-only Information -->
-      <h4 class="section-title">
-        <i class="fas fa-info-circle me-2"></i>Account Information
-      </h4>
-
-      <div class="row">
-        <div class="col-md-6">
-          <label class="form-label">Role:</label>
-          <input type="text" th:value="${user.role}" class="form-control" readonly/>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Member Since:</label>
-          <input type="text" class="form-control"
-                 th:value="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}" readonly/>
-        </div>
+      <div class="mb-3">
+        <label class="form-label">Role:</label>
+        <input type="text" th:field="*{role}" class="form-control" readonly/>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="row mt-4">
-        <div class="col-12">
-          <div class="d-flex gap-3">
-            <button type="submit" class="btn btn-primary flex-fill">
-              <i class="fas fa-save me-2"></i>Update Profile
-            </button>
-            <a th:href="@{/dashboard/artist}" class="btn btn-outline-secondary">
-              <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
-            </a>
-          </div>
-        </div>
-      </div>
+      <button type="submit" class="btn btn-primary btn-full">Update Profile</button>
     </form>
   </div>
 </div>
 
 <script>
-  // Add form validation
+  // Add password validation
   document.addEventListener('DOMContentLoaded', function() {
+    const passwordField = document.querySelector('input[type="password"]');
     const form = document.querySelector('form');
-    const passwordField = document.querySelector('input[name="password"]');
 
     form.addEventListener('submit', function(e) {
-      // Validate password length if provided
-      const password = passwordField.value;
-      if (password && password.length < 6) {
+      if (passwordField.value && passwordField.value.length < 6) {
         e.preventDefault();
         alert('Password must be at least 6 characters long');
         passwordField.focus();
-        return false;
       }
-
-      // Validate artist fields if user is artist
-      const role = '[[${user.role}]]';
-      if (role === 'ARTIST') {
-        const stageName = document.querySelector('input[name="stageName"]').value;
-        const genre = document.querySelector('input[name="genre"]').value;
-
-        if (!stageName || stageName.trim() === '') {
-          e.preventDefault();
-          alert('Stage name is required');
-          document.querySelector('input[name="stageName"]').focus();
-          return false;
-        }
-
-        if (!genre || genre.trim() === '') {
-          e.preventDefault();
-          alert('Genre is required');
-          document.querySelector('input[name="genre"]').focus();
-          return false;
-        }
-      }
-
-      return true;
     });
   });
 </script>

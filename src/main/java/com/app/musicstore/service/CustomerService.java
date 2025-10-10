@@ -35,4 +35,5 @@ public class CustomerService {
         customer.setPreferences(preferences);
         return customerRepository.save(customer);
     }
+
 }

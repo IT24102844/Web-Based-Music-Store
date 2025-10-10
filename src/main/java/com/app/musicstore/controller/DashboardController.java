@@ -1,11 +1,16 @@
 package com.app.musicstore.controller;
 
 import com.app.musicstore.model.Artist;
+import com.app.musicstore.model.Ticket;
 import com.app.musicstore.model.User;
 import com.app.musicstore.model.Song;
 import com.app.musicstore.security.CustomUserDetails;
 import com.app.musicstore.service.ArtistService;
 import com.app.musicstore.service.SongService;
+import com.app.musicstore.service.EventService;
+import com.app.musicstore.service.ArtistService;
+import com.app.musicstore.service.PaymentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -25,6 +30,14 @@ public class DashboardController {
         this.artistService = artistService;
         this.songService = songService;
     }
+    @Autowired
+    private EventService eventService;
+
+    @Autowired
+    private ArtistService artistService;
+
+    @Autowired
+    private PaymentService paymentService;
 
     @GetMapping("/dashboard/admin")
     public String adminDashboard(Model model) {
@@ -64,7 +77,21 @@ public class DashboardController {
         model.addAttribute("followerCount", 0);
         model.addAttribute("rating", 0.0);
 
+        // Get artist events count and artist details
+        Optional<Artist> artistOpt = artistService.findByUserId(user.getUserId());
+        if (artistOpt.isPresent()) {
+            Artist artist = artistOpt.get();
+            int eventsCount = eventService.getArtistEvents(artist).size();
+            model.addAttribute("eventsCount", eventsCount);
+            model.addAttribute("artist", artist);
+            System.out.println("🎭 Loaded artist for dashboard - Stage: " + artist.getStageName() + ", Genre: " + artist.getGenre());
+        } else {
+            model.addAttribute("eventsCount", 0);
+            System.out.println("⚠️ No artist profile found for dashboard user: " + user.getUserId());
+        }
+
         model.addAttribute("user", user);
+        model.addAttribute("currentUser", user);
         return "artist-dashboard";
     }
 
@@ -112,6 +139,16 @@ public class DashboardController {
         model.addAttribute("totalArtists", totalArtists);
         model.addAttribute("genres", genres);
 
+        // Get user's tickets count for events attended
+        List<Ticket> userTickets = paymentService.getUserTickets(user);
+        long eventsAttendedCount = userTickets.stream()
+                .filter(ticket -> "ACTIVE".equals(ticket.getStatus()) || "USED".equals(ticket.getStatus()))
+                .count();
+
+        System.out.println("🎫 Customer dashboard - User: " + user.getEmail() + ", Tickets: " + eventsAttendedCount);
+
+        model.addAttribute("user", user);
+        model.addAttribute("eventsAttendedCount", eventsAttendedCount);
         return "customer-dashboard";
     }
 

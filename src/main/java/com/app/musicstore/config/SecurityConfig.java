@@ -30,7 +30,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/", "/home", "/users/register", "/users/forgot-password", "/users/login", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/", "/home", "/users/register", "/users/login",
+                                "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll() // ADD /uploads/** HERE
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/artist/**").hasAuthority("ARTIST")
                         .requestMatchers("/dashboard/admin").hasAuthority("ADMIN")
@@ -46,7 +47,7 @@ public class SecurityConfig {
                         .usernameParameter("email")
                         .loginPage("/users/login")
                         .loginProcessingUrl("/users/login")
-                        .successHandler(roleBasedAuthenticationSuccessHandler()) // Use custom success handler
+                        .successHandler(roleBasedAuthenticationSuccessHandler())
                         .failureUrl("/users/login?error=true")
                         .permitAll()
                 )
@@ -55,7 +56,7 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/users/login?logout=true")
                         .permitAll()
                 )
-                .csrf(csrf -> csrf.disable()) // Enable for production
+                .csrf(csrf -> csrf.disable())
                 .httpBasic(withDefaults());
 
         return http.build();
@@ -69,12 +70,10 @@ public class SecurityConfig {
         return new AuthenticationSuccessHandler() {
             @Override
             public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                // Get the authorities/roles of the logged-in user
                 var authorities = authentication.getAuthorities().stream()
                         .map(grantedAuthority -> grantedAuthority.getAuthority())
                         .toList();
 
-                // Redirect based on role/authority
                 if (authorities.contains("ADMIN")) {
                     response.sendRedirect("/dashboard/admin");
                 } else if (authorities.contains("ARTIST")) {
@@ -86,7 +85,6 @@ public class SecurityConfig {
                 } else if (authorities.contains("CUSTOMER")) {
                     response.sendRedirect("/dashboard/customer");
                 } else {
-                    // Default redirect for users with no specific role
                     response.sendRedirect("/dashboard");
                 }
             }

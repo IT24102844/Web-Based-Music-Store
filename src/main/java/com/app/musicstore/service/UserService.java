@@ -134,6 +134,10 @@ public class UserService {
     }
 
     public void deleteUser(Long userId) {
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        userRepository.delete(user);
         try {
             var user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));

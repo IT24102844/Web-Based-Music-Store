@@ -1,5 +1,7 @@
 package com.app.musicstore.repository;
 
+import com.app.musicstore.model.Role;
+import com.app.musicstore.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,6 +14,9 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email);
+    long countByRole(Role role);
+}
 
     // FIXED: Add findByEmail method
     @Query("SELECT u FROM User u WHERE u.email = :email")

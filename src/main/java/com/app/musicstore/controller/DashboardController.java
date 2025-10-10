@@ -3,7 +3,10 @@ package com.app.musicstore.controller;
 import com.app.musicstore.model.Artist;
 import com.app.musicstore.model.Ticket;
 import com.app.musicstore.model.User;
+import com.app.musicstore.model.Song;
 import com.app.musicstore.security.CustomUserDetails;
+import com.app.musicstore.service.ArtistService;
+import com.app.musicstore.service.SongService;
 import com.app.musicstore.service.EventService;
 import com.app.musicstore.service.ArtistService;
 import com.app.musicstore.service.PaymentService;
@@ -20,6 +23,13 @@ import java.util.Optional;
 @Controller
 public class DashboardController {
 
+    private final ArtistService artistService;
+    private final SongService songService;
+
+    public DashboardController(ArtistService artistService, SongService songService) {
+        this.artistService = artistService;
+        this.songService = songService;
+    }
     @Autowired
     private EventService eventService;
 
@@ -45,6 +55,27 @@ public class DashboardController {
         if (user == null) {
             return "redirect:/users/login";
         }
+
+        // Get artist information
+        Optional<Artist> artistOpt = artistService.findByUserId(user.getUserId());
+        if (artistOpt.isPresent()) {
+            Artist artist = artistOpt.get();
+
+            // Get song statistics
+            List<Song> songs = songService.getSongsByArtist(artist);
+            int songCount = songs.size();
+            model.addAttribute("songCount", songCount);
+
+        } else {
+            model.addAttribute("songCount", 0);
+        }
+
+        // Placeholder for events
+        model.addAttribute("eventsCount", 0);
+
+        // Placeholder statistics
+        model.addAttribute("followerCount", 0);
+        model.addAttribute("rating", 0.0);
 
         // Get artist events count and artist details
         Optional<Artist> artistOpt = artistService.findByUserId(user.getUserId());
@@ -91,6 +122,23 @@ public class DashboardController {
             return "redirect:/users/login";
         }
 
+        // Add customer-specific statistics
+        List<Song> allSongs = songService.getAllSongs();
+        List<String> genres = songService.getAllGenres();
+
+        int totalSongs = allSongs.size();
+        int totalGenres = genres.size();
+        int totalArtists = (int) allSongs.stream()
+                .map(song -> song.getArtist().getUserId())
+                .distinct()
+                .count();
+
+        model.addAttribute("user", user);
+        model.addAttribute("totalSongs", totalSongs);
+        model.addAttribute("totalGenres", totalGenres);
+        model.addAttribute("totalArtists", totalArtists);
+        model.addAttribute("genres", genres);
+
         // Get user's tickets count for events attended
         List<Ticket> userTickets = paymentService.getUserTickets(user);
         long eventsAttendedCount = userTickets.stream()
@@ -103,6 +151,10 @@ public class DashboardController {
         model.addAttribute("eventsAttendedCount", eventsAttendedCount);
         return "customer-dashboard";
     }
+
+
+
+
 
     /**
      * Helper method to get the authenticated user from SecurityContext

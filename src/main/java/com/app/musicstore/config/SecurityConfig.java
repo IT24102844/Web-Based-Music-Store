@@ -39,6 +39,8 @@ public class SecurityConfig {
                         .requestMatchers("/dashboard/item-seller").hasAuthority("ITEM_SELLER")
                         .requestMatchers("/dashboard/course-seller").hasAuthority("COURSE_SELLER")
                         .requestMatchers("/dashboard/customer").hasAuthority("CUSTOMER")
+                        .requestMatchers("/tickets/create", "/tickets/my-tickets").authenticated()
+                        .requestMatchers("/tickets/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

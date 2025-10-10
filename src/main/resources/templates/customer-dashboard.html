@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Music Instruments - TuneWave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+    <style>
+        /* Customer Dashboard Specific Styles */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #f9fafb;
+            padding: 20px;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0 0 20px 0;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .product-image-placeholder {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 1.2rem;
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .product-type {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 8px;
+        }
+
+        .product-description {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .stock-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .stock-in {
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .stock-out {
+            background: #fef2f2;
+            color: #991b1b;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .product-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-purchase {
+            background: #3b82f6;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-purchase:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-view-details {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-view-details:hover {
+            background: #e2e8f0;
+        }
+
+        .no-products {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px;
+            color: #64748b;
+        }
+
+        .no-products h3 {
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 16px;
+            align-items: end;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Profile Section Styles */
+        .profile-section {
+            padding: 20px 0;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .profile-image-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .profile-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .profile-info {
+            text-align: center;
+        }
+
+        .profile-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .profile-role {
+            color: #64748b;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .profile-details {
+            font-size: 0.85rem;
+            color: #64748b;
+            line-height: 1.4;
+        }
+
+        .profile-details p {
+            margin: 4px 0;
+        }
+
+        /* Navigation Cards */
+        .nav-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .nav-card h3 {
+            margin: 0 0 8px 0;
+            color: #1e293b;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .nav-card p {
+            color: #64748b;
+            margin: 0 0 12px 0;
+            font-size: 0.9rem;
+        }
+
+        .nav-card a {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #3b82f6;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .nav-card a:hover {
+            background: #2563eb;
+        }
+
+        .logout-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .logout-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .logout-card a {
+            display: block;
+            text-align: center;
+            padding: 6px 12px;
+            background: #dc2626;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .logout-card a:hover {
+            background: #b91c1c;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .header p {
+            margin: 4px 0 0 0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* Dark Mode */
+        .dark-mode {
+            background: #1e293b;
+        }
+
+        .dark-mode .sidebar {
+            background: #2d3748;
+            border-right-color: #4b5563;
+        }
+
+        .dark-mode .product-card {
+            background: #2d3748;
+        }
+
+        .dark-mode .product-name {
+            color: #f9fafb;
+        }
+
+        .dark-mode .product-type {
+            background: #4b5563;
+            color: #e2e8f0;
+        }
+
+        .dark-mode .product-price {
+            color: #34d399;
+        }
+
+        .dark-mode .product-description {
+            color: #94a3b8;
+        }
+
+        .dark-mode .stock-in {
+            background: #14532d;
+            color: #dcfce7;
+        }
+
+        .dark-mode .stock-out {
+            background: #7f1d1d;
+            color: #fee2e2;
+        }
+
+        .dark-mode .btn-purchase {
+            background: #60a5fa;
+        }
+
+        .dark-mode .btn-purchase:hover {
+            background: #3b82f6;
+        }
+
+        .dark-mode .btn-view-details {
+            background: #4b5563;
+            color: #e2e8f0;
+        }
+
+        .dark-mode .btn-view-details:hover {
+            background: #64748b;
+        }
+
+        .dark-mode .no-products {
+            color: #94a3b8;
+        }
+
+        .dark-mode .no-products h3 {
+            color: #f9fafb;
+        }
+
+        .dark-mode .search-filters {
+            background: #2d3748;
+        }
+
+        .dark-mode .filter-group input,
+        .dark-mode .filter-group select {
+            background: #4b5563;
+            border-color: rgba(96, 165, 250, 0.2);
+            color: #e2e8f0;
+        }
+
+        .dark-mode .filter-group input:focus,
+        .dark-mode .filter-group select:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+        }
+
+        .dark-mode .profile-placeholder {
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        }
+
+        .dark-mode .profile-name {
+            color: #f9fafb;
+        }
+
+        .dark-mode .profile-role {
+            color: #94a3b8;
+        }
+
+        .dark-mode .profile-details {
+            color: #94a3b8;
+        }
+
+        .dark-mode .nav-card {
+            background: #2d3748;
+        }
+
+        .dark-mode .nav-card h3 {
+            color: #f9fafb;
+        }
+
+        .dark-mode .nav-card p {
+            color: #94a3b8;
+        }
+
+        .dark-mode .logout-card {
+            background: #2d3748;
+        }
+
+        .dark-mode .header h1 {
+            color: #f9fafb;
+        }
+
+        .dark-mode .header p {
+            color: #94a3b8;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: auto;
+        }
+
+        .theme-toggle-label {
+            font-size: 0.9rem;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .toggle-switch {
+            width: 40px;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            width: 16px;
+            height: 16px;
+            background: #3b82f6;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+
+        .dark-mode .toggle-switch {
+            background: #4b5563;
+        }
+
+        .dark-mode .toggle-switch::after {
+            background: #60a5fa;
+            transform: translateX(20px);
+        }
+    </style>
+    <script>
+        // Prevent white flash by setting theme immediately
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        }
+
+        function addToCart(productId) {
+            // TODO: Implement add to cart functionality
+            alert('Add to cart functionality will be implemented soon!');
+        }
+
+        // Load saved theme preference
+        window.onload = () => {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+        };
+    </script>
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <h2>TuneWave</h2>
+
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <div class="profile-image-container">
+                <div class="profile-placeholder">
+                    <span th:text="${user.name.charAt(0)}"></span>
+                </div>
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" th:text="${user.name}">Customer Name</div>
+                <div class="profile-role" th:text="${user.role}">CUSTOMER</div>
+                <div class="profile-details">
+                    <p><strong>Email:</strong> <span th:text="${user.email}">customer@example.com</span></p>
+                    <p><strong>Status:</strong> <span th:text="${user.status}">ACTIVE</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Cards -->
+        <div class="nav-card">
+            <h3>Songs</h3>
+            <p>Listen and discover tracks and albums.</p>
+            <a th:href="@{/music}" class="btn btn-primary">Browse Songs</a>
+        </div>
+        <div class="nav-card">
+            <h3>Instruments</h3>
+            <p>Shop guitars, keyboards, drums and more.</p>
+            <a th:href="@{/buyer/products}" class="btn btn-primary">Browse Instruments</a>
+        </div>
+        <div class="nav-card">
+            <h3>Courses</h3>
+            <p>Learn with expert-led music courses.</p>
+            <a th:href="@{/courses}" class="btn btn-primary">Browse Courses</a>
+        </div>
+        <div class="logout-card">
+            <a th:href="@{/users/logout}">Logout</a>
+        </div>
+
+        <!-- Theme Toggle -->
+        <div class="theme-toggle">
+            <span class="theme-toggle-label">Theme</span>
+            <div class="toggle-switch" onclick="toggleTheme()"></div>
+        </div>
+    </nav>
+</div>
+
+<!-- Session Guard for Authentication Context Monitoring -->
+
+</body>
+</html>

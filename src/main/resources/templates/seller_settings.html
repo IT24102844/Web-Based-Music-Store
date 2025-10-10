@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Settings - TuneWave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+    <style>
+        .image-preview-container {
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            width: auto;
+            height: auto;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            object-fit: cover;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .current-image {
+            max-width: 150px;
+            max-height: 150px;
+            width: auto;
+            height: auto;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            object-fit: cover;
+            margin-top: 10px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <h2>TuneWave</h2>
+        
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <div class="profile-image-container">
+                <img th:if="${profileImagePath}" 
+                     th:src="'/uploads/profile/' + ${profileImagePath}" 
+                     th:alt="${seller.storeName} + ' Profile Image'" 
+                     class="profile-image"
+                     onerror="this.src='https://via.placeholder.com/80x80/2333de/ffffff?text=' + this.alt.charAt(0)">
+                <img th:unless="${profileImagePath}" 
+                     src="https://via.placeholder.com/80x80/2333de/ffffff?text=U" 
+                     alt="Default Profile Image" 
+                     class="profile-image">
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" th:text="${seller.storeName ?: 'Store Name'}">Store Name</div>
+                <div class="profile-role">SELLER</div>
+                <div class="profile-details">
+                    <p><strong>Email:</strong> <span th:text="${seller.email}">seller@example.com</span></p>
+                    <p><strong>Status:</strong> <span th:text="${seller.status}">ACTIVE</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <ul>
+            <li><a th:href="@{/seller/dashboard}">Dashboard</a></li>
+            <li><a th:href="@{/seller/settings}" class="active">Settings</a></li>
+            <li><a th:href="@{/seller/orders}">Orders</a></li>
+            <li><a th:href="@{/seller/products}">Products</a></li>
+            <li><a th:href="@{/seller/reviews}">Reviews</a></li>
+            <li><a th:href="@{/seller/account}">Account</a></li>
+            <li><a th:href="@{/users/logout}" class="logout">Logout</a></li>
+        </ul>
+
+        <!-- Theme Toggle -->
+        <div class="theme-toggle">
+            <span class="theme-toggle-label">Theme</span>
+            <div class="toggle-switch" onclick="toggleTheme()"></div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>Seller Settings</h1>
+            <p>Manage your profile, business information, and payment preferences</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="message success" th:text="${success}"></div>
+        <div th:if="${error}" class="message error" th:text="${error}"></div>
+
+        <!-- Tab Navigation -->
+        <div class="card">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="switchTab('profile')" data-tab="profile">Profile Settings</button>
+                <button class="tab-button" onclick="switchTab('business')" data-tab="business">Business Settings</button>
+                <button class="tab-button" onclick="switchTab('payment')" data-tab="payment">Payment Preferences</button>
+                <button class="tab-button" onclick="switchTab('security')" data-tab="security">Security</button>
+            </div>
+        </div>
+
+        <!-- Profile Settings Tab -->
+        <div id="profile-tab" class="tab-content active">
+            <div class="card">
+                <h2>Profile Settings</h2>
+                <form id="profileForm" th:action="@{/seller/updateSettings}" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" th:value="${seller.name}"
+                               placeholder="Enter your full name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" th:value="${seller.email}"
+                               placeholder="Enter your email address" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phoneNo">Contact Number</label>
+                        <input type="tel" id="phoneNo" name="phoneNo" th:value="${seller.phoneNo}"
+                               placeholder="Enter your phone number">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Personal Address</label>
+                        <textarea id="address" name="address" rows="3"
+                                  placeholder="Enter your personal address" th:text="${seller.address}"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profileImage">Profile Image</label>
+                        <input type="file" id="profileImage" name="profileImage" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                               onchange="previewImage(this)">
+                        <small style="color: #64748b; font-size: 0.875rem;">
+                            Upload a profile image (JPG, PNG, GIF, WEBP). Max 5MB. Recommended size: 200x200px.
+                        </small>
+                        <div id="profileImageError" style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; display: none;"></div>
+                        <div class="image-preview-container">
+                            <img id="imagePreview" class="image-preview hidden" alt="Image Preview">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Current Profile Image</label>
+                        <div>
+                            <img th:if="${profileImagePath}" th:src="'/uploads/profile/' + ${profileImagePath}"
+                                 alt="Current Profile Image" class="current-image"
+                                 onerror="this.style.display='none'">
+                            <span th:unless="${profileImagePath}" class="text-muted">No profile image set</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn">Save Profile Changes</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Business Settings Tab -->
+        <div id="business-tab" class="tab-content">
+            <div class="card">
+                <h2>Business Settings</h2>
+                <form id="businessForm" th:action="@{/seller/updateSettings}" method="post">
+                    <div class="form-group">
+                        <label for="storeName">Store Name *</label>
+                        <input type="text" id="storeName" name="storeName" th:value="${seller.storeName}"
+                               placeholder="Enter your store name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location">Business Location</label>
+                        <input type="text" id="location" name="location" th:value="${seller.storeLocation}"
+                               placeholder="Enter your business location">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="storeAddress">Store Address</label>
+                        <textarea id="storeAddress" name="storeAddress" rows="3"
+                                  placeholder="Enter your store address" th:text="${seller.storeAddress}"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn">Save Business Changes</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Payment Preferences Tab -->
+        <div id="payment-tab" class="tab-content">
+            <div class="card">
+                <h2>Payment Preferences</h2>
+                <form id="paymentForm" th:action="@{/seller/updateSettings}" method="post">
+                    <div class="form-group">
+                        <label for="paymentMethod">Preferred Payment Method *</label>
+                        <select id="paymentMethod" name="paymentMethod" required>
+                            <option value="">Select payment method...</option>
+                            <option value="paypal" th:selected="${seller.paymentMethod == 'paypal'}">PayPal</option>
+                            <option value="stripe" th:selected="${seller.paymentMethod == 'stripe'}">Stripe</option>
+                            <option value="bank_transfer" th:selected="${seller.paymentMethod == 'bank_transfer'}">Bank Transfer</option>
+                            <option value="cash" th:selected="${seller.paymentMethod == 'cash'}">Cash on Delivery</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Payment Instructions</label>
+                        <div style="background-color: #f7fafc; padding: 16px; border-radius: 6px; font-size: 0.9rem;">
+                            <p th:if="${seller.paymentMethod == 'paypal'}">Please ensure your PayPal email is verified and matches your account email.</p>
+                            <p th:if="${seller.paymentMethod == 'stripe'}">Stripe payments will be processed automatically. Ensure your Stripe account is connected.</p>
+                            <p th:if="${seller.paymentMethod == 'bank_transfer'}">Bank transfer details will be shared with customers upon order confirmation.</p>
+                            <p th:if="${seller.paymentMethod == 'cash'}">Cash payments will be collected during product delivery.</p>
+                            <p th:unless="${seller.paymentMethod}">Select a payment method to see specific instructions.</p>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn">Save Payment Preferences</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Security Tab -->
+        <div id="security-tab" class="tab-content">
+            <div class="card">
+                <h2>Security Settings</h2>
+                <form id="securityForm" th:action="@{/seller/updateSettings}" method="post">
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password *</label>
+                        <input type="password" id="currentPassword" name="currentPassword"
+                               placeholder="Enter your current password" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newPassword">New Password *</label>
+                        <input type="password" id="newPassword" name="newPassword"
+                               placeholder="Enter new password" required>
+                        <small style="color: #718096; font-size: 0.85rem;">Password must be at least 6 characters long</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password *</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword"
+                               placeholder="Confirm new password" required>
+                    </div>
+
+                    <button type="submit" class="btn">Update Password</button>
+                </form>
+            </div>
+
+            <div class="form-container">
+                <h2>Account Actions</h2>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-danger" onclick="deleteAccount()">Delete Account</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Theme Toggle Function
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+
+    // Tab Switching Function
+    function switchTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.add('hidden');
+        });
+
+        // Remove active class from all buttons
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('active');
+        });
+
+        // Show selected tab content
+        document.getElementById(tabName + '-tab').classList.remove('hidden');
+
+        // Add active class to clicked button
+        event.target.classList.add('active');
+    }
+
+    // Profile image validation constants
+    const MAX_PROFILE_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+    const ALLOWED_PROFILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const ALLOWED_PROFILE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+
+    // Profile image validation functions
+    function validateProfileImage(file) {
+        const errors = [];
+        
+        // Check file type
+        if (!ALLOWED_PROFILE_TYPES.includes(file.type.toLowerCase())) {
+            errors.push(`Invalid file type. Allowed: JPG, PNG, GIF, WEBP`);
+        }
+        
+        // Check file extension
+        const extension = '.' + file.name.split('.').pop().toLowerCase();
+        if (!ALLOWED_PROFILE_EXTENSIONS.includes(extension)) {
+            errors.push(`Invalid file extension. Allowed: .jpg, .jpeg, .png, .gif, .webp`);
+        }
+        
+        // Check file size
+        if (file.size > MAX_PROFILE_IMAGE_SIZE) {
+            errors.push(`File is too large. Maximum size: 5MB`);
+        }
+        
+        // Check if file is empty
+        if (file.size === 0) {
+            errors.push(`File is empty`);
+        }
+        
+        return errors;
+    }
+
+    function showProfileImageError(message) {
+        const errorDiv = document.getElementById('profileImageError');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+
+    function hideProfileImageError() {
+        const errorDiv = document.getElementById('profileImageError');
+        errorDiv.style.display = 'none';
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Enhanced Image Preview Function with Validation
+    function previewImage(input) {
+        const preview = document.getElementById('imagePreview');
+        hideProfileImageError();
+        
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            
+            // Validate the file
+            const errors = validateProfileImage(file);
+            if (errors.length > 0) {
+                showProfileImageError(errors.join('; '));
+                // Clear the file input
+                input.value = '';
+                preview.classList.add('hidden');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                preview.title = `${file.name} (${formatFileSize(file.size)})`;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.classList.add('hidden');
+        }
+    }
+
+    // Form Validation
+    function validateForm(formId) {
+        const form = document.getElementById(formId);
+        const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+
+        let isValid = true;
+        inputs.forEach(input => {
+            if (!input.value.trim()) {
+                input.style.borderColor = '#e53e3e';
+                isValid = false;
+            } else {
+                input.style.borderColor = '';
+            }
+        });
+
+        // Password confirmation check for security form
+        if (formId === 'securityForm') {
+            const newPassword = document.getElementById('newPassword');
+            const confirmPassword = document.getElementById('confirmPassword');
+
+            if (newPassword.value !== confirmPassword.value) {
+                confirmPassword.style.borderColor = '#e53e3e';
+                isValid = false;
+            } else if (newPassword.value.length < 6) {
+                newPassword.style.borderColor = '#e53e3e';
+                isValid = false;
+            }
+        }
+
+        return isValid;
+    }
+
+    // Attach form validation to form submissions
+    document.addEventListener('DOMContentLoaded', function() {
+        const forms = ['profileForm', 'businessForm', 'paymentForm', 'securityForm'];
+        forms.forEach(formId => {
+            const form = document.getElementById(formId);
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    if (!validateForm(formId)) {
+                        e.preventDefault();
+                        alert('Please fill in all required fields correctly.');
+                    }
+                });
+            }
+        });
+    });
+
+    // Account Actions
+    function deleteAccount() {
+        // Create a custom warning dialog
+        const warningDialog = document.createElement('div');
+        warningDialog.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        `;
+        
+        const dialogContent = document.createElement('div');
+        dialogContent.style.cssText = `
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            text-align: center;
+        `;
+        
+        dialogContent.innerHTML = `
+            <h3 style="color: #e53e3e; margin-bottom: 15px;">⚠️ Delete Account</h3>
+            <p style="margin-bottom: 20px; color: #4a5568;">
+                <strong>WARNING:</strong> This will permanently delete your account and ALL associated data including:
+            </p>
+            <ul style="text-align: left; margin-bottom: 20px; color: #4a5568;">
+                <li>Your profile and settings</li>
+                <li>All your products and images</li>
+                <li>Order history and transactions</li>
+                <li>Reviews and ratings</li>
+            </ul>
+            <p style="color: #e53e3e; font-weight: bold; margin-bottom: 20px;">
+                This action CANNOT be undone!
+            </p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button id="cancelDelete" style="
+                    background: #718096;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                ">Cancel</button>
+                <button id="confirmDelete" style="
+                    background: #e53e3e;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                ">Delete Account</button>
+            </div>
+        `;
+        
+        warningDialog.appendChild(dialogContent);
+        document.body.appendChild(warningDialog);
+        
+        // Handle cancel
+        document.getElementById('cancelDelete').onclick = function() {
+            document.body.removeChild(warningDialog);
+        };
+        
+        // Handle confirm delete
+        document.getElementById('confirmDelete').onclick = function() {
+            document.body.removeChild(warningDialog);
+            // Submit the delete request
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/seller/deleteAccount';
+            document.body.appendChild(form);
+            form.submit();
+        };
+        
+        // Close dialog when clicking outside
+        warningDialog.onclick = function(e) {
+            if (e.target === warningDialog) {
+                document.body.removeChild(warningDialog);
+            }
+        };
+    }
+
+    // Load saved theme preference immediately to prevent flashing
+    (function() {
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    })();
+
+    // Load saved theme preference
+    window.onload = function() {
+        // Handle URL parameters for success/error messages
+        const urlParams = new URLSearchParams(window.location.search);
+        const success = urlParams.get('success');
+        const error = urlParams.get('error');
+
+        if (success) {
+            showMessage(success, 'success');
+        }
+        if (error) {
+            showMessage(error, 'error');
+        }
+    };
+
+    function showMessage(text, type) {
+        // You can enhance this to show beautiful toast notifications
+        alert(text);
+    }
+
+    // Tab navigation functionality
+    function switchTab(tabName) {
+        // Remove active class from all buttons and content
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+
+        // Add active class to clicked button
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        
+        // Show corresponding content
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+    }
+
+    // Initialize first tab as active
+    document.addEventListener('DOMContentLoaded', function() {
+        switchTab('profile');
+    });
+</script>
+</body>
+</html>

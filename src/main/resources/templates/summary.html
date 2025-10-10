@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Summary - TuneWave</title>
+    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+</head>
+<body>
+<div class="dashboard-container">
+    <nav class="sidebar">
+        <h2>🎵 TuneWave</h2>
+        <ul>
+            <li><a th:href="@{/buyer/cart}">Back to Cart</a></li>
+        </ul>
+    </nav>
+    <main class="main-content">
+        <div class="header">
+            <h1>Order Summary</h1>
+        </div>
+
+        <!-- Shipping Address -->
+        <div class="card" style="margin-bottom:16px;">
+            <h3 style="margin-top:0;">Shipping Address</h3>
+            <p style="margin:4px 0;" th:text="${user.name}">Customer Name</p>
+            <p style="margin:0; color:#64748b;" th:text="${user.address}">Address</p>
+            <p style="margin:0; color:#64748b;" th:text="${user.email}">Email</p>
+        </div>
+
+        <!-- Selected Items -->
+        <div class="card" th:if="${items != null}">
+            <div th:each="ci : ${items}" style="display:grid; grid-template-columns: 64px 1fr 100px 120px; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #eee;">
+                <div style="width:64px; height:64px; border-radius:8px; overflow:hidden; background:#f8fafc;">
+                    <img th:if="${ci.product.getPrimaryImageUrl()}" th:src="${ci.product.getPrimaryImageUrl()}" alt="Product Image" style="width:100%; height:100%; object-fit:cover;">
+                    <div th:unless="${ci.product.getPrimaryImageUrl()}" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#64748b; font-size:0.9rem;">🎵</div>
+                </div>
+                <div>
+                    <div style="font-weight:600;" th:text="${ci.product.name}">Product</div>
+                    <div style="color:#64748b;" th:text="${ci.product.instrumentType}">Type</div>
+                </div>
+                <div style="text-align:right;">Qty: <span th:text="${ci.quantity}">1</span></div>
+                <div style="font-weight:700; color:#059669; text-align:right;" th:text="'LKR ' + ${#numbers.formatDecimal(ci.product.price * ci.quantity, 1, 2)}">LKR 0.00</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
+                <div style="color:#64748b;">VAT included, where applicable</div>
+                <div style="font-weight:800; color:#059669;" th:text="'LKR ' + ${#numbers.formatDecimal(total, 1, 2)}">LKR 0.00</div>
+            </div>
+        </div>
+
+        <form th:action="@{/buyer/place-order}" method="post" style="margin-top:16px;">
+            <div th:each="pid : ${selectedIds}">
+                <input type="hidden" name="selectedIds" th:value="${pid}">
+            </div>
+            <button type="submit" class="btn btn-primary">Place Order</button>
+            <a th:href="@{/buyer/cart}" class="btn btn-secondary" style="margin-left:8px;">Back</a>
+        </form>
+    </main>
+  </div>
+
+  <script>
+    if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+    }
+  </script>
+</body>
+</html>
+
+

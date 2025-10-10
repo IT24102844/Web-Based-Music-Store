@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Check - Music Store</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+        }
+        .btn:hover { opacity: 0.8; }
+        .success { color: #28a745; font-weight: bold; }
+        .error { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Session Status Check</h1>
+        <p>Simple session monitoring for debugging session issues.</p>
+        
+        <button class="btn" onclick="checkSession()">Check Current Session</button>
+        <button class="btn" onclick="startMonitoring()">Start Auto-Monitor</button>
+        <button class="btn" onclick="stopMonitoring()">Stop Monitor</button>
+        
+        <div id="sessionStatus" class="status">
+            Click "Check Current Session" to see session details...
+        </div>
+        
+        <div style="margin-top: 20px; background: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;">
+            <h3>⚠️ IMPORTANT: Session Context Mixing Issue</h3>
+            <p><strong>Problem:</strong> When you login with different users in the same browser (different tabs), the newer login overwrites the authentication context of the previous login.</p>
+            <p><strong>Why:</strong> Browsers share cookies across tabs, so Spring Security uses the same session for all tabs.</p>
+            <p><strong>Solutions:</strong></p>
+            <ul>
+                <li><strong>🔧 Use Different Browsers:</strong> Login as User in Chrome, Seller in Firefox</li>
+                <li><strong>🕵️ Use Incognito/Private Windows:</strong> Each private window has isolated cookies</li>
+                <li><strong>👤 Use Different Devices:</strong> Login from different computers/phones</li>
+                <li><strong>🧹 Clear Cookies:</strong> Clear browser data between different user logins</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <h3>Quick Links for Testing:</h3>
+            <a href="/users/login" target="_blank">Login</a> |
+            <a href="/seller/dashboard" target="_blank">Seller Dashboard</a> |
+            <a href="/dashboard/customer" target="_blank">Customer Dashboard</a> |
+            <a href="/public_products" target="_blank">Browse Products</a>
+        </div>
+    </div>
+
+    <script>
+        let monitorInterval;
+
+        async function checkSession() {
+            try {
+                const response = await fetch('/api/session-status');
+                const data = await response.json();
+                
+                const statusDiv = document.getElementById('sessionStatus');
+                let html = `<strong>Session Status:</strong><br>`;
+                html += `Session ID: ${data.sessionId}<br>`;
+                html += `Is New: ${data.isNew}<br>`;
+                html += `Authenticated: ${data.authenticated ? '<span class="success">✅ YES</span>' : '<span class="error">❌ NO</span>'}<br>`;
+                
+                if (data.authenticated) {
+                    html += `Username: ${data.username}<br>`;
+                    html += `Roles: ${data.authorities ? data.authorities.join(', ') : 'N/A'}<br>`;
+                }
+                
+                html += `Total Active Sessions: ${data.totalActiveSessions}<br>`;
+                html += `Timeout: ${data.maxInactiveInterval} seconds<br>`;
+                html += `Last Check: ${new Date().toLocaleTimeString()}<br>`;
+                
+                statusDiv.innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('sessionStatus').innerHTML = `
+                    <span class="error">Error checking session: ${error.message}</span><br>
+                    Time: ${new Date().toLocaleTimeString()}
+                `;
+            }
+        }
+
+        function startMonitoring() {
+            if (monitorInterval) clearInterval(monitorInterval);
+            monitorInterval = setInterval(checkSession, 5000);
+            checkSession(); // Initial check
+        }
+
+        function stopMonitoring() {
+            if (monitorInterval) {
+                clearInterval(monitorInterval);
+                monitorInterval = null;
+            }
+        }
+
+        // Auto-start monitoring when page loads
+        window.addEventListener('load', startMonitoring);
+        
+        // Stop monitoring when page is hidden
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopMonitoring();
+            } else {
+                startMonitoring();
+            }
+        });
+    </script>
+</body>
+</html>

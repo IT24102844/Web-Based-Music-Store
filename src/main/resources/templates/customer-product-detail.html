@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.name} + ' - TuneWave'">Product Detail - TuneWave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+    <style>
+        /* Customer Product Detail Specific Styles */
+        .product-detail-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .product-image-main {
+            width: 100%;
+            height: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f8fafc;
+            margin-bottom: 16px;
+        }
+        
+        .product-image-main img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .product-image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 2rem;
+        }
+        
+        .product-thumbnails {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+        }
+        
+        .product-thumbnail {
+            min-width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid #e2e8f0;
+            transition: border-color 0.2s;
+        }
+        
+        .product-thumbnail:hover {
+            border-color: #3b82f6;
+        }
+        
+        .product-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .product-info {
+            padding: 20px 0;
+        }
+        
+        .product-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+        }
+        
+        .product-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .product-type-badge {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .product-rating .stars {
+            color: #fbbf24;
+        }
+        
+        .product-rating .review-count {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .product-price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 24px;
+        }
+        
+        .stock-section {
+            margin-bottom: 24px;
+        }
+        
+        .stock-section h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .stock-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stock-in {
+            background: #dcfce7;
+            color: #166534;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        
+        .stock-out {
+            background: #fef2f2;
+            color: #991b1b;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        
+        .seller-info {
+            margin-bottom: 24px;
+        }
+        
+        .seller-info h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .seller-card {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .seller-name {
+            margin: 0 0 8px 0;
+            font-weight: 500;
+            color: #1e293b;
+        }
+        
+        .seller-email {
+            margin: 0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+        
+        .btn-primary {
+            flex: 1;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            padding: 12px 16px;
+            font-size: 1rem;
+            background: #f1f5f9;
+            color: #475569;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        
+        .product-tabs {
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 24px;
+        }
+        
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: none;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .tab-button.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        
+        .tab-button:hover {
+            color: #3b82f6;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .product-description {
+            color: #64748b;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+        
+        .product-specifications {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .product-specifications p {
+            color: #64748b;
+            line-height: 1.6;
+            white-space: pre-line;
+            margin: 0;
+        }
+        
+        .reviews-section {
+            margin-top: 24px;
+        }
+        
+        .review-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        
+        .review-customer {
+            margin: 0;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .review-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        
+        .review-stars {
+            color: #fbbf24;
+        }
+        
+        .review-date {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .review-comment {
+            color: #64748b;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .no-reviews {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        
+        .no-reviews .icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+        
+        .no-reviews h4 {
+            margin-bottom: 8px;
+            color: #374151;
+        }
+        
+        .breadcrumb {
+            margin-bottom: 20px;
+        }
+        
+        .breadcrumb a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .breadcrumb span {
+            margin: 0 8px;
+            color: #64748b;
+        }
+    </style>
+    <style>
+        /* Theme Toggle Styles */
+        .theme-toggle { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; margin-top: auto; border-top: 1px solid #e5e7eb; }
+        .theme-toggle-label { font-size: 14px; font-weight: 500; color: #374151; }
+        .toggle-switch { position: relative; width: 50px; height: 24px; background-color: #d1d5db; border-radius: 12px; cursor: pointer; transition: background-color 0.3s ease; }
+        .toggle-switch.active { background-color: #3b82f6; }
+        .toggle-slider { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background-color: white; border-radius: 50%; transition: transform 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .toggle-switch.active .toggle-slider { transform: translateX(26px); }
+
+        /* Dark Mode Styles (high specificity, override globals) */
+        html.dark-mode, html.dark-mode body { background-color: #12172b !important; color: #f9fafb !important; }
+        html.dark-mode .sidebar { background-color: #12172b !important; border-right-color: #374151 !important; }
+        html.dark-mode .main-content { background-color: #12172b !important; }
+        html.dark-mode .card { background-color: #374151 !important; border-color: #4b5563 !important; }
+        html.dark-mode .theme-toggle-label { color: #f9fafb !important; }
+        html.dark-mode a { color: #93c5fd !important; }
+        html.dark-mode .product-title, html.dark-mode h1, html.dark-mode h3 { color: #f9fafb !important; }
+        html.dark-mode .product-description, html.dark-mode .review-comment, html.dark-mode .seller-email { color: #d1d5db !important; }
+    </style>
+    <script>
+        // Prevent white flash by setting theme immediately
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+        }
+    </script>
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <h2>🎵 TuneWave</h2>
+        
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <div class="profile-image-container">
+                <img 
+                     src="https://via.placeholder.com/80x80/3b82f6/ffffff?text=U" 
+                     th:alt="${user.name} + ' Profile Image'" 
+                     class="profile-image">
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" th:text="${user.name}">Customer Name</div>
+                <div class="profile-role" th:text="${user.role}">CUSTOMER</div>
+                <div class="profile-details">
+                    <p><strong>Email:</strong> <span th:text="${user.email}">customer@example.com</span></p>
+                    <p><strong>Status:</strong> <span th:text="${user.status}">ACTIVE</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <ul>
+            <li><a th:href="@{/buyer/dashboard}">Shop</a></li>
+            <li><a th:href="@{/buyer/orders}">My Orders</a></li>
+            <li><a th:href="@{/buyer/reviews}">My Reviews</a></li>
+        </ul>
+
+        <!-- Theme Toggle -->
+        <div class="theme-toggle" style="position: relative; z-index: 1000;">
+            <span class="theme-toggle-label">Theme</span>
+            <div class="toggle-switch" tabindex="0" role="switch" aria-checked="false">
+                <div class="toggle-slider"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Breadcrumb -->
+        <div style="margin-bottom: 20px;">
+            <a th:href="@{/buyer/dashboard}" style="color: #3b82f6; text-decoration: none;">🛍️ Shop</a>
+            <span style="margin: 0 8px; color: #64748b;">›</span>
+            <span style="color: #64748b;" th:text="${product.name}">Product Name</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px;">
+            <!-- Product Images -->
+            <div>
+                <div style="width: 100%; height: 400px; border-radius: 12px; overflow: hidden; background: #f8fafc; margin-bottom: 16px;">
+                    <img th:if="${product.getPrimaryImageUrl()}" 
+                         th:src="${product.getPrimaryImageUrl()}" 
+                         alt="Product Image" 
+                         style="width: 100%; height: 100%; object-fit: cover;">
+                    <div th:unless="${product.getPrimaryImageUrl()}" 
+                         style="width: 100%; height: 100%; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 2rem;">
+                        🎵 No Image
+                    </div>
+                </div>
+                
+                <!-- Additional Images -->
+                <div th:if="${product.images != null and product.images.size() > 1}" 
+                     style="display: flex; gap: 8px; overflow-x: auto;">
+                    <div th:each="image : ${product.images}" 
+                         style="min-width: 80px; height: 80px; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid #e2e8f0;"
+                         th:attr="data-image-url=${image.imageUrl}"
+                         onclick="changeMainImage(this.dataset.imageUrl)">
+                        <img th:src="${image.imageUrl}" 
+                             alt="Product Image" 
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div>
+                <h1 style="font-size: 2rem; font-weight: 700; color: #1e293b; margin-bottom: 16px;" 
+                    th:text="${product.name}">Product Name</h1>
+                
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                    <span style="background: #f1f5f9; color: #475569; padding: 8px 12px; border-radius: 8px; font-weight: 500;" 
+                          th:text="${product.instrumentType}">GUITAR</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>
+                            <span th:each="i : ${#numbers.sequence(1,5)}"
+                                  th:style="'color: ' + (${i <= T(java.lang.Math).round(averageRating)} ? '#fbbf24' : '#e2e8f0')">★</span>
+                        </span>
+                        <span style="color:#111827; font-weight:600;" th:text="${#numbers.formatDecimal(averageRating,1,1)}">0.0</span>
+                        <span style="color: #64748b; font-size: 0.9rem;" 
+                              th:text="'(' + ${reviewCount} + ' reviews)'">(0 reviews)</span>
+                    </div>
+                </div>
+
+                <div style="font-size: 2.5rem; font-weight: 700; color: #059669; margin-bottom: 24px;" 
+                     th:text="'LKR ' + ${#numbers.formatDecimal(product.price, 1, 2)}">LKR 299.99</div>
+
+                <div style="margin-bottom: 24px;">
+                    <h3 style="font-size: 1.1rem; font-weight: 600; color: #374151; margin-bottom: 8px;">Stock Status</h3>
+                    <div th:if="${product.stock > 0}" 
+                         style="display: flex; align-items: center; gap: 8px; color: #166534; font-weight: 500;">
+                        <span style="background: #dcfce7; padding: 6px 12px; border-radius: 6px;">✅ In Stock</span>
+                        <span th:text="'(' + ${product.stock} + ' available)'">(5 available)</span>
+                    </div>
+                    <div th:unless="${product.stock > 0}" 
+                         style="display: flex; align-items: center; gap: 8px; color: #991b1b; font-weight: 500;">
+                        <span style="background: #fef2f2; padding: 6px 12px; border-radius: 6px;">❌ Out of Stock</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 24px;">
+                    <h3 style="font-size: 1.1rem; font-weight: 600; color: #374151; margin-bottom: 8px;">Seller Information</h3>
+                    <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <p style="margin: 0 0 8px 0; font-weight: 500; color: #1e293b;" th:text="${seller.name}">Seller Name</p>
+                        <p style="margin: 0; color: #64748b; font-size: 0.9rem;" th:text="${seller.email}">seller@example.com</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-bottom: 32px;">
+                    <form th:if="${product.stock > 0}" th:action="@{'/buyer/cart/add/' + ${product.id}}" method="post" style="flex: 1;">
+                        <button type="submit" class="btn btn-primary" 
+                                style="width: 100%; padding: 12px 24px; font-size: 1rem; font-weight: 600;">
+                            🛒 Add to Cart
+                        </button>
+                    </form>
+                    <button th:unless="${product.stock > 0}" 
+                            class="btn btn-secondary" 
+                            style="flex: 1; padding: 12px 24px; font-size: 1rem; font-weight: 600;"
+                            disabled>
+                        Out of Stock
+                    </button>
+                    <button class="btn btn-outline" 
+                            style="padding: 12px 16px; font-size: 1rem;"
+                            th:attr="data-product-id=${product.id}"
+                            onclick="addToWishlist(this.dataset.productId)">
+                        ❤️
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details Tabs -->
+        <div class="card">
+            <div style="display: flex; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px;">
+                <button class="tab-button active" onclick="showTab('description')" 
+                        style="padding: 12px 24px; border: none; background: none; font-weight: 500; color: #3b82f6; border-bottom: 2px solid #3b82f6;">
+                    Description
+                </button>
+                <button class="tab-button" onclick="showTab('specifications')" 
+                        style="padding: 12px 24px; border: none; background: none; font-weight: 500; color: #64748b;">
+                    Specifications
+                </button>
+                <button class="tab-button" onclick="showTab('reviews')" 
+                        style="padding: 12px 24px; border: none; background: none; font-weight: 500; color: #64748b;">
+                    Reviews (<span th:text="${reviewCount}">12</span>)
+                </button>
+            </div>
+
+            <!-- Description Tab -->
+            <div id="description-tab" class="tab-content active">
+                <h3 style="font-size: 1.2rem; font-weight: 600; color: #1e293b; margin-bottom: 16px;">Product Description</h3>
+                <p style="color: #64748b; line-height: 1.6; white-space: pre-line;" 
+                   th:text="${product.description}">Detailed product description goes here...</p>
+            </div>
+
+            <!-- Specifications Tab -->
+            <div id="specifications-tab" class="tab-content">
+                <h3 style="font-size: 1.2rem; font-weight: 600; color: #1e293b; margin-bottom: 16px;">Product Specifications</h3>
+                <div style="background: #f8fafc; padding: 20px; border-radius: 8px;">
+                    <p style="color: #64748b; line-height: 1.6; white-space: pre-line;" 
+                       th:text="${product.specifications}">Product specifications go here...</p>
+                </div>
+            </div>
+
+            <!-- Reviews Tab -->
+            <div id="reviews-tab" class="tab-content">
+                <h3 style="font-size: 1.2rem; font-weight: 600; color: #1e293b; margin-bottom: 16px;">Customer Reviews</h3>
+                
+                <div th:if="${#lists.isEmpty(reviews)}" 
+                     style="text-align: center; padding: 40px; color: #64748b;">
+                    <div style="font-size: 3rem; margin-bottom: 16px;">⭐</div>
+                    <h4 style="margin-bottom: 8px; color: #374151;">No reviews yet</h4>
+                    <p>Be the first to review this product!</p>
+                </div>
+
+                <div th:each="review : ${reviews}" 
+                     style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                        <div>
+                            <h4 style="margin: 0; font-weight: 600; color: #1e293b;" th:text="${review.customerEmail}">user@example.com</h4>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                                <div style="color: #fbbf24;">
+                                    <span th:each="i : ${#numbers.sequence(1, 5)}" 
+                                          th:style="'color: ' + (${i <= review.rating} ? '#fbbf24' : '#e2e8f0')">★</span>
+                                </div>
+                                <span style="color: #64748b; font-size: 0.9rem;" 
+                                      th:text="${#temporals.format(review.createdAt, 'MMM dd, yyyy')}">Jan 15, 2025</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="color: #64748b; line-height: 1.6; margin: 0;" th:text="${review.comment}">Review comment goes here...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    function toggleTheme() {
+        const html = document.documentElement;
+        const toggleSwitch = document.querySelector('.toggle-switch');
+        html.classList.toggle('dark-mode');
+        if (toggleSwitch) toggleSwitch.classList.toggle('active');
+        localStorage.setItem('theme', html.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+
+    function showTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.style.display = 'none';
+        });
+        
+        // Remove active class from all buttons
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('active');
+            button.style.color = '#64748b';
+            button.style.borderBottom = 'none';
+        });
+        
+        // Show selected tab
+        document.getElementById(tabName + '-tab').style.display = 'block';
+        
+        // Add active class to clicked button
+        event.target.classList.add('active');
+        event.target.style.color = '#3b82f6';
+        event.target.style.borderBottom = '2px solid #3b82f6';
+    }
+
+    function changeMainImage(imageUrl) {
+        const mainImage = document.querySelector('img[alt="Product Image"]');
+        if (mainImage) {
+            mainImage.src = imageUrl;
+        }
+    }
+
+    function addToCart(productId) {
+        // TODO: Implement add to cart functionality
+        alert('Add to cart functionality will be implemented soon!');
+    }
+
+    function addToWishlist(productId) {
+        // TODO: Implement add to wishlist functionality
+        alert('Add to wishlist functionality will be implemented soon!');
+    }
+
+    // Load saved theme preference and initialize toggle
+    window.addEventListener('DOMContentLoaded', function() {
+        const savedTheme = localStorage.getItem('theme');
+        const toggleSwitch = document.querySelector('.toggle-switch');
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+            if (toggleSwitch) toggleSwitch.classList.add('active');
+        } else {
+            document.documentElement.classList.remove('dark-mode');
+            if (toggleSwitch) toggleSwitch.classList.remove('active');
+        }
+        if (toggleSwitch) toggleSwitch.addEventListener('click', toggleTheme);
+    });
+</script>
+</body>
+</html>

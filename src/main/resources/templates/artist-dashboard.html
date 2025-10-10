@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artist Dashboard - TuneWave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <h2>TuneWave</h2>
+        
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <div class="profile-image-container">
+                <img th:if="${user.profileImagePath}" 
+                     th:src="'/uploads/profile/' + ${user.profileImagePath}" 
+                     th:alt="${user.name} + ' Profile Image'" 
+                     class="profile-image"
+                     onerror="this.src='https://via.placeholder.com/80x80/2333de/ffffff?text=' + this.alt.charAt(0)">
+                <img th:unless="${user.profileImagePath}" 
+                     src="https://via.placeholder.com/80x80/2333de/ffffff?text=U" 
+                     alt="Default Profile Image" 
+                     class="profile-image">
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" th:text="${user.name}">Artist Name</div>
+                <div class="profile-role">ARTIST</div>
+                <div class="profile-details">
+                    <p><strong>Email:</strong> <span th:text="${user.email}">artist@example.com</span></p>
+                    <p><strong>Status:</strong> <span th:text="${user.status}">ACTIVE</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <ul>
+            <li><a th:href="@{/dashboard/artist}" class="active">Dashboard</a></li>
+            <li><a th:href="@{/users/edit-profile}">Update Profile</a></li>
+            <li><a th:href="@{/users/logout}" class="logout">Logout</a></li>
+        </ul>
+
+        <!-- Theme Toggle -->
+        <div class="theme-toggle">
+            <span class="theme-toggle-label">Theme</span>
+            <div class="toggle-switch" onclick="toggleTheme()"></div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="header">
+            <h1>Artist Dashboard</h1>
+            <p>Manage your artist profile, showcase your work, and connect with fans</p>
+        </div>
+
+        <!-- Artist Stats -->
+        <div class="stats-grid">
+            <div class="card">
+                <h3>Profile Views</h3>
+                <div class="stat-value">2,456</div>
+                <div class="stat-label">This month</div>
+            </div>
+            <div class="card">
+                <h3>Followers</h3>
+                <div class="stat-value">1,234</div>
+                <div class="stat-label">Total followers</div>
+            </div>
+            <div class="card">
+                <h3>Uploads</h3>
+                <div class="stat-value">89</div>
+                <div class="stat-label">Content pieces</div>
+            </div>
+            <div class="card">
+                <h3>Engagement</h3>
+                <div class="stat-value" style="color: #059669;">4.8%</div>
+                <div class="stat-label">Average rate</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <h3>Quick Actions</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px;">
+                <a href="#" class="btn">Upload Content</a>
+                <a href="#" class="btn btn-secondary">View Analytics</a>
+                <a href="#" class="btn btn-warning">Manage Portfolio</a>
+                <a href="#" class="btn btn-danger">Settings</a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+
+    // Load saved theme preference immediately to prevent flashing
+    (function() {
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    })();
+</script>
+</body>
+</html>

@@ -7,243 +7,544 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        .container {
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 30px;
-            background: #fff;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #e0e0e0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            padding-top: 100px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px, 120px 120px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .text-center h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00d4ff, #ffffff, #00d4ff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: textShimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes textShimmer {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .text-center p {
+            color: #b0b0b0;
+            margin-bottom: 30px;
+        }
+
         .form-section {
             margin-bottom: 25px;
             padding: 20px;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            background: #f8f9fa;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.03);
         }
+
         .form-section h5 {
-            color: #495057;
-            border-bottom: 2px solid #007bff;
+            color: #00d4ff;
+            border-bottom: 2px solid #00d4ff;
             padding-bottom: 10px;
             margin-bottom: 20px;
+            font-weight: 600;
         }
+
         .required::after {
             content: " *";
-            color: #dc3545;
+            color: #ff4757;
         }
+
         .role-fields {
             display: none;
             animation: fadeIn 0.3s ease-in;
         }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .alert {
-            border-radius: 8px;
-            margin-bottom: 20px;
+
+        .form-label {
+            color: #e0e0e0;
+            font-weight: 500;
+            margin-bottom: 8px;
         }
+
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #e0e0e0;
+            padding: 12px 15px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #00d4ff;
+            color: #e0e0e0;
+            box-shadow: 0 0 0 0.25rem rgba(0, 212, 255, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: #888;
+        }
+
+        .invalid-feedback {
+            color: #ff4757;
+        }
+
+        .alert {
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+        }
+
+        .alert-danger {
+            border-color: rgba(255, 71, 87, 0.3);
+        }
+
+        .alert-success {
+            border-color: rgba(46, 213, 115, 0.3);
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
         .btn-register {
-            background: linear-gradient(45deg, #007bff, #0056b3);
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
             border: none;
             padding: 12px 30px;
             font-size: 18px;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: 30px;
             transition: all 0.3s ease;
+            width: 100%;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
         }
+
         .btn-register:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
         }
+
         .login-link {
             text-align: center;
             margin-top: 20px;
-            color: #6c757d;
+            color: #b0b0b0;
         }
+
         .login-link a {
-            color: #007bff;
+            color: #00d4ff;
             text-decoration: none;
             font-weight: 600;
         }
+
         .login-link a:hover {
             text-decoration: underline;
+        }
+
+        .form-check-label {
+            color: #e0e0e0;
+        }
+
+        .form-check-input {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .form-check-input:checked {
+            background-color: #00d4ff;
+            border-color: #00d4ff;
+        }
+
+        .form-text {
+            color: #888;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-family: 'Monospace', monospace;
+            font-size: 28px;
+            font-weight: 600;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #00d4ff;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00d4ff, #0099cc);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-login {
+            background: transparent;
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+
+        .btn-signup {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-signup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                width: 95%;
+                padding: 12px 20px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .form-container {
+                padding: 30px 20px;
+            }
         }
     </style>
 </head>
 <body class="bg-light">
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="logo">TuneWave</div>
+    <ul class="nav-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Artists</a></li>
+        <li><a href="#">Courses</a></li>
+        <li><a href="#">Instruments</a></li>
+        <li><a href="#">About</a></li>
+    </ul>
+    <div class="auth-buttons">
+        <a th:href="@{/users/login}" class="btn btn-login">Login</a>
+        <a th:href="@{/users/register}" class="btn btn-signup">Sign Up</a>
+    </div>
+</nav>
+
 <div class="container">
-    <div class="text-center mb-4">
-        <h2 class="text-primary">🎵 Join Music Store</h2>
-        <p class="text-muted">Create your account and start your musical journey</p>
-    </div>
-
-    <!-- Error/Success Messages -->
-    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show">
-        <strong>Error!</strong> <span th:text="${param.error}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-
-    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
-        <strong>Success!</strong> <span th:text="${param.success}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-
-    <form th:action="@{/users/register}" method="post" th:object="${user}" class="needs-validation" novalidate>
-
-        <!-- Basic Information Section -->
-        <div class="form-section">
-            <h5>📝 Basic Information</h5>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="name" class="form-label required">Full Name</label>
-                    <input type="text" class="form-control" id="name" th:field="*{name}"
-                           placeholder="Enter your full name" required>
-                    <div class="invalid-feedback">Please enter your name.</div>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="email" class="form-label required">Email Address</label>
-                    <input type="email" class="form-control" id="email" th:field="*{email}"
-                           placeholder="your.email@example.com" required>
-                    <div class="invalid-feedback">Please enter a valid email address.</div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="password" class="form-label required">Password</label>
-                    <input type="password" class="form-control" id="password" th:field="*{password}"
-                           placeholder="At least 6 characters" minlength="6" required>
-                    <div class="invalid-feedback">Password must be at least 6 characters long.</div>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="confirmPassword" class="form-label required">Confirm Password</label>
-                    <input type="password" class="form-control" id="confirmPassword"
-                           placeholder="Confirm your password" required>
-                    <div class="invalid-feedback">Passwords must match.</div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="phoneNo" class="form-label">Phone Number</label>
-                    <input type="tel" class="form-control" id="phoneNo" th:field="*{phoneNo}"
-                           placeholder="+1 (555) 123-4567">
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="role" class="form-label required">Account Type</label>
-                    <select class="form-select" id="role" th:field="*{role}" required onchange="showRoleFields(this.value)">
-                        <option value="">Select your role...</option>
-                        <option value="CUSTOMER">🎧 Music Fan (Customer)</option>
-                        <option value="ARTIST">🎤 Performing Artist</option>
-                        <option value="COURSE_SELLER">📚 Music Instructor</option>
-                        <option value="ITEM_SELLER">🎸 Instrument Seller</option>
-                    </select>
-                    <div class="invalid-feedback">Please select your account type.</div>
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <label for="address" class="form-label">Address</label>
-                <textarea class="form-control" id="address" th:field="*{address}"
-                          placeholder="Enter your full address" rows="2"></textarea>
-            </div>
+    <div class="form-container">
+        <div class="text-center mb-4">
+            <h2 class="text-primary">🎵 Join Music Store</h2>
+            <p class="text-muted">Create your account and start your musical journey</p>
         </div>
 
-        <!-- Role-Specific Fields -->
-
-        <!-- Artist Fields -->
-        <div id="artistFields" class="form-section role-fields">
-            <h5>🎤 Artist Profile</h5>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="stageName" class="form-label required">Stage Name</label>
-                    <input type="text" class="form-control" id="stageName" name="stageName"
-                           placeholder="Your artist name" required>
-                    <div class="invalid-feedback">Please enter your stage name.</div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="genre" class="form-label">Music Genre</label>
-                    <input type="text" class="form-control" id="genre" name="genre"
-                           placeholder="e.g., Rock, Jazz, Pop">
-                </div>
-            </div>
+        <!-- Error/Success Messages -->
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show">
+            <strong>Error!</strong> <span th:text="${param.error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- Customer Fields -->
-        <div id="customerFields" class="form-section role-fields">
-            <h5>🎧 Music Preferences</h5>
-            <div class="mb-3">
-                <label for="preferences" class="form-label">Favorite Music Genres/Artists</label>
-                <input type="text" class="form-control" id="preferences" name="preferences"
-                       placeholder="e.g., Rock, Classical, Jazz, Beatles, Mozart">
-                <div class="form-text">Tell us what kind of music you enjoy!</div>
-            </div>
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
+            <strong>Success!</strong> <span th:text="${param.success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- Course Seller Fields -->
-        <div id="courseSellerFields" class="form-section role-fields">
-            <h5>📚 Teaching Profile</h5>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="expertise" class="form-label required">Area of Expertise</label>
-                    <input type="text" class="form-control" id="expertise" name="expertise"
-                           placeholder="e.g., Guitar, Piano, Vocal" required>
-                    <div class="invalid-feedback">Please enter your area of expertise.</div>
+        <form th:action="@{/users/register}" method="post" th:object="${user}" class="needs-validation" novalidate>
+
+            <!-- Basic Information Section -->
+            <div class="form-section">
+                <h5>📝 Basic Information</h5>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="name" class="form-label required">Full Name</label>
+                        <input type="text" class="form-control" id="name" th:field="*{name}"
+                               placeholder="Enter your full name" required>
+                        <div class="invalid-feedback">Please enter your name.</div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label required">Email Address</label>
+                        <input type="email" class="form-control" id="email" th:field="*{email}"
+                               placeholder="your.email@example.com" required>
+                        <div class="invalid-feedback">Please enter a valid email address.</div>
+                    </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label for="expYears" class="form-label required">Years of Experience</label>
-                    <input type="number" class="form-control" id="expYears" name="expYears"
-                           min="0" max="50" placeholder="0" required>
-                    <div class="invalid-feedback">Please enter your years of experience.</div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="password" class="form-label required">Password</label>
+                        <input type="password" class="form-control" id="password" th:field="*{password}"
+                               placeholder="At least 6 characters" minlength="6" required>
+                        <div class="invalid-feedback">Password must be at least 6 characters long.</div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="confirmPassword" class="form-label required">Confirm Password</label>
+                        <input type="password" class="form-control" id="confirmPassword"
+                               placeholder="Confirm your password" required>
+                        <div class="invalid-feedback">Passwords must match.</div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="phoneNo" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phoneNo" th:field="*{phoneNo}"
+                               placeholder="+1 (555) 123-4567">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="role" class="form-label required">Account Type</label>
+                        <select class="form-select" id="role" th:field="*{role}" required onchange="showRoleFields(this.value)">
+                            <option value="">Select your role...</option>
+                            <option value="CUSTOMER">🎧 Music Fan (Customer)</option>
+                            <option value="ARTIST">🎤 Performing Artist</option>
+                            <option value="COURSE_SELLER">📚 Music Instructor</option>
+                            <option value="ITEM_SELLER">🎸 Instrument Seller</option>
+                        </select>
+                        <div class="invalid-feedback">Please select your account type.</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea class="form-control" id="address" th:field="*{address}"
+                              placeholder="Enter your full address" rows="2"></textarea>
                 </div>
             </div>
+
+            <!-- Role-Specific Fields -->
+
+            <!-- Artist Fields -->
+            <div id="artistFields" class="form-section role-fields">
+                <h5>🎤 Artist Profile</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="stageName" class="form-label required">Stage Name</label>
+                        <input type="text" class="form-control" id="stageName" name="stageName"
+                               placeholder="Your artist name" required>
+                        <div class="invalid-feedback">Please enter your stage name.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="genre" class="form-label">Music Genre</label>
+                        <input type="text" class="form-control" id="genre" name="genre"
+                               placeholder="e.g., Rock, Jazz, Pop">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Fields -->
+            <div id="customerFields" class="form-section role-fields">
+                <h5>🎧 Music Preferences</h5>
+                <div class="mb-3">
+                    <label for="preferences" class="form-label">Favorite Music Genres/Artists</label>
+                    <input type="text" class="form-control" id="preferences" name="preferences"
+                           placeholder="e.g., Rock, Classical, Jazz, Beatles, Mozart">
+                    <div class="form-text">Tell us what kind of music you enjoy!</div>
+                </div>
+            </div>
+
+            <!-- Course Seller Fields -->
+            <div id="courseSellerFields" class="form-section role-fields">
+                <h5>📚 Teaching Profile</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="expertise" class="form-label required">Area of Expertise</label>
+                        <input type="text" class="form-control" id="expertise" name="expertise"
+                               placeholder="e.g., Guitar, Piano, Vocal" required>
+                        <div class="invalid-feedback">Please enter your area of expertise.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="expYears" class="form-label required">Years of Experience</label>
+                        <input type="number" class="form-control" id="expYears" name="expYears"
+                               min="0" max="50" placeholder="0" required>
+                        <div class="invalid-feedback">Please enter your years of experience.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item Seller (Instrument Seller) Fields -->
+            <div id="itemSellerFields" class="form-section role-fields">
+                <h5>🎸 Business Information</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="storeName" class="form-label required">Store Name</label>
+                        <input type="text" class="form-control" id="storeName" name="storeName"
+                               placeholder="Your business name" required>
+                        <div class="invalid-feedback">Please enter your store name.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="location" class="form-label required">Business Location</label>
+                        <input type="text" class="form-control" id="location" name="location"
+                               placeholder="City, State" required>
+                        <div class="invalid-feedback">Please enter your business location.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terms and Submit -->
+            <div class="form-section">
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="terms" required>
+                    <label class="form-check-label" for="terms">
+                        I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                    </label>
+                    <div class="invalid-feedback">You must agree before submitting.</div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-register">
+                        🎵 Create Account
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <div class="login-link">
+            <p>Already have an account? <a th:href="@{/users/login}">Sign in here</a></p>
         </div>
-
-        <!-- Item Seller (Instrument Seller) Fields -->
-        <div id="itemSellerFields" class="form-section role-fields">
-            <h5>🎸 Business Information</h5>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="storeName" class="form-label required">Store Name</label>
-                    <input type="text" class="form-control" id="storeName" name="storeName"
-                           placeholder="Your business name" required>
-                    <div class="invalid-feedback">Please enter your store name.</div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="location" class="form-label required">Business Location</label>
-                    <input type="text" class="form-control" id="location" name="location"
-                           placeholder="City, State" required>
-                    <div class="invalid-feedback">Please enter your business location.</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Terms and Submit -->
-        <div class="form-section">
-            <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" id="terms" required>
-                <label class="form-check-label" for="terms">
-                    I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
-                </label>
-                <div class="invalid-feedback">You must agree before submitting.</div>
-            </div>
-
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary btn-register">
-                    🎵 Create Account
-                </button>
-            </div>
-        </div>
-    </form>
-
-    <div class="login-link">
-        <p>Already have an account? <a th:href="@{/users/login}">Sign in here</a></p>
     </div>
 </div>
 

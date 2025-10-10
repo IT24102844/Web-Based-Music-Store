@@ -150,15 +150,16 @@ public class UserService {
         var existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
 
-        // Update fields using modern null-safe patterns
+        // Only update allowed fields - never update email or role through profile update
         Optional.ofNullable(updatedUser.getName()).ifPresent(existingUser::setName);
         Optional.ofNullable(updatedUser.getPhoneNo()).ifPresent(existingUser::setPhoneNo);
         Optional.ofNullable(updatedUser.getAddress()).ifPresent(existingUser::setAddress);
-        Optional.ofNullable(updatedUser.getRole()).ifPresent(existingUser::setRole);
         Optional.ofNullable(updatedUser.getStatus()).ifPresent(existingUser::setStatus);
 
-        // Handle password separately
-        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
+        // Handle password separately - only update if it's different from current
+        if (updatedUser.getPassword() != null &&
+                !updatedUser.getPassword().isEmpty() &&
+                !updatedUser.getPassword().equals(existingUser.getPassword())) {
             existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         }
 
@@ -174,8 +175,8 @@ public class UserService {
     public void deleteUser(Long userId) {
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setStatus(Status.INACTIVE);
-        userRepository.save(user);
+
+        userRepository.delete(user);
     }
 
     public void changeUserRole(Long userId, String newRole) {
@@ -191,6 +192,15 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         user.setStatus(Status.valueOf(status));
         user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
+    public void resetPassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " not found"));
+
+        // Encode the new password
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
 }

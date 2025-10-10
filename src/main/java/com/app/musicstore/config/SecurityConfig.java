@@ -30,7 +30,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/", "/home", "/users/register", "/users/login", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/", "/home", "/users/register", "/users/forgot-password", "/users/login", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/artist/**").hasAuthority("ARTIST")
                         .requestMatchers("/dashboard/admin").hasAuthority("ADMIN")
@@ -38,6 +38,8 @@ public class SecurityConfig {
                         .requestMatchers("/dashboard/item-seller").hasAuthority("ITEM_SELLER")
                         .requestMatchers("/dashboard/course-seller").hasAuthority("COURSE_SELLER")
                         .requestMatchers("/dashboard/customer").hasAuthority("CUSTOMER")
+                        .requestMatchers("/tickets/create", "/tickets/my-tickets").authenticated()
+                        .requestMatchers("/tickets/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

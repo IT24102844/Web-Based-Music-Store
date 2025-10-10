@@ -20,11 +20,11 @@ public class UserService {
     private final ArtistService artistService;
     private final CustomerService customerService;
 
-
     public UserService(UserRepository userRepository,
                        BCryptPasswordEncoder passwordEncoder,
                        ArtistService artistService,
                        CustomerService customerService) {
+
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.artistService = artistService;

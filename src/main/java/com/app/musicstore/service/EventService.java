@@ -2,6 +2,7 @@ package com.app.musicstore.service;
 
 import com.app.musicstore.model.Artist;
 import com.app.musicstore.model.Event;
+import com.app.musicstore.model.EventStatus;
 import com.app.musicstore.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,14 +23,29 @@ public class EventService {
             throw new RuntimeException("Only artists can create events");
         }
         event.setArtist(artist);
+        event.setStatus(EventStatus.PENDING); // Set to pending by default
         return eventRepository.save(event);
     }
 
     /**
-     * Get all events.
+     * Get all APPROVED events for public view.
      */
     public List<Event> getAllEvents() {
+        return eventRepository.findByStatusOrderByDateDesc(EventStatus.APPROVED);
+    }
+
+    /**
+     * Get all events including pending/rejected - for admin use
+     */
+    public List<Event> getAllEventsWithAllStatus() {
         return eventRepository.findAll();
+    }
+
+    /**
+     * Get all APPROVED events for public view.
+     */
+    public List<Event> getApprovedEvents() {
+        return eventRepository.findByStatusOrderByDateDesc(EventStatus.APPROVED);
     }
 
     /**
@@ -40,6 +56,30 @@ public class EventService {
             return List.of();
         }
         return eventRepository.findByArtistOrderByDateDesc(artist);
+    }
+
+    /**
+     * Get events for a specific artist by status
+     */
+    public List<Event> getArtistEventsByStatus(Artist artist, EventStatus status) {
+        if (artist == null) {
+            return List.of();
+        }
+        return eventRepository.findByArtistAndStatusOrderByDateDesc(artist, status);
+    }
+
+    /**
+     * Get pending events for admin review.
+     */
+    public List<Event> getPendingEvents() {
+        return eventRepository.findByStatus(EventStatus.PENDING);
+    }
+
+    /**
+     * Get events by status
+     */
+    public List<Event> getEventsByStatus(EventStatus status) {
+        return eventRepository.findByStatus(status);
     }
 
     /**
@@ -57,6 +97,30 @@ public class EventService {
             throw new RuntimeException("Event ID is required for update");
         }
         return eventRepository.save(event);
+    }
+
+    /**
+     * Approve an event.
+     */
+    public Event approveEvent(Long eventId) {
+        Event event = getEventById(eventId);
+        if (event != null) {
+            event.setStatus(EventStatus.APPROVED);
+            return eventRepository.save(event);
+        }
+        throw new RuntimeException("Event not found with id: " + eventId);
+    }
+
+    /**
+     * Reject an event.
+     */
+    public Event rejectEvent(Long eventId) {
+        Event event = getEventById(eventId);
+        if (event != null) {
+            event.setStatus(EventStatus.REJECTED);
+            return eventRepository.save(event);
+        }
+        throw new RuntimeException("Event not found with id: " + eventId);
     }
 
     /**

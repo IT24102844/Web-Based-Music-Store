@@ -6,6 +6,7 @@ import com.app.musicstore.service.EventService;
 import com.app.musicstore.service.ArtistService;
 import com.app.musicstore.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -18,11 +19,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -71,10 +75,10 @@ public class EventController {
         }
     }
 
-    // -------------------- Public: View all events --------------------
+    // -------------------- Public: View only APPROVED events --------------------
     @GetMapping("/events")
     public String listEvents(Model model) {
-        List<Event> events = eventService.getAllEvents();
+        List<Event> events = eventService.getApprovedEvents();
         User currentUser = getCurrentUser();
         model.addAttribute("events", events);
         model.addAttribute("currentUser", currentUser);
@@ -144,8 +148,9 @@ public class EventController {
                 event.setImagePath(null);
             }
 
+            // Create event - this will set status to PENDING
             eventService.createEvent(event, artist);
-            return "redirect:/artist/events?success=eventCreated";
+            return "redirect:/artist/events?success=Event created successfully! Waiting for admin approval.";
 
         } catch (IOException e) {
             model.addAttribute("error", "Error uploading image: " + e.getMessage());
@@ -179,11 +184,31 @@ public class EventController {
         Artist artist = artistOpt.get();
         List<Event> artistEvents = eventService.getArtistEvents(artist);
 
-        // Debug info
-        System.out.println("📅 Found " + artistEvents.size() + " events for artist: " + artist.getName());
+        // Calculate status counts
+        long pendingCount = artistEvents.stream()
+                .filter(event -> event.getStatus() == EventStatus.PENDING)
+                .count();
+
+        long approvedCount = artistEvents.stream()
+                .filter(event -> event.getStatus() == EventStatus.APPROVED)
+                .count();
+
+        long rejectedCount = artistEvents.stream()
+                .filter(event -> event.getStatus() == EventStatus.REJECTED)
+                .count();
+
+        // Debug output
+        System.out.println("📊 Event Statistics:");
+        System.out.println("   Total Events: " + artistEvents.size());
+        System.out.println("   Pending: " + pendingCount);
+        System.out.println("   Approved: " + approvedCount);
+        System.out.println("   Rejected: " + rejectedCount);
 
         model.addAttribute("events", artistEvents);
         model.addAttribute("currentUser", currentUser);
+        model.addAttribute("pendingCount", pendingCount);
+        model.addAttribute("approvedCount", approvedCount);
+        model.addAttribute("rejectedCount", rejectedCount);
 
         if (success != null) model.addAttribute("success", success);
         if (error != null) model.addAttribute("error", error);
@@ -267,8 +292,11 @@ public class EventController {
                 System.out.println("🔄 Updated image for event " + id + ": " + imagePath);
             }
 
+            // When artist updates event, set status back to PENDING for admin review
+            existingEvent.setStatus(EventStatus.PENDING);
+
             eventService.updateEvent(existingEvent);
-            return "redirect:/artist/events?success=eventUpdated";
+            return "redirect:/artist/events?success=Event updated successfully! Waiting for admin approval.";
 
         } catch (Exception e) {
             model.addAttribute("error", "Error updating event: " + e.getMessage());
@@ -310,7 +338,7 @@ public class EventController {
         }
 
         Event event = eventService.getEventById(id);
-        if (event == null) {
+        if (event == null || event.getStatus() != EventStatus.APPROVED) {
             return "redirect:/events?error=eventNotFound";
         }
 
@@ -340,8 +368,8 @@ public class EventController {
         }
 
         Event event = eventService.getEventById(id);
-        if (event == null) {
-            System.out.println("❌ Event not found: " + id);
+        if (event == null || event.getStatus() != EventStatus.APPROVED) {
+            System.out.println("❌ Event not found or not approved: " + id);
             return "redirect:/events?error=eventNotFound";
         }
 
@@ -434,7 +462,145 @@ public class EventController {
         return "my_tickets";
     }
 
-    // -------------------- Helper: Validate Card Details --------------------
+    // -------------------- Ticket Download Functionality --------------------
+    @GetMapping("/tickets/download/{paymentId}")
+    public void downloadTickets(@PathVariable Long paymentId, HttpServletResponse response) {
+        System.out.println("📥 Download request for payment: " + paymentId);
+
+        try {
+            User currentUser = getCurrentUser();
+            if (currentUser == null) {
+                response.sendError(HttpStatus.UNAUTHORIZED.value(), "Please log in to download tickets");
+                return;
+            }
+
+            Payment payment = paymentService.getPaymentById(paymentId);
+            if (payment == null) {
+                response.sendError(HttpStatus.NOT_FOUND.value(), "Payment not found");
+                return;
+            }
+
+            // Check if payment belongs to current user
+            if (!payment.getUser().getUserId().equals(currentUser.getUserId())) {
+                response.sendError(HttpStatus.FORBIDDEN.value(), "Access denied");
+                return;
+            }
+
+            List<Ticket> tickets = paymentService.getUserTickets(currentUser).stream()
+                    .filter(ticket -> ticket.getPayment().getPaymentId().equals(paymentId))
+                    .toList();
+
+            if (tickets.isEmpty()) {
+                response.sendError(HttpStatus.NOT_FOUND.value(), "No tickets found for this payment");
+                return;
+            }
+
+            // Set response headers for text file download
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");
+            String filename = "tickets-" + paymentId + "-" + System.currentTimeMillis() + ".txt";
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+
+            // Generate ticket content
+            String ticketContent = generateTicketContent(payment, tickets);
+            response.getWriter().write(ticketContent);
+            response.getWriter().flush();
+
+            System.out.println("✅ Tickets downloaded successfully for payment: " + paymentId);
+
+        } catch (Exception e) {
+            System.err.println("❌ Error downloading tickets: " + e.getMessage());
+            try {
+                response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error generating tickets");
+            } catch (IOException ex) {
+                System.err.println("❌ Failed to send error response: " + ex.getMessage());
+            }
+        }
+    }
+
+    @GetMapping("/tickets/print/{paymentId}")
+    public String printTickets(@PathVariable Long paymentId, Model model) {
+        System.out.println("🖨️ Print view for payment: " + paymentId);
+
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
+            return "redirect:/users/login";
+        }
+
+        Payment payment = paymentService.getPaymentById(paymentId);
+        if (payment == null) {
+            return "redirect:/my-tickets?error=paymentNotFound";
+        }
+
+        // Check if payment belongs to current user
+        if (!payment.getUser().getUserId().equals(currentUser.getUserId())) {
+            return "redirect:/my-tickets?error=unauthorized";
+        }
+
+        List<Ticket> tickets = paymentService.getUserTickets(currentUser).stream()
+                .filter(ticket -> ticket.getPayment().getPaymentId().equals(paymentId))
+                .toList();
+
+        model.addAttribute("payment", payment);
+        model.addAttribute("tickets", tickets);
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("printView", true); // Flag for print-specific styling
+
+        return "ticket_print";
+    }
+
+    // -------------------- Helper Methods --------------------
+    private String generateTicketContent(Payment payment, List<Ticket> tickets) {
+        StringBuilder content = new StringBuilder();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+        content.append("🎵 TuneWave - Your Event Tickets\n");
+        content.append("================================\n\n");
+        content.append("Order Details:\n");
+        content.append("--------------\n");
+        content.append("Transaction ID: ").append(payment.getTransactionId()).append("\n");
+        content.append("Order Date: ").append(payment.getPaymentDate().format(formatter)).append("\n");
+        content.append("Total Amount: LKR ").append(String.format("%.2f", payment.getAmount())).append("\n");
+        content.append("Payment Method: ").append(payment.getPaymentMethod()).append("\n\n");
+
+        content.append("Event Details:\n");
+        content.append("--------------\n");
+        content.append("Event: ").append(payment.getEvent().getTitle()).append("\n");
+        content.append("Date: ").append(payment.getEvent().getDate()).append("\n");
+        content.append("Venue: ").append(payment.getEvent().getVenue()).append("\n");
+        content.append("Artist: ").append(payment.getEvent().getArtist().getStageName()).append("\n\n");
+
+        content.append("Your Tickets (").append(tickets.size()).append("):\n");
+        content.append("----------------").append("-".repeat(String.valueOf(tickets.size()).length())).append("\n\n");
+
+        for (int i = 0; i < tickets.size(); i++) {
+            Ticket ticket = tickets.get(i);
+            content.append("Ticket #").append(i + 1).append(":\n");
+            content.append("  Ticket Number: ").append(ticket.getTicketNumber()).append("\n");
+            content.append("  Status: ").append(ticket.getStatus()).append("\n");
+            content.append("  Purchased: ").append(ticket.getPurchasedAt().format(formatter)).append("\n");
+            content.append("  Seat: General Admission\n"); // You can add seat info if available
+            content.append("  Barcode: ████████████████████████████████████████\n");
+            content.append("  ").append(ticket.getTicketNumber()).append("\n");
+            content.append("  ████████████████████████████████████████\n");
+
+            if (i < tickets.size() - 1) {
+                content.append("\n────────────────────────────────────────\n\n");
+            }
+        }
+
+        content.append("\nImportant Information:\n");
+        content.append("---------------------\n");
+        content.append("• Please bring this ticket and valid ID to the event\n");
+        content.append("• Tickets are non-transferable and non-refundable\n");
+        content.append("• Doors open 1 hour before event start time\n");
+        content.append("• For assistance, contact support@tunewave.com\n\n");
+
+        content.append("Thank you for choosing TuneWave! 🎶\n");
+
+        return content.toString();
+    }
+
     private String validateCardDetails(String cardholderName, String cardNumber, String expiryDate, String cvv) {
         System.out.println("🔍 Validating card details...");
 

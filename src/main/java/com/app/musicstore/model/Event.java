@@ -28,6 +28,11 @@ public class Event {
     @Column(length = 255)
     private String imagePath;
 
+    // ✅ Add approval status field
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EventStatus status = EventStatus.PENDING;
+
     // ✅ Relationship to Artist (FK stored in "artistId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "artistId", referencedColumnName = "userId", nullable = false)
@@ -44,6 +49,7 @@ public class Event {
         this.ticket_price = ticketPrice;
         this.imagePath = imagePath;
         this.artist = artist;
+        this.status = EventStatus.PENDING;
     }
 
     // Getters and Setters
@@ -71,6 +77,9 @@ public class Event {
     public Artist getArtist() { return artist; }
     public void setArtist(Artist artist) { this.artist = artist; }
 
+    public EventStatus getStatus() { return status; }
+    public void setStatus(EventStatus status) { this.status = status; }
+
     @Override
     public String toString() {
         return "Event{" +
@@ -78,6 +87,7 @@ public class Event {
                 ", title='" + name + '\'' +
                 ", ticketPrice=" + ticket_price +
                 ", venue='" + loction + '\'' +
+                ", status='" + status + '\'' +
                 ", artist=" + (artist != null ? artist.getUserId() : null) +
                 ", imagePath='" + imagePath + '\'' +
                 '}';

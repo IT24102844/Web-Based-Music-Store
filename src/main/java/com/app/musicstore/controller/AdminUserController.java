@@ -1,5 +1,6 @@
 package com.app.musicstore.controller;
 
+import com.app.musicstore.model.Event;
 import com.app.musicstore.model.Role;
 import com.app.musicstore.model.User;
 import com.app.musicstore.security.CustomUserDetails;
@@ -14,13 +15,93 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
 @Controller
-@RequestMapping("/admin/users")
+@RequestMapping("/admin")
 public class AdminUserController {
 
     private final UserService userService;
+    private final EventService eventService;
 
-    public AdminUserController(UserService userService) {
+    public AdminUserController(UserService userService, EventService eventService) {
         this.userService = userService;
+        this.eventService = eventService;
+    }
+
+    // -------------------- Admin Dashboard --------------------
+    @GetMapping("/dashboard")
+    public String adminDashboard(Model model) {
+        User admin = getAuthenticatedUser();
+        if (admin == null || admin.getRole() != Role.ADMIN) {
+            return "redirect:/users/login";
+        }
+
+        List<User> users = userService.getAllUsers();
+        List<Event> pendingEvents = eventService.getPendingEvents();
+
+        long totalUsers = users.size();
+        long activeUsers = users.stream().filter(user -> user.getStatus().name().equals("ACTIVE")).count();
+
+        model.addAttribute("user", admin);
+        model.addAttribute("totalUsers", totalUsers);
+        model.addAttribute("activeUsers", activeUsers);
+        model.addAttribute("pendingEventsCount", pendingEvents.size());
+
+        return "admin-dashboard";
+    }
+
+    // -------------------- Event Management: Pending Events --------------------
+    @GetMapping("/events/pending")
+    public String pendingEvents(Model model,
+                                @RequestParam(required = false) String success,
+                                @RequestParam(required = false) String error) {
+        User admin = getAuthenticatedUser();
+        if (admin == null || admin.getRole() != Role.ADMIN) {
+            return "redirect:/users/login";
+        }
+
+        List<Event> pendingEvents = eventService.getPendingEvents();
+        model.addAttribute("events", pendingEvents);
+        model.addAttribute("currentUser", admin);
+
+        if (success != null) model.addAttribute("success", success);
+        if (error != null) model.addAttribute("error", error);
+
+        return "admin-pending-events";
+    }
+
+    // -------------------- Event Management: Approve Event --------------------
+    @PostMapping("/events/approve/{id}")
+    public String approveEvent(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        User admin = getAuthenticatedUser();
+        if (admin == null || admin.getRole() != Role.ADMIN) {
+            return "redirect:/users/login";
+        }
+
+        try {
+            eventService.approveEvent(id);
+            redirectAttributes.addFlashAttribute("success", "Event approved successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to approve event: " + e.getMessage());
+        }
+
+        return "redirect:/admin/events/pending";
+    }
+
+    // -------------------- Event Management: Reject Event --------------------
+    @PostMapping("/events/reject/{id}")
+    public String rejectEvent(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        User admin = getAuthenticatedUser();
+        if (admin == null || admin.getRole() != Role.ADMIN) {
+            return "redirect:/users/login";
+        }
+
+        try {
+            eventService.rejectEvent(id);
+            redirectAttributes.addFlashAttribute("success", "Event rejected successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to reject event: " + e.getMessage());
+        }
+
+        return "redirect:/admin/events/pending";
     }
 
     // List all users

@@ -81,7 +81,7 @@ public class SecurityConfig {
                 } else if (authorities.contains("COURSE_SELLER")) {
                     response.sendRedirect("/dashboard/course-seller");
                 } else if (authorities.contains("CUSTOMER")) {
-                    response.sendRedirect("/events");
+                    response.sendRedirect("/dashboard/customer");
                 } else {
                     response.sendRedirect("/dashboard");
                 }

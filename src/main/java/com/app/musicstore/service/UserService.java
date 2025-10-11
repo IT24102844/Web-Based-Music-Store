@@ -28,6 +28,8 @@ public class UserService {
                        CustomerService customerService,
                        CourseSellerService courseSellerService,
                        InstrumentSellerService instrumentSellerService) {
+                       CustomerService customerService) {
+
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.artistService = artistService;
@@ -80,6 +82,10 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setCreatedAt(LocalDateTime.now());
             user.setUpdatedAt(LocalDateTime.now());
+        // Encode password and set timestamps
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
 
         User savedUser;
 
@@ -155,6 +161,9 @@ public class UserService {
                 seller.setStoreLocation(roleSpecificData.get("location"));
 
                 savedUser = instrumentSellerService.save(seller);
+                customer.setPreferences(roleSpecificData.get("preferences"));
+
+                savedUser = customerService.save(customer);
             }
             case ADMIN -> {
                 // Admin is just a User
@@ -171,6 +180,7 @@ public class UserService {
             e.printStackTrace();
             throw e;
         }
+        return savedUser;
     }
 
 
@@ -226,6 +236,19 @@ public class UserService {
             if (updatedSeller.getProfileImagePath() != null && !updatedSeller.getProfileImagePath().isEmpty()) {
                 existingSeller.setProfileImagePath(updatedSeller.getProfileImagePath());
             }
+        }
+
+        // Only update allowed fields - never update email or role through profile update
+        Optional.ofNullable(updatedUser.getName()).ifPresent(existingUser::setName);
+        Optional.ofNullable(updatedUser.getPhoneNo()).ifPresent(existingUser::setPhoneNo);
+        Optional.ofNullable(updatedUser.getAddress()).ifPresent(existingUser::setAddress);
+        Optional.ofNullable(updatedUser.getStatus()).ifPresent(existingUser::setStatus);
+
+        // Handle password separately - only update if it's different from current
+        if (updatedUser.getPassword() != null &&
+                !updatedUser.getPassword().isEmpty() &&
+                !updatedUser.getPassword().equals(existingUser.getPassword())) {
+            existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         }
 
         existingUser.setUpdatedAt(LocalDateTime.now());
@@ -285,6 +308,25 @@ public class UserService {
         System.out.println("Deleting main user record for user: " + userId);
         userRepository.deleteById(userId);
         System.out.println("Hard delete completed for user: " + userId);
+
+        userRepository.delete(user);
+        try {
+            var user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            System.out.println("DEBUG: Deleting user ID: " + userId + ", Role: " + user.getRole());
+
+            // Simply delete the user - Hibernate will handle the child tables automatically
+            // due to the JOINED inheritance strategy
+            userRepository.delete(user);
+
+            System.out.println("DEBUG: User deletion completed");
+
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error during deletion: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to delete user: " + e.getMessage());
+        }
     }
 
     public void changeUserRole(Long userId, String newRole) {
@@ -306,5 +348,22 @@ public class UserService {
     public boolean isEmailAvailable(String email) {
         Optional<User> user = userRepository.findByEmail(email);
         return user.isEmpty() || user.get().getStatus() != Status.ACTIVE;
+    public void resetPassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " not found"));
+
+        // Encode the new password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    public long getTotalUsersCount() {
+        return userRepository.count();
+    }
+
+    public long getActiveUsersCount() {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getStatus() == Status.ACTIVE)
+                .count();
     }
 }

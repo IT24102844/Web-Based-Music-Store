@@ -35,6 +35,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
         
         return new CustomUserDetails(user);
+        return userRepository.findByEmail(email)
+                .filter(u -> u.getStatus() == Status.ACTIVE) // check active status
+                .map(CustomUserDetails::new) // wrap into UserDetails
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
 }
 

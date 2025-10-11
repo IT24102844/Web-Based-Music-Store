@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purchase Tickets - Music Store</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      color: #ffffff;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      padding-top: 100px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+              radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+              radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+              radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+      background-size: 50px 50px, 80px 80px, 120px 120px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 1200px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo {
+      font-family: 'Monospace', monospace;
+      font-size: 28px;
+      font-weight: 600;
+      color: #00d4ff;
+      text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 30px;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-links a {
+      color: #e0e0e0;
+      text-decoration: none;
+      font-weight: 400;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav-links a:hover {
+      color: #00d4ff;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #00d4ff, #0099cc);
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    /* User info styling */
+    .user-email {
+      margin-right: 15px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    /* Logout Button Specific Styling */
+    .logout-btn {
+      background: rgba(255, 71, 87, 0.2);
+      border: 1px solid rgba(255, 71, 87, 0.4);
+      color: #ff6b81 !important;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      margin-left: 20px;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 71, 87, 0.3);
+      border-color: #ff4757;
+      color: #ff4757 !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 212, 255, 0.2);
+      border-color: rgba(0, 212, 255, 0.3);
+    }
+
+    .card-header {
+      background: rgba(0, 212, 255, 0.15) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      color: #ffffff;
+    }
+
+    .card-header.bg-primary {
+      background: rgba(0, 212, 255, 0.2) !important;
+      border: none;
+    }
+
+    .card-body {
+      padding: 30px;
+      color: #ffffff;
+    }
+
+    /* Text Colors - Improved Contrast */
+    .text-muted {
+      color: #b0b0b0 !important;
+    }
+
+    .text-success {
+      color: #2ed573 !important;
+    }
+
+    .text-primary {
+      color: #00d4ff !important;
+    }
+
+    /* Form Styling */
+    .form-label {
+      color: #ffffff;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .form-control, .form-select {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      color: #ffffff;
+      padding: 12px 15px;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: #00d4ff;
+      color: #ffffff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+    }
+
+    .form-control::placeholder {
+      color: #a0a0a0;
+    }
+
+    .form-text {
+      color: #b0b0b0 !important;
+      font-size: 0.85rem;
+      margin-top: 5px;
+    }
+
+    /* Select Dropdown Styling - Fixed */
+    .form-select {
+      background: rgba(255, 255, 255, 0.08) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23b0b0b0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") no-repeat right 12px center/16px 12px;
+      color: #ffffff;
+    }
+
+    .form-select option {
+      background: #1a1a2e;
+      color: #ffffff;
+      padding: 10px;
+    }
+
+    .form-select:focus {
+      background: rgba(255, 255, 255, 0.12) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2300d4ff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") no-repeat right 12px center/16px 12px;
+    }
+
+    .input-group-text {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #b0b0b0;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+      border: none;
+      color: white;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+      color: white;
+    }
+
+    .btn-outline-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #e0e0e0;
+    }
+
+    .btn-outline-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.4);
+      color: #ffffff;
+    }
+
+    /* Alerts */
+    .alert {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 15px;
+      color: #ffffff;
+      padding: 15px 20px;
+    }
+
+    .alert-success {
+      border-color: rgba(46, 213, 115, 0.4);
+      background: rgba(46, 213, 115, 0.1);
+    }
+
+    .alert-danger {
+      border-color: rgba(255, 71, 87, 0.4);
+      background: rgba(255, 71, 87, 0.1);
+    }
+
+    .alert-info {
+      border-color: rgba(0, 212, 255, 0.4);
+      background: rgba(0, 212, 255, 0.1);
+    }
+
+    .alert-warning {
+      border-color: rgba(255, 193, 7, 0.4);
+      background: rgba(255, 193, 7, 0.1);
+    }
+
+    /* Payment Options */
+    .payment-option {
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+    }
+
+    .payment-option:hover {
+      border-color: #00d4ff;
+      background: rgba(0, 212, 255, 0.08);
+    }
+
+    .payment-option.selected {
+      border-color: #00d4ff;
+      background: rgba(0, 212, 255, 0.15);
+    }
+
+    .payment-option h6 {
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .payment-option .text-muted {
+      color: #b0b0b0 !important;
+    }
+
+    .card-logo {
+      font-size: 24px;
+      margin-right: 10px;
+    }
+
+    .visa { color: #1a1f71; }
+    .mastercard { color: #eb001b; }
+    .amex { color: #2e77bc; }
+    .discover { color: #ff6000; }
+
+    /* Form Elements */
+    .card-input:focus {
+      border-color: #00d4ff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+    }
+
+    .error-message {
+      display: none;
+      color: #ff4757;
+      font-size: 0.875em;
+      margin-top: 0.25rem;
+    }
+
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    /* Event Image */
+    .event-image {
+      max-height: 150px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .event-placeholder {
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    /* Modal Styling */
+    .modal-content {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      color: #ffffff;
+    }
+
+    .modal-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 212, 255, 0.15);
+      color: #ffffff;
+    }
+
+    .modal-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Checkbox Styling */
+    .form-check-input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .form-check-input:checked {
+      background-color: #00d4ff;
+      border-color: #00d4ff;
+    }
+
+    .form-check-label {
+      color: #ffffff;
+    }
+
+    .form-check-label a {
+      color: #00d4ff;
+      text-decoration: none;
+    }
+
+    .form-check-label a:hover {
+      color: #00b8e6;
+      text-decoration: underline;
+    }
+
+    /* Headings and Text */
+    h4, h5, h6 {
+      color: #ffffff;
+    }
+
+    h5.text-success {
+      color: #2ed573 !important;
+    }
+
+    /* Border colors for better visibility */
+    .border-bottom {
+      border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    hr {
+      border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar {
+        width: 95%;
+        padding: 12px 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .container {
+        padding: 20px;
+      }
+
+      .auth-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .user-email {
+        margin-right: 10px;
+        padding: 6px 10px;
+        font-size: 0.9rem;
+      }
+
+      .logout-btn {
+        margin-left: 10px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+      }
+
+      .card-body {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar">
+  <div class="logo">TuneWave</div>
+  <ul class="nav-links">
+    <li><a href="/events">Home</a></li>
+    <li><a href="#">Music</a></li>
+    <li><a href="#">Courses</a></li>
+    <li><a href="/events">Events</a></li>
+    <li><a href="#">Instruments</a></li>
+    <li><a href="#">About</a></li>
+  </ul>
+  <div class="auth-buttons">
+    <div th:if="${currentUser != null}" class="d-flex align-items-center">
+      <span class="nav-link text-white mb-0 user-email">
+        <i class="fas fa-user me-1"></i>
+        <span th:text="${currentUser.email}"></span>
+      </span>
+      <a class="nav-link logout-btn" href="/users/logout">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">
+            <i class="fas fa-ticket-alt me-2"></i>Purchase Tickets
+          </h4>
+        </div>
+        <div class="card-body">
+          <!-- Event Info -->
+          <div class="row mb-4">
+            <div class="col-md-4">
+              <div th:if="${event?.imagePath != null}" class="text-center">
+                <img th:src="@{${event.imagePath}}" class="event-image img-fluid"
+                     alt="Event Image">
+              </div>
+              <div th:unless="${event?.imagePath != null}" class="event-placeholder">
+                <i class="fas fa-music fa-3x text-muted"></i>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <h5 th:text="${event?.title}">Event Title</h5>
+              <p class="text-muted mb-1" th:text="${event?.venue}">Venue</p>
+              <p class="text-muted mb-1" th:text="${event?.date}">Date</p>
+              <p class="text-muted mb-1">
+                Artist: <span th:text="${event?.artist?.stageName ?: 'Unknown Artist'}">Artist Name</span>
+              </p>
+              <h5 class="text-success">
+                LKR.<span th:text="${event?.ticketPrice != null ? #numbers.formatDecimal(event.ticketPrice, 1, 2) : '0.00'}">0.00</span> per ticket
+              </h5>
+            </div>
+          </div>
+
+          <!-- Error Messages -->
+          <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${error}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+
+          <!-- Hidden element to store event data -->
+          <div id="eventData"
+               th:data-ticket-price="${event?.ticketPrice ?: 0}"
+               style="display: none;">
+          </div>
+
+          <!-- Payment Form -->
+          <form th:action="@{/events/{id}/process-payment(id=${event.id})}" method="post" id="paymentForm" onsubmit="return validateForm()">
+            <!-- Ticket Quantity -->
+            <div class="mb-4">
+              <label for="quantity" class="form-label fw-bold">Number of Tickets</label>
+              <select class="form-select" id="quantity" name="quantity" required>
+                <option value="">Select quantity...</option>
+                <option value="1">1 Ticket</option>
+                <option value="2">2 Tickets</option>
+                <option value="3">3 Tickets</option>
+                <option value="4">4 Tickets</option>
+                <option value="5">5 Tickets</option>
+                <option value="6">6 Tickets</option>
+                <option value="7">7 Tickets</option>
+                <option value="8">8 Tickets</option>
+                <option value="9">9 Tickets</option>
+                <option value="10">10 Tickets</option>
+              </select>
+            </div>
+
+            <!-- Payment Method Selection -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Select Payment Method</label>
+
+              <!-- Credit Card Option -->
+              <div class="payment-option selected" onclick="selectPaymentMethod('creditCard')">
+                <input class="form-check-input" type="radio" name="paymentMethod"
+                       id="creditCard" value="CREDIT_CARD" checked style="display: none;">
+                <div class="d-flex align-items-center">
+                  <i class="fab fa-cc-visa card-logo visa"></i>
+                  <i class="fab fa-cc-mastercard card-logo mastercard"></i>
+                  <i class="fab fa-cc-amex card-logo amex"></i>
+                  <i class="fab fa-cc-discover card-logo discover"></i>
+                  <div>
+                    <h6 class="mb-1">Credit Card</h6>
+                    <p class="text-muted mb-0 small">Pay with Visa, Mastercard, American Express, or Discover</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Debit Card Option -->
+              <div class="payment-option" onclick="selectPaymentMethod('debitCard')">
+                <input class="form-check-input" type="radio" name="paymentMethod"
+                       id="debitCard" value="DEBIT_CARD" style="display: none;">
+                <div class="d-flex align-items-center">
+                  <i class="fab fa-cc-visa card-logo visa"></i>
+                  <div>
+                    <h6 class="mb-1">Debit Card</h6>
+                    <p class="text-muted mb-0 small">Pay with your debit card</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Details -->
+            <div class="mb-4">
+              <h6 class="mb-3 border-bottom pb-2">
+                <i class="fas fa-credit-card me-2 text-primary"></i>Card Details
+              </h6>
+
+              <!-- Card Number -->
+              <div class="mb-3">
+                <label for="cardNumber" class="form-label">Card Number</label>
+                <div class="input-group">
+                  <input type="text"
+                         class="form-control card-input"
+                         id="cardNumber"
+                         name="cardNumber"
+                         placeholder="1234 5678 9012 3456"
+                         maxlength="19"
+                         oninput="formatCardNumber(this)"
+                         required>
+                  <span class="input-group-text">
+                    <i class="fas fa-credit-card text-muted"></i>
+                  </span>
+                </div>
+                <div class="form-text">Enter 16-digit card number</div>
+                <div class="error-message" id="cardNumberError">Must be exactly 16 digits</div>
+              </div>
+
+              <div class="row">
+                <!-- Expiry Date -->
+                <div class="col-md-6 mb-3">
+                  <label for="expiryDate" class="form-label">Expiry Date</label>
+                  <input type="text"
+                         class="form-control card-input"
+                         id="expiryDate"
+                         name="expiryDate"
+                         placeholder="MM/YY"
+                         maxlength="5"
+                         oninput="formatExpiryDate(this)"
+                         required>
+                  <div class="form-text">Month/Year (e.g., 12/25)</div>
+                  <div class="error-message" id="expiryDateError">Must be in MM/YY format</div>
+                </div>
+
+                <!-- CVV -->
+                <div class="col-md-6 mb-3">
+                  <label for="cvv" class="form-label">Security Code (CVV)</label>
+                  <div class="input-group">
+                    <input type="text"
+                           class="form-control card-input"
+                           id="cvv"
+                           name="cvv"
+                           placeholder="123"
+                           maxlength="4"
+                           oninput="formatCVV(this)"
+                           required>
+                    <span class="input-group-text">
+                      <i class="fas fa-lock text-muted"></i>
+                    </span>
+                  </div>
+                  <div class="form-text">3 or 4 digits</div>
+                  <div class="error-message" id="cvvError">Must be 3 or 4 digits</div>
+                </div>
+              </div>
+
+              <!-- Cardholder Name -->
+              <div class="mb-3">
+                <label for="cardholderName" class="form-label">Cardholder Name</label>
+                <input type="text"
+                       class="form-control card-input"
+                       id="cardholderName"
+                       name="cardholderName"
+                       placeholder="Enter name as it appears on card"
+                       required>
+                <div class="error-message" id="cardholderNameError">Cardholder name is required</div>
+              </div>
+            </div>
+
+            <!-- Total Amount Display -->
+            <div class="alert alert-info">
+              <div class="d-flex justify-content-between">
+                <span>Ticket Price (<span id="quantityDisplay">0</span> tickets):</span>
+                <span id="subtotalAmount">LKR.0.00</span>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span>Service Fee (2.5%):</span>
+                <span id="serviceFee">LKR.0.00</span>
+              </div>
+              <hr class="my-2">
+              <div class="d-flex justify-content-between fw-bold fs-5">
+                <span>Total Amount:</span>
+                <strong id="totalAmount">LKR.0.00</strong>
+              </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="alert alert-warning">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-shield-alt me-2"></i>
+                <div>
+                  <strong>Secure Payment</strong>
+                  <p class="mb-0 small">Your payment information is encrypted and secure. We do not store your card details.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Terms Agreement -->
+            <div class="form-check mb-4">
+              <input class="form-check-input" type="checkbox" id="termsAgreement" required>
+              <label class="form-check-label" for="termsAgreement">
+                I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a>
+                and understand that all ticket sales are final.
+              </label>
+              <div class="error-message" id="termsError">You must agree to the terms and conditions</div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                <i class="fas fa-lock me-2"></i>Complete Purchase - LKR.<span id="submitAmount">0.00</span>
+              </button>
+              <a th:href="@{/events}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Events
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-file-contract me-2"></i>Terms and Conditions
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <h6>Ticket Purchase Terms:</h6>
+        <ul>
+          <li>All ticket sales are final - no refunds or exchanges</li>
+          <li>Ticket is valid only for the specified event and date</li>
+          <li>Management reserves the right to refuse admission</li>
+          <li>Event date and time subject to change</li>
+          <li>Keep your ticket safe - duplicates will not be issued</li>
+          <li>Payment processing may take 2-3 business days</li>
+          <li>Service fees are non-refundable</li>
+        </ul>
+
+        <h6>Payment Security:</h6>
+        <ul>
+          <li>All payments are processed securely using 256-bit SSL encryption</li>
+          <li>Credit/Debit card details are encrypted and not stored on our servers</li>
+          <li>We do not store sensitive payment information</li>
+          <li>Your financial data is protected by industry-standard security measures</li>
+        </ul>
+
+        <h6>Card Payment Terms:</h6>
+        <ul>
+          <li>By providing card details, you authorize us to charge the total amount</li>
+          <li>Card transactions are subject to bank authorization</li>
+          <li>Failed payments may result in ticket reservation cancellation</li>
+          <li>Ensure your card has sufficient funds and is enabled for online transactions</li>
+        </ul>
+
+        <p class="text-muted small">By purchasing this ticket, you agree to these terms and conditions.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Global variables
+  let ticketPrice = 0;
+  let selectedPaymentMethod = 'creditCard';
+
+  // Select payment method
+  function selectPaymentMethod(method) {
+    selectedPaymentMethod = method;
+
+    // Update UI
+    document.querySelectorAll('.payment-option').forEach(el => {
+      el.classList.remove('selected');
+    });
+
+    const currentOption = document.querySelector(`[onclick="selectPaymentMethod('${method}')"]`);
+    if (currentOption) {
+      currentOption.classList.add('selected');
+    }
+
+    // Update radio button
+    const radioButton = document.getElementById(method);
+    if (radioButton) {
+      radioButton.checked = true;
+    }
+  }
+
+  // Format card number with spaces but allow exactly 16 digits
+  function formatCardNumber(input) {
+    if (!input) return;
+
+    // Remove all non-digits and spaces
+    let value = input.value.replace(/\D/g, '');
+
+    // STRICTLY LIMIT to 16 digits (no more, no less)
+    if (value.length > 16) {
+      value = value.substring(0, 16);
+    }
+
+    // Add spaces every 4 digits for readability, but store the raw value
+    let formattedValue = '';
+    for (let i = 0; i < value.length; i++) {
+      if (i > 0 && i % 4 === 0) {
+        formattedValue += ' ';
+      }
+      formattedValue += value[i];
+    }
+
+    input.value = formattedValue;
+
+    // Update error message
+    const errorElement = document.getElementById('cardNumberError');
+    const digitCount = value.length;
+
+    if (digitCount > 0 && digitCount !== 16) {
+      errorElement.style.display = 'block';
+      errorElement.textContent = `Enter 16 digits (currently ${digitCount})`;
+    } else {
+      errorElement.style.display = 'none';
+    }
+  }
+
+  // Format expiry date
+  function formatExpiryDate(input) {
+    if (!input) return;
+    let value = input.value.replace(/\D/g, '');
+
+    // Limit to 4 digits
+    if (value.length > 4) {
+      value = value.substring(0, 4);
+    }
+
+    if (value.length >= 2) {
+      input.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    } else {
+      input.value = value;
+    }
+
+    // Validate format
+    const errorElement = document.getElementById('expiryDateError');
+    if (value.length > 0 && !input.value.match(/(0[1-9]|1[0-2])\/[0-9]{2}/)) {
+      errorElement.style.display = 'block';
+    } else {
+      errorElement.style.display = 'none';
+    }
+  }
+
+  // Format CVV - numbers only
+  function formatCVV(input) {
+    if (!input) return;
+    // Remove non-digits and limit to 4 characters
+    let value = input.value.replace(/\D/g, '');
+    if (value.length > 4) {
+      value = value.substring(0, 4);
+    }
+    input.value = value;
+
+    // Validate length
+    const errorElement = document.getElementById('cvvError');
+    if (value.length > 0 && (value.length < 3 || value.length > 4)) {
+      errorElement.style.display = 'block';
+    } else {
+      errorElement.style.display = 'none';
+    }
+  }
+
+  // Show/hide error message
+  function showError(elementId, show, message = '') {
+    const errorElement = document.getElementById(elementId);
+    if (errorElement) {
+      errorElement.style.display = show ? 'block' : 'none';
+      if (message) {
+        errorElement.textContent = message;
+      }
+    }
+  }
+
+  // Calculate total amount
+  function calculateTotal() {
+    const quantityElement = document.getElementById('quantity');
+    if (!quantityElement) return;
+
+    const quantity = parseInt(quantityElement.value) || 0;
+    const subtotal = quantity * ticketPrice;
+    const serviceFee = subtotal * 0.025;
+    const total = subtotal + serviceFee;
+
+    // Update display elements
+    const quantityDisplay = document.getElementById('quantityDisplay');
+    const subtotalAmount = document.getElementById('subtotalAmount');
+    const serviceFeeElement = document.getElementById('serviceFee');
+    const totalAmount = document.getElementById('totalAmount');
+    const submitAmount = document.getElementById('submitAmount');
+
+    if (quantityDisplay) quantityDisplay.textContent = quantity;
+    if (subtotalAmount) subtotalAmount.textContent = 'LKR.' + subtotal.toFixed(2);
+    if (serviceFeeElement) serviceFeeElement.textContent = 'LKR.' + serviceFee.toFixed(2);
+    if (totalAmount) totalAmount.textContent = 'LKR.' + total.toFixed(2);
+    if (submitAmount) submitAmount.textContent = total.toFixed(2);
+  }
+
+  // Real-time validation
+  function validateField(fieldId, validationFn) {
+    const field = document.getElementById(fieldId);
+    if (field) {
+      field.addEventListener('blur', function() {
+        validationFn(field);
+      });
+      field.addEventListener('input', function() {
+        showError(fieldId + 'Error', false);
+      });
+    }
+  }
+
+  // Validate card number field
+  function validateCardNumberField(field) {
+    const value = field.value.replace(/\s/g, '');
+    const isValid = value.length === 16 && /^\d+$/.test(value);
+    showError('cardNumberError', !isValid, 'Must be exactly 16 digits');
+    return isValid;
+  }
+
+  // Validate expiry date field
+  function validateExpiryDateField(field) {
+    const isValid = field.value.match(/(0[1-9]|1[0-2])\/[0-9]{2}/);
+    showError('expiryDateError', !isValid, 'Must be in MM/YY format (e.g., 12/25)');
+    return isValid;
+  }
+
+  // Validate CVV field
+  function validateCVVField(field) {
+    const value = field.value;
+    const isValid = value.match(/^\d{3,4}$/);
+    showError('cvvError', !isValid, 'Must be 3 or 4 digits');
+    return isValid;
+  }
+
+  // Validate cardholder name field
+  function validateCardholderNameField(field) {
+    const isValid = field.value.trim().length > 0;
+    showError('cardholderNameError', !isValid, 'Cardholder name is required');
+    return isValid;
+  }
+
+  // Validate form before submission
+  function validateForm() {
+    console.log("Form submitted - validating...");
+
+    let isValid = true;
+
+    // Validate quantity
+    const quantity = document.getElementById('quantity').value;
+    if (!quantity) {
+      alert('Please select number of tickets');
+      return false;
+    }
+
+    // Validate card fields
+    if (!validateCardNumberField(document.getElementById('cardNumber'))) isValid = false;
+    if (!validateExpiryDateField(document.getElementById('expiryDate'))) isValid = false;
+    if (!validateCVVField(document.getElementById('cvv'))) isValid = false;
+    if (!validateCardholderNameField(document.getElementById('cardholderName'))) isValid = false;
+
+    // Check terms agreement
+    const terms = document.getElementById('termsAgreement');
+    if (!terms.checked) {
+      showError('termsError', true);
+      isValid = false;
+    } else {
+      showError('termsError', false);
+    }
+
+    if (!isValid) {
+      alert('Please fix the errors in the form before submitting.');
+      return false;
+    }
+
+    // Show loading state
+    const submitBtn = document.getElementById('submitBtn');
+    const form = document.getElementById('paymentForm');
+
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing Payment...';
+    submitBtn.disabled = true;
+    form.classList.add('loading');
+
+    console.log("Form validation passed, submitting...");
+    return true;
+  }
+
+  // Initialize everything after DOM loads
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get ticket price safely
+    const eventDataElement = document.getElementById('eventData');
+    if (eventDataElement && eventDataElement.dataset.ticketPrice) {
+      ticketPrice = parseFloat(eventDataElement.dataset.ticketPrice);
+    } else {
+      console.warn('Ticket price not found, using default 0');
+      ticketPrice = 0;
+    }
+
+    // Initialize UI
+    calculateTotal();
+    selectPaymentMethod('creditCard');
+
+    // Add event listeners
+    const quantityElement = document.getElementById('quantity');
+    if (quantityElement) {
+      quantityElement.addEventListener('change', calculateTotal);
+    }
+
+    // Setup real-time validation
+    validateField('cardNumber', validateCardNumberField);
+    validateField('expiryDate', validateExpiryDateField);
+    validateField('cvv', validateCVVField);
+    validateField('cardholderName', validateCardholderNameField);
+
+    // Clear error when terms is checked
+    document.getElementById('termsAgreement').addEventListener('change', function() {
+      showError('termsError', false);
+    });
+
+    // Allow only numbers in card fields (with some exceptions for navigation)
+    const cardFields = document.querySelectorAll('#cardNumber, #expiryDate, #cvv');
+    cardFields.forEach(field => {
+      field.addEventListener('keydown', function(event) {
+        // Allow: backspace, delete, tab, escape, enter, arrow keys, home, end
+        if ([8, 9, 13, 27, 37, 38, 39, 40, 36, 35, 46].includes(event.keyCode)) {
+          return;
+        }
+        // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+        if (event.ctrlKey && [65, 67, 86, 88].includes(event.keyCode)) {
+          return;
+        }
+        // Only allow numbers
+        if (!/^\d$/.test(event.key)) {
+          event.preventDefault();
+        }
+      });
+    });
+  });
+</script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+2025-09-20T00:59:08.397+05:30 DEBUG 19364 --- [tomcat-handler-11] o.s.web.servlet.DispatcherServlet        : GET "/login", parameters={}
+2025-09-20T00:59:08.546+05:30  WARN 19364 --- [tomcat-handler-11] o.s.web.servlet.PageNotFound             : No mapping for GET /login
+2025-09-20T00:59:08.553+05:30  WARN 19364 --- [tomcat-handler-11] o.s.web.servlet.PageNotFound             : No endpoint GET /login.
+2025-09-20T00:59:08.556+05:30 DEBUG 19364 --- [tomcat-handler-11] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.servlet.NoHandlerFoundException: No endpoint GET /login.]
+2025-09-20T00:59:08.562+05:30 DEBUG 19364 --- [tomcat-handler-11] o.s.web.servlet.DispatcherServlet        : Completed 404 NOT_FOUND
+2025-09-20T00:59:08.565+05:30 DEBUG 19364 --- [tomcat-handler-11] o.s.web.servlet.DispatcherServlet        : "ERROR" dispatch for GET "/error", parameters={}
+2025-09-20T00:59:08.568+05:30 DEBUG 19364 --- [tomcat-handler-11] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController#errorHtml(HttpServletRequest, HttpServletResponse)
+2025-09-20T00:59:08.600+05:30 DEBUG 19364 --- [tomcat-handler-11] o.s.w.s.v.ContentNegotiatingViewResolver : Selected 'text/html' given [text/html, text/html;q=0.8]
+2025-09-20T00:59:08.602+05:30 DEBUG 19364 --- [tomcat-handler-11] o.s.web.servlet.DispatcherServlet        : Exiting from "ERROR" dispatch, status 404
+2025-09-20T01:59:14.746+05:30  INFO 19364 --- [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-09-20T01:59:15.352+05:30  INFO 19364 --- [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-09-20T01:59:15.404+05:30  INFO 19364 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-09-20T01:59:15.500+05:30  INFO 19364 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-09-20T01:59:15.513+05:30  INFO 19364 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

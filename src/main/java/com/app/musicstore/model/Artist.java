@@ -3,6 +3,7 @@ package com.app.musicstore.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Artist")
@@ -27,4 +28,5 @@ public class Artist extends User {
 
     public String getGenre() { return genre; }
     public void setGenre(String genre) { this.genre = genre; }
+
 }

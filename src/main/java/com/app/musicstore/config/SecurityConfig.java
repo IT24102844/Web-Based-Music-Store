@@ -19,6 +19,19 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 import java.io.IOException;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.Authentication;
+
+import java.io.IOException;
+
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -71,6 +84,27 @@ public class SecurityConfig {
                         .loginPage("/users/login")
                         .loginProcessingUrl("/login")
                         .successHandler(roleBasedAuthenticationSuccessHandler()) // Role-based redirect
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/", "/home", "/users/register", "/users/login",
+                                "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll() // ADD /uploads/** HERE
+                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers("/artist/**").hasAuthority("ARTIST")
+                        .requestMatchers("/dashboard/admin").hasAuthority("ADMIN")
+                        .requestMatchers("/dashboard/artist").hasAuthority("ARTIST")
+                        .requestMatchers("/dashboard/item-seller").hasAuthority("ITEM_SELLER")
+                        .requestMatchers("/dashboard/course-seller").hasAuthority("COURSE_SELLER")
+                        .requestMatchers("/dashboard/customer").hasAuthority("CUSTOMER")
+                        .requestMatchers("/tickets/create", "/tickets/my-tickets").authenticated()
+                        .requestMatchers("/tickets/admin/**").hasAuthority("ADMIN")
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .usernameParameter("email")
+                        .loginPage("/users/login")
+                        .loginProcessingUrl("/users/login")
+                        .successHandler(roleBasedAuthenticationSuccessHandler())
                         .failureUrl("/users/login?error=true")
                         .permitAll()
                 )
@@ -87,10 +121,18 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .csrf(csrf -> csrf.disable()); // Disable for development; enable in production
+                        .logoutSuccessUrl("/users/login?logout=true")
+                        .permitAll()
+                )
+                .csrf(csrf -> csrf.disable())
+                .httpBasic(withDefaults());
 
         return http.build();
     }
 
+    /**
+     * Custom authentication success handler for role-based redirection
+     */
     @Bean
     public AuthenticationSuccessHandler roleBasedAuthenticationSuccessHandler() {
         return new AuthenticationSuccessHandler() {
@@ -107,6 +149,9 @@ public class SecurityConfig {
 
                 var authorities = authentication.getAuthorities().stream()
                         .map(auth -> auth.getAuthority())
+            public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+                var authorities = authentication.getAuthorities().stream()
+                        .map(grantedAuthority -> grantedAuthority.getAuthority())
                         .toList();
 
                 if (authorities.contains("ADMIN")) {
@@ -119,6 +164,19 @@ public class SecurityConfig {
                     response.sendRedirect("/dashboard/customer");
                 } else {
                     response.sendRedirect("/");
+                }
+            }
+        };
+    }
+}
+                } else if (authorities.contains("ITEM_SELLER")) {
+                    response.sendRedirect("/dashboard/item-seller");
+                } else if (authorities.contains("COURSE_SELLER")) {
+                    response.sendRedirect("/dashboard/course-seller");
+                } else if (authorities.contains("CUSTOMER")) {
+                    response.sendRedirect("/dashboard/customer");
+                } else {
+                    response.sendRedirect("/dashboard");
                 }
             }
         };

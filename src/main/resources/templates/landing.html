@@ -15,11 +15,11 @@
     <nav class="navbar">
         <div class="logo">TuneWave</div>
         <ul class="nav-links">
+            <li><a th:href="@{/public_products}">Instruments</a></li>
+            <li><a th:href="@{/courses}">Courses</a></li>
+            <li><a th:href="@{/about}">About</a></li>
             <li><a href="#music">Music</a></li>
-            <li><a href="#courses">Courses</a></li>
             <li><a href="/events">Events</a></li>
-            <li><a href="#instruments">Instruments</a></li>
-            <li><a href="#about">About</a></li>
         </ul>
         <div class="auth-buttons">
             <a th:href="@{/users/login}" class="btn btn-login">Login</a>
@@ -32,7 +32,9 @@
         <h1>Your Sound, Your Wave</h1>
         <p>Discover premium music, professional instruments, and expert courses all in one place. Join thousands of
             musicians who trust TuneWave for their musical journey.</p>
-        <a th:href="@{/users/register}" class="cta-button">Start Your Journey</a>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+            <a th:href="@{/users/register}" class="cta-button">Start Your Journey</a>
+        </div>
     </section>
 
     <!-- Features Section -->
@@ -62,11 +64,11 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>&copy; 2024 TuneWave. All rights reserved.</p>
+        <p>2025 TuneWave. All rights reserved</p>
         <div class="social-links">
-            <a>♪</a>
-            <a>♫</a>
-            <a>♬</a>
+            <a href="https://facebook.com" target="_blank">Facebook</a>
+            <a href="https://twitter.com" target="_blank">Twitter</a>
+            <a href="https://instagram.com" target="_blank">Instagram</a>
         </div>
     </footer>
 </div>

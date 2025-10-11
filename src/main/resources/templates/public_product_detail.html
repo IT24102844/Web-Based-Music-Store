@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.name} + ' - TuneWave'">Product - TuneWave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+    <style>
+        .container { max-width: 1100px; margin: 0 auto; padding: 32px 16px; }
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+        .image-main { width: 100%; height: 400px; border-radius: 12px; overflow: hidden; background: #f8fafc; margin-bottom: 16px; }
+        .image-main img { width: 100%; height: 100%; object-fit: cover; }
+        .image-placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 2rem; }
+        .thumbnails { display: flex; gap: 8px; overflow-x: auto; }
+        .thumbnail { min-width: 80px; height: 80px; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid #e2e8f0; transition: border-color 0.2s; }
+        .thumbnail:hover { border-color: #3b82f6; }
+        .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+        .title { font-size: 2rem; font-weight: 700; color: #1e293b; margin-bottom: 16px; }
+        .meta { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+        .type-badge { background: #f1f5f9; color: #475569; padding: 8px 12px; border-radius: 8px; font-weight: 500; }
+        .rating { display: flex; align-items: center; gap: 8px; }
+        .price { font-size: 2.5rem; font-weight: 700; color: #059669; margin-bottom: 24px; }
+        .stock-section { margin-bottom: 24px; }
+        .stock-in { background: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 6px; font-weight: 500; }
+        .stock-out { background: #fef2f2; color: #991b1b; padding: 6px 12px; border-radius: 6px; font-weight: 500; }
+        .actions { display: flex; gap: 12px; margin-bottom: 32px; }
+        .btn { padding: 12px 24px; font-size: 1rem; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+        .btn-secondary { background: #f1f5f9; color: #475569; }
+        .breadcrumb a { color: #3b82f6; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb span.sep { margin: 0 8px; color: #64748b; }
+        .tabs { display: flex; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px; }
+        .tab-button { padding: 12px 24px; border: none; background: none; font-weight: 500; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .tab-button.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
+        .reviews-empty { text-align: center; padding: 40px; color: #64748b; }
+        .review-item { border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+        .review-stars { color: #fbbf24; }
+        /* Modal styles */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal { background: #fff; width: 90%; max-width: 420px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,.15); overflow: hidden; }
+        .modal-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e5e7eb; }
+        .modal-title { font-size: 1.125rem; font-weight: 600; color: #111827; }
+        .modal-close { border: none; background: transparent; font-size: 1.25rem; cursor: pointer; color: #6b7280; }
+        .modal-body { padding: 20px; color: #374151; }
+        .modal-actions { display: flex; gap: 12px; padding: 0 20px 20px 20px; }
+        @media (max-width: 768px) { .product-grid { grid-template-columns: 1fr; } .image-main { height: 300px; } }
+    </style>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="breadcrumb" style="margin-bottom: 20px;">
+        <a th:href="@{/}">Home</a>
+        <span class="sep">›</span>
+        <a th:href="@{/public_products}">Instruments</a>
+        <span class="sep">›</span>
+        <span style="color: #64748b;" th:text="${product.name}">Product</span>
+    </div>
+
+    <div class="product-grid">
+        <!-- Images -->
+        <div>
+            <div class="image-main">
+                <img th:if="${product.getPrimaryImageUrl()}"
+                     id="mainImage"
+                     th:src="${product.getPrimaryImageUrl()}"
+                     alt="Product Image">
+                <div th:unless="${product.getPrimaryImageUrl()}" class="image-placeholder">🎵 No Image</div>
+                </div>
+            <div th:if="${product.images != null and product.images.size() > 1}" class="thumbnails">
+                <div th:each="image : ${product.images}"
+                     class="thumbnail"
+                     th:attr="data-image-url=${image.imageUrl}"
+                     onclick="changeMainImage(this.dataset.imageUrl)">
+                    <img th:src="${image.imageUrl}" alt="Product Image">
+                </div>
+            </div>
+        </div>
+
+        <!-- Info -->
+        <div>
+            <h1 class="title" th:text="${product.name}">Product Name</h1>
+            <div class="meta">
+                <span class="type-badge" th:text="${product.instrumentType}">GUITAR</span>
+                <div class="rating">
+                <span>
+                    <span th:each="i : ${#numbers.sequence(1,5)}"
+                          th:style="'color: ' + (${i <= T(java.lang.Math).round(averageRating)} ? '#fbbf24' : '#e2e8f0')">★</span>
+                </span>
+                    <span style="color:#111827; font-weight:600;" th:text="${#numbers.formatDecimal(averageRating,1,1)}">0.0</span>
+                <span style="color:#64748b; font-size:0.9rem;" th:text="'(' + ${reviewCount} + ' reviews)'">(0 reviews)</span>
+            </div>
+            </div>
+
+            <div class="price" th:text="'LKR ' + ${#numbers.formatDecimal(product.price, 1, 2)}">LKR 0.00</div>
+
+            <div class="stock-section">
+                <h3 style="font-size: 1.1rem; font-weight: 600; color: #374151; margin-bottom: 8px;">Stock Status</h3>
+                <div th:if="${product.stock > 0}" style="display:flex; align-items:center; gap:8px; color:#166534; font-weight:500;">
+                    <span class="stock-in">✅ In Stock</span>
+                    <span th:text="'(' + ${product.stock} + ' available)'">(0 available)</span>
+                </div>
+                <div th:unless="${product.stock > 0}" style="display:flex; align-items:center; gap:8px; color:#991b1b; font-weight:500;">
+                    <span class="stock-out">❌ Out of Stock</span>
+            </div>
+            </div>
+
+            <div class="actions">
+                <a th:href="@{/users/login}" class="btn btn-primary auth-required" style="flex:1; text-align:center;">🛒 Add to Cart</a>
+                <a th:href="@{/users/login}" class="btn btn-secondary auth-required" style="flex:1; text-align:center;">Buy Now</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="card" style="margin-top: 24px;">
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('description')">Description</button>
+            <button class="tab-button" onclick="showTab('specifications')">Specifications</button>
+            <button class="tab-button" onclick="showTab('reviews')">Reviews (<span th:text="${reviewCount}">0</span>)</button>
+        </div>
+
+        <div id="description-tab" class="tab-content active">
+            <h3 style="font-size: 1.2rem; font-weight: 600; color: #1e293b; margin-bottom: 16px;">Product Description</h3>
+            <p style="color: #64748b; line-height: 1.6; white-space: pre-line;" th:text="${product.description}">Detailed product description goes here...</p>
+        </div>
+
+        <div id="specifications-tab" class="tab-content">
+            <h3 style="font-size: 1.2rem; font-weight: 600; color: #1e293b; margin-bottom: 16px;">Product Specifications</h3>
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px;">
+                <p style="color: #64748b; line-height: 1.6; white-space: pre-line;" th:text="${product.specifications}">Product specifications go here...</p>
+            </div>
+        </div>
+
+        <div id="reviews-tab" class="tab-content">
+            <h3 style="font-size: 1.2rem; font-weight: 600; color: #1e293b; margin-bottom: 16px;">Customer Reviews</h3>
+            <div th:if="${#lists.isEmpty(reviews)}" class="reviews-empty">
+                <div style="font-size: 3rem; margin-bottom: 16px;">⭐</div>
+                <h4 style="margin-bottom: 8px; color: #374151;">No reviews yet</h4>
+                <p>Be the first to review this product!</p>
+            </div>
+            <div th:each="review : ${reviews}" class="review-item">
+                <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:12px;">
+                    <div>
+                        <h4 style="margin:0; font-weight:600; color:#1e293b;" th:text="${review.customerEmail}">user@example.com</h4>
+                        <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+                            <div class="review-stars">
+                                <span th:each="i : ${#numbers.sequence(1, 5)}" th:style="'color: ' + (${i <= review.rating} ? '#fbbf24' : '#e2e8f0')">★</span>
+                            </div>
+                            <span style="color:#64748b; font-size: 0.9rem;" th:text="${#temporals.format(review.createdAt, 'MMM dd, yyyy')}">Jan 15, 2025</span>
+                        </div>
+                    </div>
+                </div>
+                <p style="color:#64748b; line-height:1.6; margin:0;" th:text="${review.comment}">Review comment goes here...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+    <div class="modal">
+        <div class="modal-header">
+            <div id="loginModalTitle" class="modal-title">Please log in to continue</div>
+            <button type="button" class="modal-close" aria-label="Close">×</button>
+        </div>
+        <div class="modal-body">To buy or add to cart, please log in or sign up.</div>
+        <div class="modal-actions">
+            <a th:href="@{/users/login}" class="btn btn-primary" style="flex: 1; text-align: center;">Login</a>
+            <a th:href="@{/users/register}" class="btn btn-secondary" style="flex: 1; text-align: center;">Sign Up</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(function(tab){ tab.style.display = 'none'; tab.classList.remove('active'); });
+        document.querySelectorAll('.tab-button').forEach(function(btn){ btn.classList.remove('active'); btn.style.color = '#64748b'; btn.style.borderBottom = 'none'; });
+        var target = document.getElementById(tabName + '-tab');
+        if (target) { target.style.display = 'block'; target.classList.add('active'); }
+        if (event && event.target) { event.target.classList.add('active'); event.target.style.color = '#3b82f6'; event.target.style.borderBottom = '2px solid #3b82f6'; }
+    }
+    function changeMainImage(imageUrl) {
+        var main = document.getElementById('mainImage');
+        if (main) { main.src = imageUrl; }
+    }
+    (function(){
+        var modal = document.getElementById('loginModal');
+        function openM() { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+        function closeM() { modal.style.display = 'none'; document.body.style.overflow = ''; }
+        document.querySelectorAll('.auth-required').forEach(function(a) {
+            a.addEventListener('click', function(e) { e.preventDefault(); openM(); });
+        });
+        modal.addEventListener('click', function(e) { if (e.target === modal) closeM(); });
+        var c = modal.querySelector('.modal-close');
+        if (c) c.addEventListener('click', closeM);
+        // Initialize default visible tab
+        showTab('description');
+        // Apply saved theme
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    })();
+</script>
+</body>
+</html>

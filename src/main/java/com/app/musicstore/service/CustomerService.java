@@ -1,6 +1,11 @@
 package com.app.musicstore.service;
 
 import com.app.musicstore.model.Customer;
+import com.app.musicstore.repository.CustomerRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.app.musicstore.model.User;
 import com.app.musicstore.repository.CustomerRepository;
 import com.app.musicstore.repository.UserRepository;
@@ -36,4 +41,9 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
+    public void deleteById(Long userId) {
+        customerRepository.findByUserId(userId).ifPresent(customer -> {
+            customerRepository.deleteById(customer.getUserId());
+        });
+    }
 }

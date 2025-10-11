@@ -33,4 +33,9 @@ public class ArtistService {
         return artistRepository.save(artist);
     }
 
+    public void deleteById(Long userId) {
+        artistRepository.findByUserId(userId).ifPresent(artist -> {
+            artistRepository.deleteById(artist.getUserId());
+        });
+    }
 }

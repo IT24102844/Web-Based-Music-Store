@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Reviews - TuneWave</title>
+    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+        }
+    </script>
+    <style>
+        .product-review { display: grid; grid-template-columns: 80px 1fr auto; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+        .product-review img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; background: #f8fafc; }
+        .stars input { display:none; }
+        .stars label { font-size: 1.4rem; color: #cbd5e1; cursor: pointer; transition: color 0.2s ease; }
+        .stars input:checked ~ label, .stars label:hover, .stars label:hover ~ label { color: #f59e0b; }
+        .stars label:hover { transform: scale(1.1); }
+        .product-name { font-weight: 600; }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .btn-outline-primary:hover { background: #3b82f6; color: white; }
+
+        /* Theme Toggle Styles */
+        .theme-toggle { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; margin-top: auto; border-top: 1px solid #e5e7eb; }
+        .theme-toggle-label { font-size: 14px; font-weight: 500; color: #374151; }
+        .toggle-switch { position: relative; width: 50px; height: 24px; background-color: #d1d5db; border-radius: 12px; cursor: pointer; transition: background-color 0.3s ease; }
+        .toggle-switch.active { background-color: #3b82f6; }
+        .toggle-slider { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background-color: white; border-radius: 50%; transition: transform 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .toggle-switch.active .toggle-slider { transform: translateX(26px); }
+
+        /* Dark Mode Styles (high specificity, override globals) */
+        html.dark-mode, html.dark-mode body { background-color: #12172b !important; color: #f9fafb !important; }
+        html.dark-mode .sidebar { background-color: #12172b !important; border-right-color: #374151 !important; }
+        html.dark-mode .main-content { background-color: #12172b !important; }
+        html.dark-mode .card { background-color: #374151 !important; border-color: #4b5563 !important; }
+        html.dark-mode .theme-toggle-label { color: #f9fafb !important; }
+        html.dark-mode a { color: #93c5fd !important; }
+        html.dark-mode .header p { color: #cbd5e1 !important; }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <nav class="sidebar">
+        <h2>🎵 TuneWave</h2>
+        <div class="profile-section">
+            <div class="profile-image-container">
+                <img src="https://via.placeholder.com/80x80/3b82f6/ffffff?text=U" class="profile-image">
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" th:text="${user.name}">Customer Name</div>
+                <div class="profile-role" th:text="${user.role}">CUSTOMER</div>
+                <div class="profile-details">
+                    <p><strong>Email:</strong> <span th:text="${user.email}">customer@example.com</span></p>
+                    <p><strong>Status:</strong> <span th:text="${user.status}">ACTIVE</span></p>
+                </div>
+            </div>
+        </div>
+        <ul>
+            <li><a th:href="@{/buyer/dashboard}"> Dashboard</a></li>
+            <li><a th:href="@{/buyer/products}">Browse Products</a></li>
+            <li><a th:href="@{/buyer/cart}">My Cart</a></li>
+            <li><a th:href="@{/buyer/orders}">My Orders</a></li>
+            <li class="active"><a th:href="@{/buyer/reviews}"> My Reviews</a></li>
+        </ul>
+        <div class="theme-toggle" style="position: relative; z-index: 1000;">
+            <span class="theme-toggle-label">Theme</span>
+            <div class="toggle-switch" tabindex="0" role="switch" aria-checked="false">
+                <div class="toggle-slider"></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <h1>My Reviews</h1>
+                    <p>Rate products you received</p>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${param.success}" class="alert alert-success" style="margin-bottom: 20px; padding: 12px; background: #d1fae5; color: #065f46; border-radius: 8px; border-left: 4px solid #10b981;">
+            <span th:text="${param.success[0]}">Success message</span>
+        </div>
+        <div th:if="${param.error}" class="alert alert-danger" style="margin-bottom: 20px; padding: 12px; background: #fee2e2; color: #991b1b; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <span th:text="${param.error[0]}">Error message</span>
+        </div>
+
+        <div class="card" th:if="${#lists.isEmpty(orders)}" style="padding: 40px; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 12px;">📭</div>
+            <h3>No products to review</h3>
+            <p>Products appear here after your orders are shipped or completed.</p>
+            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+                <a th:href="@{/buyer/orders}" class="btn btn-outline-primary" style="padding: 10px 20px; text-decoration: none; border: 2px solid #3b82f6; color: #3b82f6; border-radius: 6px;">
+                    📦 View My Orders
+                </a>
+                <a th:href="@{/buyer/products}" class="btn btn-primary" style="padding: 10px 20px; text-decoration: none; background: #3b82f6; color: white; border-radius: 6px;">
+                    🛍️ Browse Products
+                </a>
+            </div>
+        </div>
+
+        <div th:each="order : ${orders}" class="card" style="margin-bottom: 20px;">
+            <div style="display:flex; justify-content: space-between; align-items:center; padding: 16px 20px; border-bottom:1px solid #e5e7eb;">
+                <div style="font-weight:600;">Order #<span th:text="${order.id}">1</span></div>
+                <div><span class="badge" th:text="${order.status}">SHIPPED</span></div>
+            </div>
+            <div style="padding: 16px;">
+                <div th:each="item : ${order.items}" class="product-review">
+                    <img th:if="${item.productImageUrl}" th:src="${item.productImageUrl}" alt="Product">
+                    <div th:unless="${item.productImageUrl}" style="width:80px;height:80px;background:#f3f4f6;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9ca3af;">No image</div>
+                    <div>
+                        <div class="product-name" th:text="${item.productName}">Product Name</div>
+                        <div style="color:#6b7280; font-size:0.9rem;">Qty: <span th:text="${item.quantity}">1</span></div>
+                    </div>
+                    <div th:with="r=${existingReviews[item.productId]}">
+                        <div th:if="${r != null}" style="grid-column: 1 / -1; margin-top: 8px; padding: 12px; background:#e8f5e8; border-radius:8px; border-left: 4px solid #10b981;">
+                            <div style="font-size:0.9rem; color:#065f46; font-weight: 500; margin-bottom: 8px;">
+                                ✓ You already reviewed this product
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <div style="display: flex; gap: 2px;">
+                                    <span th:each="i : ${#numbers.sequence(1, 5)}" 
+                                          th:style="'color: ' + (${i <= r.rating} ? '#f59e0b' : '#cbd5e1') + '; font-size: 1.2rem;'">★</span>
+                                </div>
+                                <span style="color:#6b7280; font-size: 0.9rem;" th:text="'(' + ${r.rating} + ' out of 5 stars)'"></span>
+                            </div>
+                            <div th:if="${r.comment != null and !r.comment.trim().isEmpty()}" style="color:#374151; font-style: italic; margin-top: 4px;">
+                                "<span th:text="${r.comment}"></span>"
+                            </div>
+                            <div th:if="${r.comment == null or r.comment.trim().isEmpty()}" style="color:#9ca3af; font-size: 0.85rem; margin-top: 4px;">
+                                No comment provided
+                            </div>
+                        </div>
+                        <form th:if="${r == null}" th:action="@{/buyer/reviews}" method="post" style="display:flex; align-items:center; gap: 12px;">
+                            <input type="hidden" name="productId" th:value="${item.productId}" />
+                            <div class="stars" style="display:flex; flex-direction:row-reverse; gap:4px;">
+                                <input type="radio" th:id="${'star5-' + order.id + '-' + item.productId}" name="rating" value="5" required><label th:for="${'star5-' + order.id + '-' + item.productId}">★</label>
+                                <input type="radio" th:id="${'star4-' + order.id + '-' + item.productId}" name="rating" value="4"><label th:for="${'star4-' + order.id + '-' + item.productId}">★</label>
+                                <input type="radio" th:id="${'star3-' + order.id + '-' + item.productId}" name="rating" value="3"><label th:for="${'star3-' + order.id + '-' + item.productId}">★</label>
+                                <input type="radio" th:id="${'star2-' + order.id + '-' + item.productId}" name="rating" value="2"><label th:for="${'star2-' + order.id + '-' + item.productId}">★</label>
+                                <input type="radio" th:id="${'star1-' + order.id + '-' + item.productId}" name="rating" value="1"><label th:for="${'star1-' + order.id + '-' + item.productId}">★</label>
+                            </div>
+                            <input type="text" name="comment" placeholder="Optional comment" class="form-control" style="min-width:220px;"/>
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+function toggleTheme() {
+    const html = document.documentElement;
+    const toggleSwitch = document.querySelector('.toggle-switch');
+    html.classList.toggle('dark-mode');
+    if (toggleSwitch) toggleSwitch.classList.toggle('active');
+    localStorage.setItem('theme', html.classList.contains('dark-mode') ? 'dark' : 'light');
+}
+
+// Star rating interaction
+function initStarRatings() {
+    document.querySelectorAll('.stars').forEach(starGroup => {
+        const inputs = starGroup.querySelectorAll('input[type="radio"]');
+        const labels = starGroup.querySelectorAll('label');
+        
+        // Function to update star colors based on rating
+        function updateStars(rating) {
+            labels.forEach((label, index) => {
+                if (index < rating) {
+                    label.style.color = '#f59e0b';
+                } else {
+                    label.style.color = '#cbd5e1';
+                }
+            });
+        }
+        
+        // Add hover effects
+        labels.forEach((label, index) => {
+            label.addEventListener('mouseenter', () => {
+                // Highlight stars up to hovered star
+                for (let i = 0; i <= index; i++) {
+                    labels[i].style.color = '#f59e0b';
+                }
+                // Dim stars after hovered star
+                for (let i = index + 1; i < labels.length; i++) {
+                    labels[i].style.color = '#cbd5e1';
+                }
+            });
+            
+            label.addEventListener('mouseleave', () => {
+                // Reset to checked state or default
+                const checkedInput = starGroup.querySelector('input:checked');
+                if (checkedInput) {
+                    const checkedIndex = Array.from(inputs).indexOf(checkedInput);
+                    updateStars(checkedIndex + 1);
+                } else {
+                    updateStars(0);
+                }
+            });
+        });
+        
+        // Add click handlers
+        inputs.forEach((input, index) => {
+            input.addEventListener('change', () => {
+                updateStars(index + 1);
+            });
+        });
+        
+        // Initialize with current state
+        const checkedInput = starGroup.querySelector('input:checked');
+        if (checkedInput) {
+            const checkedIndex = Array.from(inputs).indexOf(checkedInput);
+            updateStars(checkedIndex + 1);
+        }
+    });
+}
+
+// Form validation
+function validateReviewForm(form) {
+    const rating = form.querySelector('input[name="rating"]:checked');
+    if (!rating) {
+        alert('Please select a rating before submitting your review.');
+        return false;
+    }
+    return true;
+}
+
+// Add form validation to all review forms
+function initFormValidation() {
+    document.querySelectorAll('form[action*="/buyer/reviews"]').forEach(form => {
+        form.addEventListener('submit', (e) => {
+            if (!validateReviewForm(form)) {
+                e.preventDefault();
+            }
+        });
+    });
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    const toggleSwitch = document.querySelector('.toggle-switch');
+    if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+        if (toggleSwitch) toggleSwitch.classList.add('active');
+    } else {
+        document.documentElement.classList.remove('dark-mode');
+        if (toggleSwitch) toggleSwitch.classList.remove('active');
+    }
+    if (toggleSwitch) toggleSwitch.addEventListener('click', toggleTheme);
+
+    initStarRatings();
+    initFormValidation();
+
+    // Auto-hide success/error messages after 5 seconds
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.transition = 'opacity 0.5s ease';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 5000);
+});
+</script>
+</body>
+</html>
+
+

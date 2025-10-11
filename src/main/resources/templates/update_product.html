@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product - TuneWave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <h2>TuneWave</h2>
+        
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <div class="profile-image-container">
+                <img th:if="${user.profileImagePath}" 
+                     th:src="'/uploads/profile/' + ${user.profileImagePath}" 
+                     th:alt="${user.name} + ' Profile Image'" 
+                     class="profile-image"
+                     onerror="this.src='https://via.placeholder.com/80x80/2333de/ffffff?text=' + this.alt.charAt(0)">
+                <img th:unless="${user.profileImagePath}" 
+                     src="https://via.placeholder.com/80x80/2333de/ffffff?text=U" 
+                     alt="Default Profile Image" 
+                     class="profile-image">
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" th:text="${user.name}">Seller Name</div>
+                <div class="profile-role" th:text="${user.role}">SELLER</div>
+                <div class="profile-details">
+                    <p><strong>Email:</strong> <span th:text="${user.email}">seller@example.com</span></p>
+                    <p><strong>Status:</strong> <span th:text="${user.status}">ACTIVE</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <ul>
+            <li><a th:href="@{/seller/dashboard}">Dashboard</a></li>
+            <li><a th:href="@{/seller/settings}">Settings</a></li>
+            <li><a th:href="@{/seller/orders}">Orders</a></li>
+            <li><a th:href="@{/seller/products}">Products</a></li>
+            <li><a th:href="@{/seller/reviews}">Reviews</a></li>
+            <li><a th:href="@{/seller/account}">Account</a></li>
+            <li><a th:href="@{/users/logout}" class="logout">Logout</a></li>
+        </ul>
+
+        <!-- Theme Toggle -->
+        <div class="theme-toggle">
+            <span class="theme-toggle-label">Theme</span>
+            <div class="toggle-switch" onclick="toggleTheme()"></div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="header">
+            <h1>Edit Product</h1>
+            <p>Update your product information and settings</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Edit Product Form -->
+        <div class="card">
+            <form th:action="@{'/seller/products/edit/' + ${product.id}}" method="post" enctype="multipart/form-data">
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                    <!-- Product Name -->
+                    <div class="form-group">
+                        <label for="name">Product Name *</label>
+                        <input type="text" id="name" name="name" th:value="${product.name}" class="form-control" placeholder="Enter product name" required>
+                    </div>
+
+                    <!-- Instrument Type -->
+                    <div class="form-group">
+                        <label for="instrumentType">Instrument Type *</label>
+                        <select id="instrumentType" name="instrumentType" class="form-control" required>
+                            <option value="">Select instrument type</option>
+                            <option value="GUITAR" th:selected="${product.instrumentType == 'GUITAR'}">Guitar</option>
+                            <option value="BASS" th:selected="${product.instrumentType == 'BASS'}">Bass</option>
+                            <option value="DRUMS" th:selected="${product.instrumentType == 'DRUMS'}">Drums</option>
+                            <option value="PIANO" th:selected="${product.instrumentType == 'PIANO'}">Piano</option>
+                            <option value="VIOLIN" th:selected="${product.instrumentType == 'VIOLIN'}">Violin</option>
+                            <option value="SAXOPHONE" th:selected="${product.instrumentType == 'SAXOPHONE'}">Saxophone</option>
+                            <option value="TRUMPET" th:selected="${product.instrumentType == 'TRUMPET'}">Trumpet</option>
+                            <option value="FLUTE" th:selected="${product.instrumentType == 'FLUTE'}">Flute</option>
+                            <option value="OTHER" th:selected="${product.instrumentType == 'OTHER'}">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                    <!-- Price -->
+                    <div class="form-group">
+                        <label for="price">Price *</label>
+                        <input type="number" id="price" name="price" th:value="${product.price}" class="form-control" placeholder="0.00" step="0.01" min="0" required>
+                    </div>
+
+                    <!-- Stock -->
+                    <div class="form-group">
+                        <label for="stock">Stock Quantity *</label>
+                        <input type="number" id="stock" name="stock" th:value="${product.stock}" class="form-control" placeholder="0" min="0" required>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label for="description">Description *</label>
+                    <textarea id="description" name="description" class="form-control" rows="4" placeholder="Describe your product..." required th:text="${product.description}"></textarea>
+                </div>
+
+                <!-- Specifications -->
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label for="specifications">Specifications (Optional)</label>
+                    <textarea id="specifications" name="specifications" class="form-control" rows="3" placeholder="Technical specifications, features, etc..." th:text="${product.specifications}"></textarea>
+                </div>
+
+                <!-- Current Images -->
+                <div th:if="${product.images != null and !product.images.isEmpty()}" class="form-group" style="margin-bottom: 24px;">
+                    <label>Current Images</label>
+                    <small style="color: #64748b; font-size: 0.875rem; display: block; margin-bottom: 8px;">Click on an image to set it as primary (main product image)</small>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;">
+                        <div th:each="image : ${product.images}" 
+                             th:id="'image-' + ${image.id}"
+                             style="position: relative; display: inline-block; cursor: pointer;"
+                             th:onclick="'selectPrimaryImage(' + ${image.id} + ')'">
+                            <img th:src="${image.imageUrl}" 
+                                 th:style="'width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 2px solid ' + (${image.primary} ? '#059669' : '#e2e8f0') + '; transition: all 0.2s;'">
+                            
+                            <!-- Primary indicator -->
+                            <div th:if="${image.primary}" 
+                                 class="primary-indicator"
+                                 style="position: absolute; top: 4px; left: 4px; background: #059669; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">
+                                PRIMARY
+                            </div>
+                            
+                            <!-- Remove button -->
+                            <button type="button" class="btn btn-danger" 
+                                    style="position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; border-radius: 50%; padding: 0; font-size: 12px;" 
+                                    th:onclick="'event.stopPropagation(); removeImage(' + ${image.id} + ')'">×</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden input to store selected primary image ID -->
+                    <input type="hidden" id="primaryImageId" name="primaryImageId" th:value="${product.images.?[primary == true][0].id}">
+                </div>
+
+                <!-- Add New Images -->
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label for="images">Add New Images</label>
+                    <input type="file" id="images" name="images" class="form-control" multiple accept="image/*">
+                    <small style="color: #64748b; font-size: 0.875rem;">Upload additional images (JPG, PNG, GIF).</small>
+                </div>
+
+                <!-- Image Preview -->
+                <div id="imagePreview" style="display: none; margin-bottom: 24px;">
+                    <h4 style="color: #374151; margin-bottom: 12px;">New Image Preview</h4>
+                    <div id="previewContainer" style="display: flex; gap: 12px; flex-wrap: wrap;"></div>
+                </div>
+
+                <!-- Form Actions -->
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <a th:href="@{/seller/products}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-success">Update Product</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script>
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    }
+
+    // Load saved theme
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+    }
+
+    // Image preview functionality
+    document.getElementById('images').addEventListener('change', function(e) {
+        const files = e.target.files;
+        const previewContainer = document.getElementById('previewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        
+        previewContainer.innerHTML = '';
+        
+        if (files.length > 0) {
+            imagePreview.style.display = 'block';
+            
+            Array.from(files).forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.width = '100px';
+                        img.style.height = '100px';
+                        img.style.objectFit = 'cover';
+                        img.style.borderRadius = '8px';
+                        img.style.border = '2px solid #e2e8f0';
+                        img.title = file.name;
+                        previewContainer.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        } else {
+            imagePreview.style.display = 'none';
+        }
+    });
+
+    // Primary image selection functionality
+    function selectPrimaryImage(imageId) {
+        console.log('Selecting primary image:', imageId);
+        
+        // Update hidden input
+        document.getElementById('primaryImageId').value = imageId;
+        
+        // Remove primary indicator from all images
+        const allImages = document.querySelectorAll('[id^="image-"]');
+        allImages.forEach(imageDiv => {
+            const img = imageDiv.querySelector('img');
+            const primaryIndicator = imageDiv.querySelector('.primary-indicator');
+            
+            // Remove primary styling
+            img.style.border = '2px solid #e2e8f0';
+            
+            // Remove primary indicator
+            if (primaryIndicator) {
+                primaryIndicator.remove();
+            }
+        });
+        
+        // Add primary styling to selected image
+        const selectedImageDiv = document.getElementById('image-' + imageId);
+        if (selectedImageDiv) {
+            const img = selectedImageDiv.querySelector('img');
+            img.style.border = '2px solid #059669';
+            
+            // Add primary indicator
+            const primaryIndicator = document.createElement('div');
+            primaryIndicator.className = 'primary-indicator';
+            primaryIndicator.style.cssText = 'position: absolute; top: 4px; left: 4px; background: #059669; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;';
+            primaryIndicator.textContent = 'PRIMARY';
+            selectedImageDiv.appendChild(primaryIndicator);
+        }
+    }
+
+    // Remove image functionality
+    function removeImage(imageId) {
+        console.log('Removing image with ID:', imageId);
+        if (confirm('Are you sure you want to remove this image?')) {
+            // Make AJAX call to remove image from server
+            fetch('/seller/products/remove-image/' + imageId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Remove image from UI
+                    const imageDiv = document.getElementById('image-' + imageId);
+                    if (imageDiv) {
+                        // Check if this is the primary image
+                        const primaryImageId = document.getElementById('primaryImageId').value;
+                        if (imageId == primaryImageId) {
+                            // Clear primary selection if removing primary image
+                            document.getElementById('primaryImageId').value = '';
+                            console.log('Cleared primary image selection');
+                        }
+                        
+                        imageDiv.remove();
+                        console.log('Image removed successfully');
+                        
+                        // Show success message
+                        showMessage('Image removed successfully', 'success');
+                    }
+                } else {
+                    console.error('Failed to remove image');
+                    showMessage('Failed to remove image', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error removing image:', error);
+                showMessage('Error removing image', 'error');
+            });
+        }
+    }
+
+    // Helper function to show messages
+    function showMessage(message, type) {
+        // Create or update message element
+        let messageDiv = document.getElementById('imageMessage');
+        if (!messageDiv) {
+            messageDiv = document.createElement('div');
+            messageDiv.id = 'imageMessage';
+            messageDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; z-index: 1000; font-weight: 500;';
+            document.body.appendChild(messageDiv);
+        }
+        
+        messageDiv.textContent = message;
+        messageDiv.style.backgroundColor = type === 'success' ? '#059669' : '#dc2626';
+        messageDiv.style.color = 'white';
+        messageDiv.style.display = 'block';
+        
+        // Hide message after 3 seconds
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 3000);
+    }
+</script>
+</body>
+</html>

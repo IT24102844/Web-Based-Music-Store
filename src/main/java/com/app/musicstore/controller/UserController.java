@@ -3,6 +3,9 @@ package com.app.musicstore.controller;
 import com.app.musicstore.model.*;
 import com.app.musicstore.security.CustomUserDetails;
 import com.app.musicstore.service.UserService;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import com.app.musicstore.service.ArtistService;
 import com.app.musicstore.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
@@ -21,6 +24,9 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
     private final BCryptPasswordEncoder passwordEncoder;
 
     public UserController(UserService userService, BCryptPasswordEncoder passwordEncoder) {
@@ -38,6 +44,25 @@ public class UserController {
     public String registerUser(@ModelAttribute User user,
                                @RequestParam Map<String, String> allParams) {
         try {
+            System.out.println("=== REGISTRATION DEBUG ===");
+            System.out.println("User details:");
+            System.out.println("Name: " + user.getName());
+            System.out.println("Email: " + user.getEmail());
+            System.out.println("Role: " + user.getRole());
+            System.out.println("Password length: " + (user.getPassword() != null ? user.getPassword().length() : "null"));
+            System.out.println("All params: " + allParams);
+            
+            userService.registerUserWithDetails(user, allParams);
+            System.out.println("Registration successful for: " + user.getEmail());
+            return "redirect:/users/login?success=Registration successful! Please login.";
+        } catch (IllegalArgumentException e) {
+            System.err.println("Validation error: " + e.getMessage());
+            return "redirect:/users/register?error=" + e.getMessage();
+        } catch (Exception e) {
+            // Log the full exception for debugging
+            System.err.println("Registration error: " + e.getMessage());
+            e.printStackTrace();
+            return "redirect:/users/register?error=Registration failed: " + e.getMessage();
             userService.registerUserWithDetails(user, allParams);
             return "redirect:/users/login?success=Registration successful! Please login.";
         } catch (IllegalArgumentException e) {
@@ -52,6 +77,21 @@ public class UserController {
         error.ifPresent(e -> model.addAttribute("error", e));
         success.ifPresent(s -> model.addAttribute("success", s));
         return "login";
+    }
+
+
+    @GetMapping("/edit-profile")
+    public String editProfileForm(HttpSession session, Model model) {
+        var sessionUser = (User) session.getAttribute("loggedInUser");
+        if (sessionUser == null) {
+            return "redirect:/users/login";
+        }
+
+        var user = userService.getUserById(sessionUser.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        model.addAttribute("user", user);
+        return "edit-profile";
     }
 
     // Regular edit profile for all users
@@ -75,6 +115,25 @@ public class UserController {
     public String updateProfile(@ModelAttribute User user,
                                 HttpSession session,
                                 @RequestParam Map<String, String> allParams) {
+        var sessionUser = (User) session.getAttribute("loggedInUser");
+        if (sessionUser == null) {
+            return "redirect:/users/login";
+        }
+
+        userService.updateUser(sessionUser.getUserId(), user);
+
+        // Update session with latest user data
+        var updatedUser = userService.getUserById(sessionUser.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found after update"));
+        session.setAttribute("loggedInUser", updatedUser);
+
+        return switch (updatedUser.getRole()) {
+            case ADMIN -> "redirect:/dashboard/admin?success=Profile updated successfully";
+            case ARTIST -> "redirect:/dashboard/artist?success=Profile updated successfully";
+            case ITEM_SELLER -> "redirect:/dashboard/item-seller?success=Profile updated successfully";
+            case COURSE_SELLER -> "redirect:/dashboard/course-seller?success=Profile updated successfully";
+            case CUSTOMER -> "redirect:/dashboard/customer?success=Profile updated successfully";
+        };
         User authenticatedUser = getAuthenticatedUser();
         if (authenticatedUser == null) {
             return "redirect:/users/login";
@@ -290,6 +349,7 @@ public class UserController {
             return "redirect:/users/login";
         }
 
+        // Use switch expression
         return switch (user.getRole()) {
             case ARTIST -> {
                 model.addAttribute("artist", new Artist());
@@ -298,6 +358,14 @@ public class UserController {
             case CUSTOMER -> {
                 model.addAttribute("customer", new Customer());
                 yield "complete-customer-profile";
+            }
+            case COURSE_SELLER -> {
+                model.addAttribute("courseSeller", new CourseSeller());
+                yield "complete-course-seller-profile";
+            }
+            case ITEM_SELLER-> {
+                model.addAttribute("instrumentSeller", new InstrumentSeller());
+                yield "complete-instrument-seller-profile";
             }
             default -> "redirect:/dashboard";
         };

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Products - TuneWave</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+</head>
+<body>
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+        <h2>TuneWave</h2>
+        
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <div class="profile-image-container">
+                <img th:if="${user.profileImagePath}" 
+                     th:src="'/uploads/profile/' + ${user.profileImagePath}" 
+                     th:alt="${user.name} + ' Profile Image'" 
+                     class="profile-image"
+                     onerror="this.src='https://via.placeholder.com/80x80/2333de/ffffff?text=' + this.alt.charAt(0)">
+                <img th:unless="${user.profileImagePath}" 
+                     src="https://via.placeholder.com/80x80/2333de/ffffff?text=U" 
+                     alt="Default Profile Image" 
+                     class="profile-image">
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" th:text="${user.name}">Seller Name</div>
+                <div class="profile-role" th:text="${user.role}">SELLER</div>
+                <div class="profile-details">
+                    <p><strong>Email:</strong> <span th:text="${user.email}">seller@example.com</span></p>
+                    <p><strong>Status:</strong> <span th:text="${user.status}">ACTIVE</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <ul>
+            <li><a th:href="@{/seller/dashboard}">Dashboard</a></li>
+            <li><a th:href="@{/seller/settings}">Settings</a></li>
+            <li><a th:href="@{/seller/orders}">Orders</a></li>
+            <li><a th:href="@{/seller/products}" class="active">Products</a></li>
+            <li><a th:href="@{/seller/reviews}">Reviews</a></li>
+            <li><a th:href="@{/seller/account}">Account</a></li>
+            <li><a th:href="@{/users/logout}" class="logout">Logout</a></li>
+        </ul>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+      <span class="theme-toggle-label">Theme</span>
+      <div class="toggle-switch" onclick="toggleTheme()"></div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="header">
+      <h1>Manage Products</h1>
+      <p>View and manage your instrument products inventory</p>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <!-- Top Bar with Add Button -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; color: #1e293b;">Your Products (<span th:text="${#lists.size(products)}">0</span>)</h3>
+        <a th:href="@{/seller/products/add}" class="btn btn-success">+ Add New Product</a>
+      </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="card">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>Image</th>
+          <th>Product Name</th>
+          <th>Instrument Type</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product : ${products}">
+          <td>
+            <div th:if="${product.getPrimaryImageUrl()}" style="width: 80px; height: 60px; border-radius: 8px; overflow: hidden;">
+              <img th:src="${product.getPrimaryImageUrl()}" alt="Product Image" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div th:unless="${product.getPrimaryImageUrl()}" style="width: 80px; height: 60px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 0.8rem;">
+              No Image
+            </div>
+          </td>
+          <td style="font-weight: 600;" th:text="${product.name}">Product Name</td>
+          <td>
+            <span style="background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0369a1; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500;" th:text="${product.instrumentType}">Instrument Type</span>
+          </td>
+          <td style="font-weight: 600; color: #059669;" th:text="'LKR ' + ${product.price}">LKR 0.00</td>
+          <td>
+            <span th:if="${product.stock > 0}" style="color: #059669; font-weight: 600;" th:text="${product.stock}">0</span>
+            <span th:unless="${product.stock > 0}" style="color: #dc2626; font-weight: 600;">Out of Stock</span>
+          </td>
+          <td>
+            <span style="background: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 8px; font-size: 0.8rem;" th:text="${#lists.size(product.images)}">0</span> images
+          </td>
+          <td>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <a th:href="@{'/seller/products/edit/' + ${product.id}}" class="btn btn-warning" style="padding: 6px 12px; font-size: 0.8rem;">Edit</a>
+              <button class="btn btn-danger" style="padding: 6px 12px; font-size: 0.8rem;" th:data-product-id="${product.id}" th:data-product-name="${product.name}" onclick="deleteProduct(this)">Delete</button>
+            </div>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(products)}">
+          <td colspan="7" style="text-align: center; padding: 60px; color: #64748b;">
+            <h3 style="margin-bottom: 8px; color: #374151;">No products found</h3>
+            <p style="margin-bottom: 16px;">Start building your music store inventory</p>
+            <a th:href="@{/seller/products/add}" class="btn btn-success">+ Add Your First Product</a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
+      <div class="card" style="max-width: 500px; width: 90%; margin: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h3 style="color: #dc2626; margin: 0;">Confirm Delete</h3>
+          <span onclick="closeDeleteModal()" style="font-size: 24px; cursor: pointer; color: #64748b;">&times;</span>
+        </div>
+        <div style="margin-bottom: 24px;">
+          <p style="margin-bottom: 12px; color: #374151;">Are you sure you want to delete the product:</p>
+          <p style="font-weight: 600; color: #1e293b; margin-bottom: 12px;"><strong id="deleteProductName"></strong></p>
+          <p style="color: #dc2626; font-weight: 500;">This action cannot be undone!</p>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+          <button class="btn btn-danger" id="confirmDelete">Delete</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Theme toggle functionality
+  function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+  }
+
+  // Load saved theme preference immediately to prevent flashing
+  (function() {
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+  })();
+
+  let productToDelete = null;
+
+  function deleteProduct(button) {
+    const productId = button.getAttribute('data-product-id');
+    const productName = button.getAttribute('data-product-name');
+
+    productToDelete = productId;
+    document.getElementById('deleteProductName').textContent = productName;
+    document.getElementById('deleteModal').style.display = 'flex';
+  }
+
+  function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+    productToDelete = null;
+  }
+
+  document.getElementById('confirmDelete').addEventListener('click', () => {
+    if (productToDelete) {
+      window.location.href = '/seller/products/delete/' + productToDelete;
+    }
+  });
+
+  // Close modal when clicking outside
+  window.addEventListener('click', (event) => {
+    const deleteModal = document.getElementById('deleteModal');
+    if (event.target === deleteModal) {
+      closeDeleteModal();
+    }
+  });
+</script>
+</body>
+</html>

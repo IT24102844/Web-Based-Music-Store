@@ -18,6 +18,23 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        System.out.println("Attempting to load user with email: " + email);
+        
+        var userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            System.out.println("User not found in database: " + email);
+            throw new UsernameNotFoundException("User not found: " + email);
+        }
+        
+        var user = userOpt.get();
+        System.out.println("User found: " + user.getName() + ", Status: " + user.getStatus() + ", Role: " + user.getRole());
+        
+        if (user.getStatus() != Status.ACTIVE) {
+            System.out.println("User account is not active: " + email);
+            throw new UsernameNotFoundException("User account is not active: " + email);
+        }
+        
+        return new CustomUserDetails(user);
         return userRepository.findByEmail(email)
                 .filter(u -> u.getStatus() == Status.ACTIVE) // check active status
                 .map(CustomUserDetails::new) // wrap into UserDetails

@@ -1,4 +1,115 @@
 <!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - TuneWave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <h2>TuneWave</h2>
+        
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <div class="profile-image-container">
+                <img th:if="${user.profileImagePath}" 
+                     th:src="'/uploads/profile/' + ${user.profileImagePath}" 
+                     th:alt="${user.name} + ' Profile Image'" 
+                     class="profile-image"
+                     onerror="this.src='https://via.placeholder.com/80x80/2333de/ffffff?text=' + this.alt.charAt(0)">
+                <img th:unless="${user.profileImagePath}" 
+                     src="https://via.placeholder.com/80x80/2333de/ffffff?text=U" 
+                     alt="Default Profile Image" 
+                     class="profile-image">
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" th:text="${user.name}">Admin Name</div>
+                <div class="profile-role">ADMIN</div>
+                <div class="profile-details">
+                    <p><strong>Email:</strong> <span th:text="${user.email}">admin@example.com</span></p>
+                    <p><strong>Status:</strong> <span th:text="${user.status}">ACTIVE</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <ul>
+            <li><a th:href="@{/dashboard/admin}" class="active">Dashboard</a></li>
+            <li><a th:href="@{/admin/users}">User Management</a></li>
+            <li><a th:href="@{/users/edit-profile}">Update Profile</a></li>
+            <li><a th:href="@{/users/logout}" class="logout">Logout</a></li>
+        </ul>
+
+        <!-- Theme Toggle -->
+        <div class="theme-toggle">
+            <span class="theme-toggle-label">Theme</span>
+            <div class="toggle-switch" onclick="toggleTheme()"></div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="header">
+            <h1>Admin Dashboard</h1>
+            <p>Manage users, monitor system activity, and oversee platform operations</p>
+        </div>
+
+        <!-- Admin Stats -->
+        <div class="stats-grid">
+            <div class="card">
+                <h3>Total Users</h3>
+                <div class="stat-value">1,234</div>
+                <div class="stat-label">Registered users</div>
+            </div>
+            <div class="card">
+                <h3>Active Sellers</h3>
+                <div class="stat-value">89</div>
+                <div class="stat-label">Currently selling</div>
+            </div>
+            <div class="card">
+                <h3>Total Products</h3>
+                <div class="stat-value">456</div>
+                <div class="stat-label">Available products</div>
+            </div>
+            <div class="card">
+                <h3>System Health</h3>
+                <div class="stat-value" style="color: #059669;">99.9%</div>
+                <div class="stat-label">Uptime</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <h3>Quick Actions</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px;">
+                <a th:href="@{/admin/users}" class="btn">Manage Users</a>
+                <a href="#" class="btn btn-secondary">System Logs</a>
+                <a href="#" class="btn btn-warning">Backup Data</a>
+                <a href="#" class="btn btn-danger">System Settings</a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+
+    // Load saved theme preference immediately to prevent flashing
+    (function() {
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    })();
+</script>
+</body>
+</html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
   <meta charset="UTF-8">

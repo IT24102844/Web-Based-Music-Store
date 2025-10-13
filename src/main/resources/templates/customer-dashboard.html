@@ -1,1154 +1,267 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shop Music Instruments - TuneWave</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+    <title>Customer Dashboard - TuneWave</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Customer Dashboard Specific Styles */
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 250px;
-            background: #f9fafb;
-            padding: 20px;
-            border-right: 1px solid #e2e8f0;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .sidebar h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin: 0 0 20px 0;
-        }
-
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        .product-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-        }
-
-        .product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .product-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .product-image-placeholder {
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #64748b;
-            font-size: 1.2rem;
-        }
-
-        .product-info {
-            padding: 20px;
-        }
-
-        .product-name {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 8px;
-            line-height: 1.4;
-        }
-
-        .product-type {
-            background: #f1f5f9;
-            color: #475569;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            display: inline-block;
-            margin-bottom: 12px;
-        }
-
-        .product-price {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #059669;
-            margin-bottom: 8px;
-        }
-
-        .product-description {
-            color: #64748b;
-            font-size: 0.9rem;
-            line-height: 1.4;
-            margin-bottom: 16px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+        .dashboard-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            border-radius: 15px;
             overflow: hidden;
         }
-
-        .stock-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .stock-in {
-            background: #dcfce7;
-            color: #166534;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .stock-out {
-            background: #fef2f2;
-            color: #991b1b;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .product-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .btn-purchase {
-            background: #3b82f6;
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-purchase:hover {
-            background: #2563eb;
-            transform: translateY(-1px);
-        }
-
-        .btn-view-details {
-            background: #f1f5f9;
-            color: #475569;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-view-details:hover {
-            background: #e2e8f0;
-        }
-
-        .no-products {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 60px;
-            color: #64748b;
-        }
-
-        .no-products h3 {
-            margin-bottom: 8px;
-            color: #374151;
-        }
-
-        .search-filters {
-            display: flex;
-            gap: 16px;
-            align-items: end;
-            flex-wrap: wrap;
-            margin-bottom: 24px;
-        }
-
-        .filter-group {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .filter-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #374151;
-        }
-
-        .filter-group input,
-        .filter-group select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid rgba(102, 126, 234, 0.2);
-            border-radius: 12px;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.9);
-        }
-
-        .filter-group input:focus,
-        .filter-group select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        /* Profile Section Styles */
-        .profile-section {
-            padding: 20px 0;
-            border-bottom: 1px solid #e2e8f0;
-            margin-bottom: 20px;
-        }
-
-        .profile-image-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 15px;
-    <title>Customer Dashboard - Tune Wave</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-            color: #e0e0e0;
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
-            padding-top: 100px;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image:
-                    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
-            background-size: 50px 50px, 80px 80px, 120px 120px;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        @keyframes gradientShift {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        .container {
-            position: relative;
-            z-index: 2;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px;
-        }
-
-        .content-container {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #00d4ff, #ffffff, #00d4ff);
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: textShimmer 3s ease-in-out infinite;
-        }
-
-        @keyframes textShimmer {
-            0%, 100% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-        }
-
-        .welcome-text {
-            color: #b0b0b0;
-            margin-bottom: 30px;
-            font-size: 1.1rem;
-        }
-
-        /* Profile Section */
-        .profile-section {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .profile-image-container {
-            flex-shrink: 0;
-        }
-
-        .profile-placeholder {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            background: linear-gradient(135deg, #00d4ff, #0099cc);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2rem;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .profile-info {
-            text-align: center;
-        }
-
-        .profile-name {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 4px;
-        }
-
-        .profile-role {
-            color: #64748b;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .profile-details {
-            font-size: 0.85rem;
-            color: #64748b;
-            line-height: 1.4;
-        }
-
-        .profile-details p {
-            margin: 4px 0;
-        }
-
-        /* Navigation Cards */
-        .nav-card {
-            background: #fff;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
-        }
-
-        .nav-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .nav-card h3 {
-            margin: 0 0 8px 0;
-            color: #1e293b;
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .nav-card p {
-            color: #64748b;
-            margin: 0 0 12px 0;
-            font-size: 0.9rem;
-        }
-
-        .nav-card a {
-            display: inline-block;
-            padding: 6px 12px;
-            background: #3b82f6;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-
-        .nav-card a:hover {
-            background: #2563eb;
-        }
-
-        .logout-card {
-            background: #fff;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
-        }
-
-        .logout-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .logout-card a {
-            display: block;
-            text-align: center;
-            padding: 6px 12px;
-            background: #dc2626;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-
-        .logout-card a:hover {
-            background: #b91c1c;
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 20px;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1e293b;
-        }
-
-        .header p {
-            margin: 4px 0 0 0;
-            color: #64748b;
-            font-size: 0.9rem;
-        }
-
-        /* Dark Mode */
-        .dark-mode {
-            background: #1e293b;
-        }
-
-        .dark-mode .sidebar {
-            background: #2d3748;
-            border-right-color: #4b5563;
-        }
-
-        .dark-mode .product-card {
-            background: #2d3748;
-        }
-
-        .dark-mode .product-name {
-            color: #f9fafb;
-        }
-
-        .dark-mode .product-type {
-            background: #4b5563;
-            color: #e2e8f0;
-        }
-
-        .dark-mode .product-price {
-            color: #34d399;
-        }
-
-        .dark-mode .product-description {
-            color: #94a3b8;
-        }
-
-        .dark-mode .stock-in {
-            background: #14532d;
-            color: #dcfce7;
-        }
-
-        .dark-mode .stock-out {
-            background: #7f1d1d;
-            color: #fee2e2;
-        }
-
-        .dark-mode .btn-purchase {
-            background: #60a5fa;
-        }
-
-        .dark-mode .btn-purchase:hover {
-            background: #3b82f6;
-        }
-
-        .dark-mode .btn-view-details {
-            background: #4b5563;
-            color: #e2e8f0;
-        }
-
-        .dark-mode .btn-view-details:hover {
-            background: #64748b;
-        }
-
-        .dark-mode .no-products {
-            color: #94a3b8;
-        }
-
-        .dark-mode .no-products h3 {
-            color: #f9fafb;
-        }
-
-        .dark-mode .search-filters {
-            background: #2d3748;
-        }
-
-        .dark-mode .filter-group input,
-        .dark-mode .filter-group select {
-            background: #4b5563;
-            border-color: rgba(96, 165, 250, 0.2);
-            color: #e2e8f0;
-        }
-
-        .dark-mode .filter-group input:focus,
-        .dark-mode .filter-group select:focus {
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
-        }
-
-        .dark-mode .profile-placeholder {
-            background: linear-gradient(135deg, #60a5fa, #3b82f6);
-        }
-
-        .dark-mode .profile-name {
-            color: #f9fafb;
-        }
-
-        .dark-mode .profile-role {
-            color: #94a3b8;
-        }
-
-        .dark-mode .profile-details {
-            color: #94a3b8;
-        }
-
-        .dark-mode .nav-card {
-            background: #2d3748;
-        }
-
-        .dark-mode .nav-card h3 {
-            color: #f9fafb;
-        }
-
-        .dark-mode .nav-card p {
-            color: #94a3b8;
-        }
-
-        .dark-mode .logout-card {
-            background: #2d3748;
-        }
-
-        .dark-mode .header h1 {
-            color: #f9fafb;
-        }
-
-        .dark-mode .header p {
-            color: #94a3b8;
-        }
-
-        /* Theme Toggle */
-        .theme-toggle {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-top: auto;
-        }
-
-        .theme-toggle-label {
-            font-size: 0.9rem;
-            color: #1e293b;
-            font-weight: 500;
-        }
-
-        .toggle-switch {
-            width: 40px;
-            height: 20px;
-            background: #e2e8f0;
-            border-radius: 10px;
-            position: relative;
-            cursor: pointer;
-        }
-
-        .toggle-switch::after {
-            content: '';
-            width: 16px;
-            height: 16px;
-            background: #3b82f6;
-            border-radius: 50%;
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            transition: transform 0.3s;
-        }
-
-        .dark-mode .toggle-switch {
-            background: #4b5563;
-        }
-
-        .dark-mode .toggle-switch::after {
-            background: #60a5fa;
-            transform: translateX(20px);
-        }
-    </style>
-    <script>
-        // Prevent white flash by setting theme immediately
-        if (localStorage.getItem('theme') === 'dark') {
-            document.documentElement.classList.add('dark-mode');
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-        }
-
-        function addToCart(productId) {
-            // TODO: Implement add to cart functionality
-            alert('Add to cart functionality will be implemented soon!');
-        }
-
-        // Load saved theme preference
-        window.onload = () => {
-            if (localStorage.getItem('theme') === 'dark') {
-                document.body.classList.add('dark-mode');
-            }
-        };
-    </script>
-</head>
-<body>
-<div class="dashboard-container">
-    <!-- Sidebar -->
-    <nav class="sidebar">
-        <h2>TuneWave</h2>
-            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
-        }
-
-        .profile-info {
-            flex: 1;
-        }
-
-        .profile-name {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 5px;
-        }
-
-        .profile-role {
-            color: #00d4ff;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-            font-weight: 500;
-        }
-
-        .profile-details {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .profile-detail {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .detail-label {
-            font-size: 0.8rem;
-            color: #b0b0b0;
-            margin-bottom: 2px;
-        }
-
-        .detail-value {
-            font-size: 0.9rem;
-            color: #ffffff;
-            font-weight: 500;
-        }
-
-        /* Navigation Cards */
-        .navigation-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-
-        .nav-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 25px;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: block;
-            color: inherit;
-        }
-
-        .nav-card:hover {
+        .dashboard-card:hover {
             transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(0, 212, 255, 0.3);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            text-decoration: none;
-            color: inherit;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
-
-        .nav-icon {
+        .card-icon {
             font-size: 2.5rem;
-            margin-bottom: 15px;
-            color: #00d4ff;
+            margin-bottom: 1rem;
         }
-
-        .nav-card h3 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 10px;
+        .music-store-theme {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-
-        .nav-card p {
-            color: #b0b0b0;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin-bottom: 15px;
+        .section-title {
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+            margin: 2rem 0 1rem 0;
         }
-
-        .nav-action {
-            color: #00d4ff;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-card:hover .nav-action {
-            transform: translateX(5px);
-        }
-
-        /* Quick Stats */
-        .stats-section {
-            margin-bottom: 40px;
-        }
-
-        .stats-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-3px);
-            border-color: rgba(0, 212, 255, 0.3);
-        }
-
-        .stat-icon {
-            font-size: 2rem;
-            color: #00d4ff;
-            margin-bottom: 10px;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: #b0b0b0;
-        }
-
-        /* Navbar */
-        .navbar {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 1200px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .logo {
-            font-family: 'Monospace', monospace;
-            font-size: 28px;
-            font-weight: 600;
-            color: #00d4ff;
-            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-        }
-
-        .auth-buttons {
-            display: flex;
-            gap: 15px;
-        }
-
-        .btn-nav {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 25px;
-            font-family: 'Roboto', sans-serif;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-
-        .btn-login {
-            background: transparent;
-            color: #e0e0e0;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-login:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #00d4ff;
-            color: #00d0ff;
-        }
-
-        .btn-signup {
-            background: linear-gradient(135deg, #00d4ff, #0099cc);
+        .welcome-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 2rem;
             color: white;
-            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
-        }
-
-        .btn-signup:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
-        }
-
-        /* Event Ticket Card Special Styling */
-        .event-ticket-card {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .event-ticket-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #ff6b81, #ff4757);
-            border-radius: 0 15px 0 50px;
-            z-index: 1;
-        }
-
-        .event-ticket-card::after {
-            content: 'HOT';
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            color: white;
-            font-size: 0.7rem;
-            font-weight: 700;
-            z-index: 2;
-            transform: rotate(15deg);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .navbar {
-                width: 95%;
-                padding: 12px 20px;
-                flex-wrap: wrap;
-                gap: 15px;
-            }
-
-            .container {
-                padding: 20px;
-            }
-
-            .content-container {
-                padding: 30px 20px;
-            }
-
-            .profile-section {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .profile-details {
-                justify-content: center;
-            }
-
-            .navigation-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .profile-details {
-                flex-direction: column;
-                gap: 10px;
-            }
+            margin-bottom: 2rem;
         }
     </style>
 </head>
 <body>
-<!-- Navbar -->
-<nav class="navbar">
-    <div class="logo">TuneWave</div>
-    <div class="auth-buttons">
-        <a th:href="@{/users/logout}" class="btn-nav btn-login">Logout</a>
-        <a th:href="@{/users/edit-profile}" class="btn-nav btn-signup">Edit Profile</a>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark music-store-theme">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-music me-2"></i>
+            TuneWave
+        </a>
+        <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    Welcome, <span th:text="${user.name}">User</span>!
+                </span>
+            <a class="nav-link" href="/users/logout">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </a>
+        </div>
     </div>
 </nav>
 
-<div class="container">
-    <div class="content-container">
-        <h1>Customer Dashboard</h1>
-        <p class="welcome-text">Welcome back! Explore music, instruments, courses, and exciting events tailored for you.</p>
+<div class="container mt-4">
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold">Welcome to Your Music Hub</h1>
+                <p class="lead mb-0">Discover instruments, attend events, and enjoy music in one place</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <i class="fas fa-headphones" style="font-size: 4rem; opacity: 0.8;"></i>
+            </div>
+        </div>
+    </div>
 
-        <!-- Profile Section -->
-        <div class="profile-section">
-            <div class="profile-image-container">
-                <div class="profile-placeholder">
-                    <span th:text="${user.name.charAt(0)}"></span>
-                    <span th:text="${user.name.charAt(0)}">U</span>
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="section-title">Quick Actions</h3>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-search card-icon text-primary"></i>
+                    <h5 class="card-title">Browse Products</h5>
+                    <p class="card-text">Explore our collection of musical instruments</p>
+                    <a href="/buyer/dashboard" class="btn btn-primary">Shop Now</a>
                 </div>
             </div>
-            <div class="profile-info">
-                <div class="profile-name" th:text="${user.name}">Customer Name</div>
-                <div class="profile-role" th:text="${user.role}">CUSTOMER</div>
-                <div class="profile-details">
-                    <p><strong>Email:</strong> <span th:text="${user.email}">customer@example.com</span></p>
-                    <p><strong>Status:</strong> <span th:text="${user.status}">ACTIVE</span></p>
-                    <div class="profile-detail">
-                        <span class="detail-label">Email</span>
-                        <span class="detail-value" th:text="${user.email}">customer@example.com</span>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-calendar-alt card-icon text-success"></i>
+                    <h5 class="card-title">Events</h5>
+                    <p class="card-text">Discover upcoming concerts and music events</p>
+                    <a href="/events" class="btn btn-success">View Events</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-shopping-cart card-icon text-warning"></i>
+                    <h5 class="card-title">My Cart</h5>
+                    <p class="card-text">Manage your shopping cart items</p>
+                    <a href="/buyer/cart" class="btn btn-warning">View Cart</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-ticket-alt card-icon text-info"></i>
+                    <h5 class="card-title">My Tickets</h5>
+                    <p class="card-text">Access your event tickets</p>
+                    <a href="/my-tickets" class="btn btn-info">View Tickets</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shopping Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="section-title">Shopping & Products</h3>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-guitar me-2 text-primary"></i>
+                        Instrument Store
+                    </h5>
+                    <p class="card-text">Browse and purchase musical instruments from our sellers.</p>
+                    <div class="d-grid gap-2">
+                        <a href="/buyer/dashboard" class="btn btn-outline-primary">Browse All Products</a>
+                        <a href="/buyer/products" class="btn btn-outline-secondary">Search & Filter</a>
                     </div>
-                    <div class="profile-detail">
-                        <span class="detail-label">Status</span>
-                        <span class="detail-value" th:text="${user.status}">ACTIVE</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-shopping-bag me-2 text-success"></i>
+                        My Orders
+                    </h5>
+                    <p class="card-text">Track your orders and purchase history.</p>
+                    <div class="d-grid gap-2">
+                        <a href="/buyer/orders" class="btn btn-outline-success">View Orders</a>
+                        <a href="/buyer/reviews" class="btn btn-outline-info">Write Reviews</a>
                     </div>
-                    <div class="profile-detail">
-                        <span class="detail-label">Member Since</span>
-                        <span class="detail-value">2024</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-star me-2 text-warning"></i>
+                        Product Reviews
+                    </h5>
+                    <p class="card-text">Share your experience with purchased products.</p>
+                    <a href="/buyer/reviews" class="btn btn-warning">Manage Reviews</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events & Entertainment Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="section-title">Events & Entertainment</h3>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-music me-2 text-danger"></i>
+                        Music Events
+                    </h5>
+                    <p class="card-text">Discover concerts, festivals, and live performances from artists.</p>
+                    <div class="d-grid gap-2">
+                        <a href="/events" class="btn btn-danger">View All Events</a>
+                        <a href="/my-tickets" class="btn btn-outline-danger">My Event Tickets</a>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Navigation Grid -->
-        <div class="navigation-grid">
-<!--            <a th:href="@{/music}" class="nav-card">-->
-            <a th:href="@{/customer/songs}" class="nav-card">
-            <a th:href="@{/music}" class="nav-card">
-                <div class="nav-icon">
-                    <i class="fas fa-music"></i>
-                </div>
-                <h3>Songs & Music</h3>
-                <p>Discover and listen to tracks and albums from talented artists worldwide.</p>
-                <div class="nav-action">
-                    <span>Browse Music</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
-
-            <a th:href="@{/buyer/products}" class="nav-card">
-                <div class="nav-icon">
-                    <i class="fas fa-guitar"></i>
-                </div>
-                <h3>Instruments</h3>
-                <p>Shop guitars, keyboards, drums, and professional music equipment.</p>
-                <div class="nav-action">
-                    <span>Browse Instruments</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
-
-            <a th:href="@{/courses}" class="nav-card">
-                <div class="nav-icon">
-                    <i class="fas fa-book-open"></i>
-                </div>
-                <h3>Music Courses</h3>
-                <p>Learn from expert instructors with comprehensive music lessons and tutorials.</p>
-                <div class="nav-action">
-                    <span>Browse Courses</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
-
-            <a th:href="@{/events}" class="nav-card event-ticket-card">
-                <div class="nav-icon">
-                    <i class="fas fa-ticket-alt"></i>
-                </div>
-                <h3>Event Tickets</h3>
-                <p>Get tickets for concerts, festivals, and live music events near you.</p>
-                <div class="nav-action">
-                    <span>Browse Events</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
-        </div>
-
-        <!-- Quick Stats -->
-        <div class="stats-section">
-            <h2 class="stats-title">
-                <i class="fas fa-chart-line"></i>
-                Your Music Journey
-            </h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-headphones"></i>
-                    </div>
-                    <div class="stat-value">24</div>
-                    <div class="stat-label">Songs Listened</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                    <div class="stat-value">3</div>
-                    <div class="stat-label">Items Purchased</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-play-circle"></i>
-                    </div>
-                    <div class="stat-value">5</div>
-                    <div class="stat-label">Courses Enrolled</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-ticket-alt"></i>
-                    </div>
-                    <div class="stat-value">2</div>
-                    <div class="stat-label">Events Attended</div>
+        <div class="col-md-6 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-compact-disc me-2 text-info"></i>
+                        Artist Songs
+                    </h5>
+                    <p class="card-text">Explore and purchase songs from talented artists.</p>
+                    <a th:href="@{/customer/songs}" class="btn btn-info">Browse Songs</a>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Upcoming Events Section -->
-        <div class="stats-section">
-            <h2 class="stats-title">
-                <i class="fas fa-calendar-alt"></i>
-                Upcoming Events
-            </h2>
-            <div class="navigation-grid">
-                <div class="nav-card">
-                    <div class="nav-icon" style="color: #ff6b81;">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <h3>Summer Music Festival</h3>
-                    <p>3-day outdoor festival featuring top artists. July 15-17, 2024.</p>
-                    <div class="nav-action" style="color: #ff6b81;">
-                        <span>Get Tickets</span>
-                        <i class="fas fa-arrow-right"></i>
+    <!-- Support & Account Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="section-title">Support & Account</h3>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-life-ring me-2 text-secondary"></i>
+                        Support Tickets
+                    </h5>
+                    <p class="card-text">Get help with any issues or questions.</p>
+                    <div class="d-grid gap-2">
+                        <a href="/tickets/create" class="btn btn-outline-secondary">Create Ticket</a>
+                        <a href="/tickets/my-tickets" class="btn btn-outline-dark">My Tickets</a>
                     </div>
                 </div>
-                <div class="nav-card">
-                    <div class="nav-icon" style="color: #a55eea;">
-                        <i class="fas fa-microphone"></i>
-                    </div>
-                    <h3>Jazz Night Live</h3>
-                    <p>Intimate jazz performances at the Blue Note Club. Every Friday night.</p>
-                    <div class="nav-action" style="color: #a55eea;">
-                        <span>Book Now</span>
-                        <i class="fas fa-arrow-right"></i>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-wallet me-2 text-success"></i>
+                        Payment History
+                    </h5>
+                    <p class="card-text">View your transaction history and receipts.</p>
+                    <a href="/my-tickets" class="btn btn-outline-success">View Payments</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-user-cog me-2 text-primary"></i>
+                        Account Settings
+                    </h5>
+                    <p class="card-text">Manage your profile and preferences.</p>
+                    <a href="/users/edit-profile" class="btn btn-outline-primary">Manage Account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity (Placeholder) -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-clock fa-2x mb-3"></i>
+                        <p>Your recent activity will appear here</p>
+                        <small>Orders, tickets, and interactions will be tracked</small>
                     </div>
                 </div>
             </div>
@@ -1156,37 +269,21 @@
     </div>
 </div>
 
-<script>
-    // Add any interactive functionality here
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add hover effects for cards
-        const cards = document.querySelectorAll('.nav-card, .stat-card');
-        cards.forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-5px)';
-            });
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
-        });
+<!-- Footer -->
+<footer class="bg-dark text-light mt-5 py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h5><i class="fas fa-music me-2"></i>TuneWave</h5>
+                <p class="mb-0">Your complete music experience platform</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <p class="mb-0">&copy; 2024 TuneWave. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
 
-        // Add count-up animation for stats
-        const statValues = document.querySelectorAll('.stat-value');
-        statValues.forEach(stat => {
-            const target = parseInt(stat.textContent);
-            let current = 0;
-            const increment = target / 50;
-            const timer = setInterval(() => {
-                current += increment;
-                if (current >= target) {
-                    stat.textContent = target;
-                    clearInterval(timer);
-                } else {
-                    stat.textContent = Math.floor(current);
-                }
-            }, 30);
-        });
-    });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

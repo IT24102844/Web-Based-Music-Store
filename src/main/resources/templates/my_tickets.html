@@ -415,24 +415,24 @@
                           class="badge" th:text="${ticket.status}">ACTIVE</span>
                 </div>
                 <div class="card-body">
-                    <h6 class="mb-3" th:text="${ticket.event.title}">Event Title</h6>
+                    <h6 class="mb-3" th:text="${ticket.event?.title ?: 'Event Not Found'}">Event Name</h6>
 
                     <div class="ticket-details">
                         <p class="mb-2 d-flex align-items-center">
                             <i class="fas fa-map-marker-alt me-3"></i>
-                            <span th:text="${ticket.event.venue}">Venue</span>
+                            <span th:text="${ticket.event?.venue ?: 'Venue not available'}">Venue</span>
                         </p>
                         <p class="mb-2 d-flex align-items-center">
                             <i class="fas fa-calendar me-3"></i>
-                            <span th:text="${ticket.event.date}">Date</span>
+                            <span th:text="${ticket.event?.date ?: 'Date not available'}">Date</span>
                         </p>
                         <p class="mb-2 d-flex align-items-center">
                             <i class="fas fa-user me-3"></i>
-                            <span th:text="${ticket.event.artist.stageName}">Artist</span>
+                            <span th:text="${ticket.event?.artist?.stageName ?: 'Artist not available'}">Artist</span>
                         </p>
                         <p class="mb-0 d-flex align-items-center">
                             <i class="fas fa-money-bill-wave me-3"></i>
-                            <span>LKR.<span th:text="${#numbers.formatDecimal(ticket.event.ticketPrice, 1, 2)}">0.00</span></span>
+                            <span>LKR.<span th:text="${ticket.event?.ticketPrice ? #numbers.formatDecimal(ticket.event.ticketPrice, 1, 2) : '0.00'}">0.00</span></span>
                         </p>
                     </div>
                 </div>

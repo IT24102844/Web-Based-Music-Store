@@ -1,41 +1,10 @@
 package com.app.musicstore.controller;
 
-import com.app.musicstore.model.Role;
-import com.app.musicstore.model.User;
-import com.app.musicstore.service.UserService;
-import jakarta.servlet.http.HttpSession;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
-@Controller
-@RequestMapping("/admin/users")
-public class AdminUserController {
-
-    private final UserService userService;
-
-    public AdminUserController(UserService userService) {
-        this.userService = userService;
-    }
-
-    // ✅ List all users
-    @GetMapping
-    public String listUsers(Model model, HttpSession session) {
-        User admin = (User) session.getAttribute("loggedInUser");
-        if (admin == null || admin.getRole() != Role.ADMIN) {
-            return "redirect:/users/login";
-        }
-        model.addAttribute("users", userService.getAllUsers());
-        return "admin-user-list";
-    }
-
-    // ✅ Edit user form
-    @GetMapping("/edit/{id}")
-    public String editUserForm(@PathVariable Long id, Model model) {
 import com.app.musicstore.model.Event;
 import com.app.musicstore.model.Role;
 import com.app.musicstore.model.User;
 import com.app.musicstore.security.CustomUserDetails;
+import com.app.musicstore.service.EventService;
 import com.app.musicstore.service.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -70,7 +39,9 @@ public class AdminUserController {
         List<Event> pendingEvents = eventService.getPendingEvents();
 
         long totalUsers = users.size();
-        long activeUsers = users.stream().filter(user -> user.getStatus().name().equals("ACTIVE")).count();
+        long activeUsers = users.stream()
+                .filter(user -> user.getStatus().name().equals("ACTIVE"))
+                .count();
 
         model.addAttribute("user", admin);
         model.addAttribute("totalUsers", totalUsers);
@@ -80,7 +51,7 @@ public class AdminUserController {
         return "admin-dashboard";
     }
 
-    // -------------------- Event Management: Pending Events --------------------
+    // -------------------- Event Management --------------------
     @GetMapping("/events/pending")
     public String pendingEvents(Model model,
                                 @RequestParam(required = false) String success,
@@ -100,7 +71,6 @@ public class AdminUserController {
         return "admin-pending-events";
     }
 
-    // -------------------- Event Management: Approve Event --------------------
     @PostMapping("/events/approve/{id}")
     public String approveEvent(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         User admin = getAuthenticatedUser();
@@ -118,7 +88,6 @@ public class AdminUserController {
         return "redirect:/admin/events/pending";
     }
 
-    // -------------------- Event Management: Reject Event --------------------
     @PostMapping("/events/reject/{id}")
     public String rejectEvent(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         User admin = getAuthenticatedUser();
@@ -136,8 +105,8 @@ public class AdminUserController {
         return "redirect:/admin/events/pending";
     }
 
-    // List all users
-    @GetMapping
+    // -------------------- User Management --------------------
+    @GetMapping("/users")
     public String listUsers(Model model) {
         User admin = getAuthenticatedUser();
         if (admin == null || admin.getRole() != Role.ADMIN) {
@@ -155,8 +124,7 @@ public class AdminUserController {
         return "admin-user-list";
     }
 
-    // Edit user form
-    @GetMapping("/edit/{id}")
+    @GetMapping("/users/edit/{id}")
     public String editUserForm(@PathVariable Long id, Model model) {
         User admin = getAuthenticatedUser();
         if (admin == null || admin.getRole() != Role.ADMIN) {
@@ -169,11 +137,7 @@ public class AdminUserController {
         return "admin-edit-user";
     }
 
-    // ✅ Update user
-    @PostMapping("/update/{id}")
-    public String updateUser(@PathVariable Long id, @ModelAttribute User user) {
-    // Update user
-    @PostMapping("/update/{id}")
+    @PostMapping("/users/update/{id}")
     public String updateUser(@PathVariable Long id, @ModelAttribute User user) {
         User admin = getAuthenticatedUser();
         if (admin == null || admin.getRole() != Role.ADMIN) {
@@ -184,18 +148,7 @@ public class AdminUserController {
         return "redirect:/admin/users";
     }
 
-    // ✅ Delete user
-    @GetMapping("/delete/{id}")
-    public String deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return "redirect:/admin/users";
-    }
-
-    // ✅ Change role
-    @PostMapping("/role/{id}")
-    public String changeRole(@PathVariable Long id, @RequestParam String role) {
-    // Delete user
-    @GetMapping("/delete/{id}")
+    @GetMapping("/users/delete/{id}")
     public String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         User admin = getAuthenticatedUser();
         if (admin == null || admin.getRole() != Role.ADMIN) {
@@ -203,13 +156,11 @@ public class AdminUserController {
         }
 
         try {
-            // Prevent admin from deleting themselves
             if (admin.getUserId().equals(id)) {
                 redirectAttributes.addFlashAttribute("error", "Cannot delete your own account");
                 return "redirect:/admin/users";
             }
 
-            // Check if this is the last admin
             List<User> allUsers = userService.getAllUsers();
             long adminCount = allUsers.stream()
                     .filter(u -> u.getRole() == Role.ADMIN)
@@ -223,7 +174,6 @@ public class AdminUserController {
                 return "redirect:/admin/users";
             }
 
-            // Perform actual deletion
             userService.deleteUser(id);
             redirectAttributes.addFlashAttribute("success", "User deleted successfully");
 
@@ -234,8 +184,7 @@ public class AdminUserController {
         return "redirect:/admin/users";
     }
 
-    // Change role
-    @PostMapping("/role/{id}")
+    @PostMapping("/users/role/{id}")
     public String changeRole(@PathVariable Long id, @RequestParam String role) {
         User admin = getAuthenticatedUser();
         if (admin == null || admin.getRole() != Role.ADMIN) {
@@ -246,16 +195,7 @@ public class AdminUserController {
         return "redirect:/admin/users";
     }
 
-    // ✅ Change status
-    @PostMapping("/status/{id}")
-    public String changeStatus(@PathVariable Long id, @RequestParam String status) {
-        userService.changeUserStatus(id, status.toUpperCase());
-        return "redirect:/admin/users";
-    }
-}
-
-    // Change status
-    @PostMapping("/status/{id}")
+    @PostMapping("/users/status/{id}")
     public String changeStatus(@PathVariable Long id, @RequestParam String status) {
         User admin = getAuthenticatedUser();
         if (admin == null || admin.getRole() != Role.ADMIN) {
@@ -266,20 +206,15 @@ public class AdminUserController {
         return "redirect:/admin/users";
     }
 
-
-    //Get authenticated user from Spring Security context
-
+    // -------------------- Utility --------------------
     private User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null &&
                 authentication.isAuthenticated() &&
-                authentication.getPrincipal() instanceof CustomUserDetails) {
-
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+                authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
             return userDetails.getUser();
         }
-
         return null;
     }
 }

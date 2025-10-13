@@ -2,13 +2,10 @@ package com.app.musicstore.controller;
 
 import com.app.musicstore.model.*;
 import com.app.musicstore.security.CustomUserDetails;
+import com.app.musicstore.service.ArtistService;
 import com.app.musicstore.service.UserService;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import com.app.musicstore.service.ArtistService;
-import com.app.musicstore.repository.UserRepository;
-import jakarta.servlet.http.HttpSession;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,15 +21,18 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final ArtistService artistService;
 
-    public UserController(UserService userService, BCryptPasswordEncoder passwordEncoder) {
+    public UserController(UserService userService,
+                          BCryptPasswordEncoder passwordEncoder,
+                          ArtistService artistService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.artistService = artistService;
     }
+
+    /* ===================== REGISTER ===================== */
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
@@ -45,30 +45,22 @@ public class UserController {
                                @RequestParam Map<String, String> allParams) {
         try {
             System.out.println("=== REGISTRATION DEBUG ===");
-            System.out.println("User details:");
             System.out.println("Name: " + user.getName());
             System.out.println("Email: " + user.getEmail());
             System.out.println("Role: " + user.getRole());
-            System.out.println("Password length: " + (user.getPassword() != null ? user.getPassword().length() : "null"));
-            System.out.println("All params: " + allParams);
-            
+            System.out.println("Params: " + allParams);
+
             userService.registerUserWithDetails(user, allParams);
-            System.out.println("Registration successful for: " + user.getEmail());
             return "redirect:/users/login?success=Registration successful! Please login.";
         } catch (IllegalArgumentException e) {
-            System.err.println("Validation error: " + e.getMessage());
             return "redirect:/users/register?error=" + e.getMessage();
         } catch (Exception e) {
-            // Log the full exception for debugging
-            System.err.println("Registration error: " + e.getMessage());
             e.printStackTrace();
             return "redirect:/users/register?error=Registration failed: " + e.getMessage();
-            userService.registerUserWithDetails(user, allParams);
-            return "redirect:/users/login?success=Registration successful! Please login.";
-        } catch (IllegalArgumentException e) {
-            return "redirect:/users/register?error=" + e.getMessage();
         }
     }
+
+    /* ===================== LOGIN ===================== */
 
     @GetMapping("/login")
     public String showLoginForm(@RequestParam Optional<String> error,
@@ -79,22 +71,8 @@ public class UserController {
         return "login";
     }
 
+    /* ===================== PROFILE EDIT (GENERAL USERS) ===================== */
 
-    @GetMapping("/edit-profile")
-    public String editProfileForm(HttpSession session, Model model) {
-        var sessionUser = (User) session.getAttribute("loggedInUser");
-        if (sessionUser == null) {
-            return "redirect:/users/login";
-        }
-
-        var user = userService.getUserById(sessionUser.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        model.addAttribute("user", user);
-        return "edit-profile";
-    }
-
-    // Regular edit profile for all users
     @GetMapping("/edit-profile")
     public String editProfileForm(Model model) {
         User authenticatedUser = getAuthenticatedUser();
@@ -110,72 +88,46 @@ public class UserController {
         return "edit-profile";
     }
 
-    // Regular profile update for users
     @PostMapping("/update-profile")
-    public String updateProfile(@ModelAttribute User user,
-                                HttpSession session,
-                                @RequestParam Map<String, String> allParams) {
-        var sessionUser = (User) session.getAttribute("loggedInUser");
-        if (sessionUser == null) {
-            return "redirect:/users/login";
-        }
-
-        userService.updateUser(sessionUser.getUserId(), user);
-
-        // Update session with latest user data
-        var updatedUser = userService.getUserById(sessionUser.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found after update"));
-        session.setAttribute("loggedInUser", updatedUser);
-
-        return switch (updatedUser.getRole()) {
-            case ADMIN -> "redirect:/dashboard/admin?success=Profile updated successfully";
-            case ARTIST -> "redirect:/dashboard/artist?success=Profile updated successfully";
-            case ITEM_SELLER -> "redirect:/dashboard/item-seller?success=Profile updated successfully";
-            case COURSE_SELLER -> "redirect:/dashboard/course-seller?success=Profile updated successfully";
-            case CUSTOMER -> "redirect:/dashboard/customer?success=Profile updated successfully";
-        };
+    public String updateProfile(@RequestParam String name,
+                                @RequestParam(required = false) String phoneNo,
+                                @RequestParam(required = false) String address,
+                                @RequestParam(required = false) String password,
+                                HttpSession session) {
         User authenticatedUser = getAuthenticatedUser();
         if (authenticatedUser == null) {
             return "redirect:/users/login";
         }
 
-        // Get current user from database
-        User currentUser = userService.getUserById(authenticatedUser.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        try {
+            // Get current user from database - work with the existing object
+            User currentUser = userService.getUserById(authenticatedUser.getUserId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Handle password - if password is empty or null, keep the current one
-        String newPassword = user.getPassword();
-        if (newPassword == null || newPassword.trim().isEmpty()) {
-            // Keep current password
-            user.setPassword(currentUser.getPassword());
-        } else {
-            // New password provided - encode it
-            user.setPassword(passwordEncoder.encode(newPassword));
-        }
+            // Update only the fields that should change
+            currentUser.setName(name);
+            currentUser.setPhoneNo(phoneNo);
+            currentUser.setAddress(address);
 
-        // Preserve other fields that shouldn't be changed
-        user.setEmail(currentUser.getEmail()); // Ensure email doesn't change
-        user.setRole(currentUser.getRole()); // Ensure role doesn't change
-        user.setUserId(currentUser.getUserId()); // Ensure ID doesn't change
+            // Handle password - only update if provided and not empty
+            if (password != null && !password.trim().isEmpty()) {
+                if (password.length() < 6) {
+                    session.setAttribute("error", "Password must be at least 6 characters long");
+                    return "redirect:/users/edit-profile";
+                }
+                currentUser.setPassword(passwordEncoder.encode(password));
+            }
+            // If password is empty, it keeps the current encoded password
 
-        userService.updateUser(authenticatedUser.getUserId(), user);
+            // Use the service to update the existing user
+            User updatedUser = userService.updateUser(authenticatedUser.getUserId(), currentUser);
 
-        // Update session with latest user data
-        var updatedUser = userService.getUserById(authenticatedUser.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found after update"));
-        session.setAttribute("loggedInUser", updatedUser);
-
-            // Update User table
-            System.out.println("💾 Updating User table...");
-            User updatedUser = userService.updateUser(authenticatedUser.getUserId(), user);
-            System.out.println("✅ User table updated: " + updatedUser.getName());
+            // Refresh authentication context
+            refreshAuthenticationContext(updatedUser);
 
             // Update session with latest user data
             session.setAttribute("loggedInUser", updatedUser);
 
-            System.out.println("🎉 Profile update completed successfully!");
-
-            // Redirect based on role
             return switch (updatedUser.getRole()) {
                 case ADMIN -> "redirect:/dashboard/admin?success=Profile updated successfully";
                 case ARTIST -> "redirect:/dashboard/artist?success=Profile updated successfully";
@@ -183,24 +135,20 @@ public class UserController {
                 case COURSE_SELLER -> "redirect:/dashboard/course-seller?success=Profile updated successfully";
                 case CUSTOMER -> "redirect:/dashboard/customer?success=Profile updated successfully";
             };
-
         } catch (Exception e) {
-            System.out.println("❌ Error updating profile: " + e.getMessage());
-            e.printStackTrace();
-            model.addAttribute("error", "Error updating profile: " + e.getMessage());
-            return editProfileForm(model);
+            session.setAttribute("error", "Error updating profile: " + e.getMessage());
+            return "redirect:/users/edit-profile";
         }
     }
 
-    // Artist-specific edit profile
+    /* ===================== ARTIST PROFILE ===================== */
+
     @GetMapping("/edit-artist-profile")
     public String editArtistProfileForm(Model model) {
         User authenticatedUser = getAuthenticatedUser();
         if (authenticatedUser == null) {
             return "redirect:/users/login";
         }
-
-        // Check if user is actually an artist
         if (authenticatedUser.getRole() != Role.ARTIST) {
             return "redirect:/users/edit-profile";
         }
@@ -210,39 +158,27 @@ public class UserController {
 
         model.addAttribute("user", user);
 
-        // Load artist-specific fields
-        Optional<Artist> artistOpt = artistService.findByUserId(authenticatedUser.getUserId());
-        if (artistOpt.isPresent()) {
-            Artist artist = artistOpt.get();
+        artistService.findByUserId(authenticatedUser.getUserId()).ifPresentOrElse(artist -> {
             model.addAttribute("stageName", artist.getStageName());
             model.addAttribute("genre", artist.getGenre());
-            System.out.println("✅ Loaded artist data for edit - Stage: " + artist.getStageName() + ", Genre: " + artist.getGenre());
-        } else {
-            // If artist profile doesn't exist yet, set empty values
+        }, () -> {
             model.addAttribute("stageName", "");
             model.addAttribute("genre", "");
-            System.out.println("⚠️ No artist profile found for user: " + authenticatedUser.getUserId());
-        }
+        });
 
         model.addAttribute("currentUser", authenticatedUser);
         return "artist-edit-profile";
     }
 
-    // Artist-specific profile update
     @PostMapping("/update-artist-profile")
     public String updateArtistProfile(@RequestParam Map<String, String> allParams,
                                       HttpSession session,
                                       Model model) {
         User authenticatedUser = getAuthenticatedUser();
-        if (authenticatedUser == null) {
-            return "redirect:/users/login";
-        }
+        if (authenticatedUser == null) return "redirect:/users/login";
 
         try {
-            System.out.println("🔄 Starting artist profile update for user: " + authenticatedUser.getEmail());
-
-            // Get parameters
-            Long userId = Long.parseLong(allParams.get("userId"));
+            Long userId = authenticatedUser.getUserId();
             String name = allParams.get("name");
             String phoneNo = allParams.get("phoneNo");
             String address = allParams.get("address");
@@ -250,106 +186,58 @@ public class UserController {
             String stageName = allParams.get("stageName");
             String genre = allParams.get("genre");
 
-            System.out.println("🎤 Stage Name: " + stageName);
-            System.out.println("🎵 Genre: " + genre);
-            System.out.println("👤 Name: " + name);
-
-            // Validate required fields
-            if (stageName == null || stageName.trim().isEmpty()) {
-                model.addAttribute("error", "Stage name is required");
-                return editArtistProfileForm(model);
-            }
-            if (genre == null || genre.trim().isEmpty()) {
-                model.addAttribute("error", "Genre is required");
+            if (stageName == null || stageName.isBlank() || genre == null || genre.isBlank()) {
+                model.addAttribute("error", "Stage name and genre are required");
                 return editArtistProfileForm(model);
             }
 
-            // Get current user from database
-            User currentUser = userService.getUserById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+            // Update user info
+            User currentUser = userService.getUserById(userId).orElseThrow();
+            currentUser.setName(name);
+            currentUser.setPhoneNo(phoneNo);
+            currentUser.setAddress(address);
 
-            // Create updated user object
-            User updatedUser = new User();
-            updatedUser.setUserId(userId);
-            updatedUser.setName(name);
-            updatedUser.setEmail(currentUser.getEmail());
-            updatedUser.setPhoneNo(phoneNo);
-            updatedUser.setAddress(address);
-            updatedUser.setRole(currentUser.getRole());
-            updatedUser.setStatus(currentUser.getStatus());
-            updatedUser.setCreatedAt(currentUser.getCreatedAt());
-
-            // Handle password
-            if (password == null || password.trim().isEmpty()) {
-                updatedUser.setPassword(currentUser.getPassword());
-            } else {
+            if (password != null && !password.trim().isEmpty()) {
                 if (password.length() < 6) {
-                    model.addAttribute("error", "Password must be at least 6 characters long");
+                    model.addAttribute("error", "Password must be at least 6 characters");
                     return editArtistProfileForm(model);
                 }
-                updatedUser.setPassword(passwordEncoder.encode(password));
+                currentUser.setPassword(passwordEncoder.encode(password));
             }
 
-            // Update User table
-            System.out.println("💾 Updating User table...");
-            User savedUser = userService.updateUser(userId, updatedUser);
-            System.out.println("✅ User table updated: " + savedUser.getName());
+            User updatedUser = userService.updateUser(userId, currentUser);
 
-            // Update Artist table
-            System.out.println("🎭 Updating Artist table...");
+            // Update or create artist info
+            artistService.findByUserId(userId).ifPresentOrElse(
+                    a -> artistService.updateArtistDetails(userId, stageName.trim(), genre.trim()),
+                    () -> {
+                        Artist newArtist = new Artist();
+                        newArtist.setUserId(userId);
+                        newArtist.setStageName(stageName.trim());
+                        newArtist.setGenre(genre.trim());
+                        artistService.save(newArtist);
+                    }
+            );
 
-            // Check if artist profile exists
-            Optional<Artist> existingArtist = artistService.findByUserId(userId);
-            if (existingArtist.isPresent()) {
-                System.out.println("📝 Found existing artist profile, updating...");
-                Artist updatedArtist = artistService.updateArtistDetails(userId, stageName.trim(), genre.trim());
-                System.out.println("✅ Artist table updated - Stage: " + updatedArtist.getStageName() + ", Genre: " + updatedArtist.getGenre());
-            } else {
-                System.out.println("🆕 Creating new artist profile...");
-                // Create new artist profile
-                Artist newArtist = new Artist();
-                // Copy user properties to artist
-                newArtist.setUserId(savedUser.getUserId());
-                newArtist.setName(savedUser.getName());
-                newArtist.setEmail(savedUser.getEmail());
-                newArtist.setPassword(savedUser.getPassword());
-                newArtist.setPhoneNo(savedUser.getPhoneNo());
-                newArtist.setAddress(savedUser.getAddress());
-                newArtist.setRole(savedUser.getRole());
-                newArtist.setStatus(savedUser.getStatus());
-                newArtist.setCreatedAt(savedUser.getCreatedAt());
-                newArtist.setUpdatedAt(savedUser.getUpdatedAt());
+            // ✅ Refresh authentication context for artist as well
+            refreshAuthenticationContext(updatedUser);
 
-                // Set artist-specific fields
-                newArtist.setStageName(stageName.trim());
-                newArtist.setGenre(genre.trim());
-
-                Artist savedArtist = artistService.save(newArtist);
-                System.out.println("✅ New artist profile created - Stage: " + savedArtist.getStageName() + ", Genre: " + savedArtist.getGenre());
-            }
-
-            // Update session
-            session.setAttribute("loggedInUser", savedUser);
-
-            System.out.println("🎉 Artist profile update completed successfully!");
+            session.setAttribute("loggedInUser", updatedUser);
             return "redirect:/dashboard/artist?success=Artist profile updated successfully";
-
         } catch (Exception e) {
-            System.out.println("❌ Error updating artist profile: " + e.getMessage());
             e.printStackTrace();
-            model.addAttribute("error", "Error updating profile: " + e.getMessage());
+            model.addAttribute("error", e.getMessage());
             return editArtistProfileForm(model);
         }
     }
 
+    /* ===================== COMPLETE PROFILE ===================== */
+
     @GetMapping("/complete-profile")
     public String showCompleteProfileForm(HttpSession session, Model model) {
         var user = (User) session.getAttribute("loggedInUser");
-        if (user == null) {
-            return "redirect:/users/login";
-        }
+        if (user == null) return "redirect:/users/login";
 
-        // Use switch expression
         return switch (user.getRole()) {
             case ARTIST -> {
                 model.addAttribute("artist", new Artist());
@@ -363,7 +251,7 @@ public class UserController {
                 model.addAttribute("courseSeller", new CourseSeller());
                 yield "complete-course-seller-profile";
             }
-            case ITEM_SELLER-> {
+            case ITEM_SELLER -> {
                 model.addAttribute("instrumentSeller", new InstrumentSeller());
                 yield "complete-instrument-seller-profile";
             }
@@ -371,40 +259,7 @@ public class UserController {
         };
     }
 
-    // Debug endpoint to check artist profile
-    @GetMapping("/check-artist-profile")
-    @ResponseBody
-    public String checkArtistProfile() {
-        User authenticatedUser = getAuthenticatedUser();
-        if (authenticatedUser == null) {
-            return "No authenticated user";
-        }
-
-        Optional<Artist> artistOpt = artistService.findByUserId(authenticatedUser.getUserId());
-        if (artistOpt.isPresent()) {
-            Artist artist = artistOpt.get();
-            return "Artist profile found - ID: " + artist.getUserId() +
-                    ", Stage Name: " + artist.getStageName() +
-                    ", Genre: " + artist.getGenre();
-        } else {
-            return "No artist profile found for user: " + authenticatedUser.getEmail() +
-                    " (User ID: " + authenticatedUser.getUserId() + ")";
-        }
-    }
-
-    private User getAuthenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null &&
-                authentication.isAuthenticated() &&
-                authentication.getPrincipal() instanceof CustomUserDetails) {
-
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            return userDetails.getUser();
-        }
-
-        return null;
-    }
+    /* ===================== PASSWORD RESET ===================== */
 
     @GetMapping("/forgot-password")
     public String showForgotPasswordForm() {
@@ -417,10 +272,55 @@ public class UserController {
                                         Model model) {
         try {
             userService.resetPassword(email, newPassword);
-            return "redirect:/users/login?success=Password reset successfully! Please login with your new password.";
+            return "redirect:/users/login?success=Password reset successfully!";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             return "forgot-password";
+        }
+    }
+
+    /* ===================== DEBUG & UTIL ===================== */
+
+    @GetMapping("/check-artist-profile")
+    @ResponseBody
+    public String checkArtistProfile() {
+        User authenticatedUser = getAuthenticatedUser();
+        if (authenticatedUser == null) return "No authenticated user";
+
+        return artistService.findByUserId(authenticatedUser.getUserId())
+                .map(artist -> "Artist found - Stage: " + artist.getStageName() + ", Genre: " + artist.getGenre())
+                .orElse("No artist profile found for user " + authenticatedUser.getEmail());
+    }
+
+    private User getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null &&
+                authentication.isAuthenticated() &&
+                authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            return userDetails.getUser();
+        }
+        return null;
+    }
+
+    // ✅ NEW METHOD: Refresh authentication context after profile updates
+    private void refreshAuthenticationContext(User updatedUser) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            // Update the user in CustomUserDetails
+            userDetails.setUser(updatedUser);
+
+            // Create new authentication token with updated details
+            Authentication newAuth = new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    authentication.getCredentials(),
+                    authentication.getAuthorities()
+            );
+
+            // Set the updated authentication in security context
+            SecurityContextHolder.getContext().setAuthentication(newAuth);
+
+            System.out.println("✅ Authentication context refreshed for user: " + updatedUser.getEmail());
         }
     }
 }

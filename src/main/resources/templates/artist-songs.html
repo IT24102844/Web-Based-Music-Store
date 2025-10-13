@@ -365,6 +365,29 @@
             flex: 1;
         }
 
+        .btn-dark-theme {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            padding: 12px 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-dark-theme:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #00d4ff;
+            color: #00d4ff;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .navbar {
@@ -399,17 +422,17 @@
 <nav class="navbar">
     <div class="logo">TuneWave</div>
     <ul class="nav-links">
-        <li><a href="/events">Home</a></li>
-        <li><a href="#">Music</a></li>
-        <li><a href="#">Courses</a></li>
-        <li><a href="/artist/events">My Events</a></li>
+        <li><a th:href="@{/dashboard/artist}">Home</a></li>
+        <li><a th:href="@{/artist/events}">My Events</a></li>
         <li><a th:href="@{/artist/event/new}">Create Event</a></li>
         <li><a class="active" th:href="@{/artist/songs}">My Songs</a></li>
-        <li><a href="/users/profile">Profile</a></li>
     </ul>
     <div class="auth-buttons">
         <a class="logout-btn" th:href="@{/users/logout}">
             <i class="fas fa-sign-out-alt me-1"></i>Logout
+        </a>
+        <a class="btn btn-dark-theme" th:href="@{/dashboard/artist}">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
         </a>
     </div>
 </nav>

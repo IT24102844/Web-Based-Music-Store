@@ -57,7 +57,7 @@ public class BuyerController {
                 .toList();
         model.addAttribute("instrumentTypes", instrumentTypes);
         
-        return "customer-dashboard";
+        return "customer-instrument-dashboard";
     }
 
     // Search and Filter Products

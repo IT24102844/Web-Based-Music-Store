@@ -1,6 +1,9 @@
 package com.app.musicstore.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,6 +16,7 @@ public class Ticket {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "eventId", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Event event;
 
     @ManyToOne(fetch = FetchType.LAZY)

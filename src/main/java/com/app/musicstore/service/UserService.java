@@ -5,7 +5,14 @@ import com.app.musicstore.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +32,8 @@ public class UserService {
     public UserService(UserRepository userRepository,
                        BCryptPasswordEncoder passwordEncoder,
                        ArtistService artistService,
-                       CustomerService customerService,
                        CourseSellerService courseSellerService,
-                       InstrumentSellerService instrumentSellerService) {
+                       InstrumentSellerService instrumentSellerService,
                        CustomerService customerService) {
 
         this.userRepository = userRepository;
@@ -38,6 +44,7 @@ public class UserService {
         this.instrumentSellerService = instrumentSellerService;
     }
 
+    // Basic registration (no extra details)
     public User registerUser(User user) {
         userRepository.findByEmail(user.getEmail()).ifPresent(u -> {
             throw new IllegalArgumentException("Email already exists");
@@ -50,139 +57,104 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // Registration with role-specific details
     @Transactional
     public User registerUserWithDetails(User user, Map<String, String> roleSpecificData) {
         try {
             System.out.println("=== USER SERVICE DEBUG ===");
             System.out.println("Starting registration for user: " + user.getEmail() + " with role: " + user.getRole());
-            System.out.println("User name: " + user.getName());
-            System.out.println("User password: " + (user.getPassword() != null ? "[PROVIDED]" : "NULL"));
-            System.out.println("Role specific data: " + roleSpecificData);
-            
-            // Check if email already exists and is active
+
             Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
             if (existingUser.isPresent()) {
                 User existing = existingUser.get();
                 if (existing.getStatus() == Status.ACTIVE) {
                     throw new IllegalArgumentException("Email already exists");
                 } else {
-                    // If user exists but is inactive, delete the inactive user first
+                    // Remove inactive user before re-registering
                     System.out.println("Found inactive user with email: " + user.getEmail() + ", deleting...");
-                    try {
-                        hardDeleteUser(existing.getUserId());
-                        System.out.println("Successfully deleted inactive user");
-                    } catch (Exception e) {
-                        System.err.println("Failed to delete inactive user: " + e.getMessage());
-                        // Continue with registration anyway
-                    }
+                    hardDeleteUser(existing.getUserId());
                 }
             }
-            
-            // Encode password and set timestamps
+
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setCreatedAt(LocalDateTime.now());
             user.setUpdatedAt(LocalDateTime.now());
-        // Encode password and set timestamps
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
 
-        User savedUser;
+            User savedUser;
 
-        switch (user.getRole()) {
-            case ARTIST -> {
-                Artist artist = new Artist();
-                artist.setName(user.getName());
-                artist.setEmail(user.getEmail());
-                artist.setPassword(user.getPassword());
-                artist.setPhoneNo(user.getPhoneNo());
-                artist.setAddress(user.getAddress());
-                artist.setRole(Role.ARTIST);
-                artist.setStatus(user.getStatus());
-                artist.setCreatedAt(user.getCreatedAt());
-                artist.setUpdatedAt(user.getUpdatedAt());
-
-                artist.setStageName(roleSpecificData.get("stageName"));
-                artist.setGenre(roleSpecificData.get("genre"));
-
-                savedUser = artistService.save(artist);
+            switch (user.getRole()) {
+                case ARTIST -> {
+                    Artist artist = new Artist();
+                    artist.setName(user.getName());
+                    artist.setEmail(user.getEmail());
+                    artist.setPassword(user.getPassword());
+                    artist.setPhoneNo(user.getPhoneNo());
+                    artist.setAddress(user.getAddress());
+                    artist.setRole(Role.ARTIST);
+                    artist.setStatus(user.getStatus());
+                    artist.setCreatedAt(user.getCreatedAt());
+                    artist.setUpdatedAt(user.getUpdatedAt());
+                    artist.setStageName(roleSpecificData.get("stageName"));
+                    artist.setGenre(roleSpecificData.get("genre"));
+                    savedUser = artistService.save(artist);
+                }
+                case CUSTOMER -> {
+                    Customer customer = new Customer();
+                    customer.setName(user.getName());
+                    customer.setEmail(user.getEmail());
+                    customer.setPassword(user.getPassword());
+                    customer.setPhoneNo(user.getPhoneNo());
+                    customer.setAddress(user.getAddress());
+                    customer.setRole(Role.CUSTOMER);
+                    customer.setStatus(user.getStatus());
+                    customer.setCreatedAt(user.getCreatedAt());
+                    customer.setUpdatedAt(user.getUpdatedAt());
+                    customer.setPreferences(roleSpecificData.get("preferences"));
+                    savedUser = customerService.save(customer);
+                }
+                case COURSE_SELLER -> {
+                    CourseSeller seller = new CourseSeller();
+                    seller.setName(user.getName());
+                    seller.setEmail(user.getEmail());
+                    seller.setPassword(user.getPassword());
+                    seller.setPhoneNo(user.getPhoneNo());
+                    seller.setAddress(user.getAddress());
+                    seller.setRole(Role.COURSE_SELLER);
+                    seller.setStatus(user.getStatus());
+                    seller.setCreatedAt(user.getCreatedAt());
+                    seller.setUpdatedAt(user.getUpdatedAt());
+                    seller.setExpertise(roleSpecificData.get("expertise"));
+                    seller.setExpYears(Integer.parseInt(roleSpecificData.getOrDefault("expYears", "0")));
+                    savedUser = courseSellerService.save(seller);
+                }
+                case ITEM_SELLER -> {
+                    InstrumentSeller seller = new InstrumentSeller();
+                    seller.setName(user.getName());
+                    seller.setEmail(user.getEmail());
+                    seller.setPassword(user.getPassword());
+                    seller.setPhoneNo(user.getPhoneNo());
+                    seller.setAddress(user.getAddress());
+                    seller.setRole(Role.ITEM_SELLER);
+                    seller.setStatus(user.getStatus());
+                    seller.setCreatedAt(user.getCreatedAt());
+                    seller.setUpdatedAt(user.getUpdatedAt());
+                    seller.setStoreName(roleSpecificData.get("storeName"));
+                    seller.setStoreLocation(roleSpecificData.get("location"));
+                    savedUser = instrumentSellerService.save(seller);
+                }
+                case ADMIN -> savedUser = userRepository.save(user);
+                default -> throw new IllegalArgumentException("Unsupported role: " + user.getRole());
             }
-            case CUSTOMER -> {
-                System.out.println("Creating Customer object...");
-                Customer customer = new Customer();
-                customer.setName(user.getName());
-                customer.setEmail(user.getEmail());
-                customer.setPassword(user.getPassword());
-                customer.setPhoneNo(user.getPhoneNo());
-                customer.setAddress(user.getAddress());
-                customer.setRole(Role.CUSTOMER);
-                customer.setStatus(user.getStatus());
-                customer.setCreatedAt(user.getCreatedAt());
-                customer.setUpdatedAt(user.getUpdatedAt());
 
-                String preferences = roleSpecificData.get("preferences");
-                System.out.println("Customer preferences: " + preferences);
-                customer.setPreferences(preferences);
+            System.out.println("Registration successful for user: " + savedUser.getEmail());
+            return savedUser;
 
-                System.out.println("Saving customer to database...");
-                savedUser = customerService.save(customer);
-                System.out.println("Customer saved successfully with ID: " + savedUser.getUserId());
-            }
-            case COURSE_SELLER -> {
-                CourseSeller seller = new CourseSeller();
-                seller.setName(user.getName());
-                seller.setEmail(user.getEmail());
-                seller.setPassword(user.getPassword());
-                seller.setPhoneNo(user.getPhoneNo());
-                seller.setAddress(user.getAddress());
-                seller.setRole(Role.COURSE_SELLER);
-                seller.setStatus(user.getStatus());
-                seller.setCreatedAt(user.getCreatedAt());
-                seller.setUpdatedAt(user.getUpdatedAt());
-
-                seller.setExpertise(roleSpecificData.get("expertise"));
-                seller.setExpYears(Integer.parseInt(roleSpecificData.getOrDefault("expYears", "0")));
-
-                savedUser = courseSellerService.save(seller);
-            }
-            case ITEM_SELLER -> {
-                InstrumentSeller seller = new InstrumentSeller();
-                seller.setName(user.getName());
-                seller.setEmail(user.getEmail());
-                seller.setPassword(user.getPassword());
-                seller.setPhoneNo(user.getPhoneNo());
-                seller.setAddress(user.getAddress());
-                seller.setRole(Role.ITEM_SELLER);
-                seller.setStatus(user.getStatus());
-                seller.setCreatedAt(user.getCreatedAt());
-                seller.setUpdatedAt(user.getUpdatedAt());
-
-                seller.setStoreName(roleSpecificData.get("storeName"));
-                seller.setStoreLocation(roleSpecificData.get("location"));
-
-                savedUser = instrumentSellerService.save(seller);
-                customer.setPreferences(roleSpecificData.get("preferences"));
-
-                savedUser = customerService.save(customer);
-            }
-            case ADMIN -> {
-                // Admin is just a User
-                savedUser = userRepository.save(user);
-            }
-            default -> throw new IllegalArgumentException("Unsupported role: " + user.getRole());
-        }
-
-        System.out.println("Registration successful for user: " + savedUser.getEmail());
-        return savedUser;
-        
         } catch (Exception e) {
             System.err.println("Registration failed for user: " + user.getEmail() + " - " + e.getMessage());
             e.printStackTrace();
             throw e;
         }
-        return savedUser;
     }
-
 
     public Optional<User> login(String email, String password) {
         return userRepository.findByEmail(email)
@@ -198,53 +170,18 @@ public class UserService {
         var existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
 
-        // Update fields using modern null-safe patterns
         Optional.ofNullable(updatedUser.getName()).ifPresent(existingUser::setName);
         Optional.ofNullable(updatedUser.getPhoneNo()).ifPresent(existingUser::setPhoneNo);
         Optional.ofNullable(updatedUser.getAddress()).ifPresent(existingUser::setAddress);
-        Optional.ofNullable(updatedUser.getRole()).ifPresent(existingUser::setRole);
         Optional.ofNullable(updatedUser.getStatus()).ifPresent(existingUser::setStatus);
 
-        // Handle email change safely (avoid unique constraint violation)
-        if (updatedUser.getEmail() != null && !updatedUser.getEmail().isEmpty()
-                && !updatedUser.getEmail().equalsIgnoreCase(existingUser.getEmail())) {
+        if (updatedUser.getEmail() != null && !updatedUser.getEmail().equalsIgnoreCase(existingUser.getEmail())) {
             if (userRepository.existsByEmail(updatedUser.getEmail())) {
                 throw new IllegalArgumentException("Email already exists");
             }
             existingUser.setEmail(updatedUser.getEmail());
         }
 
-        // Handle password separately
-        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
-        }
-
-        // Copy seller-specific fields if applicable
-        if (existingUser instanceof InstrumentSeller existingSeller && updatedUser instanceof InstrumentSeller updatedSeller) {
-            if (updatedSeller.getStoreName() != null && !updatedSeller.getStoreName().isEmpty()) {
-                existingSeller.setStoreName(updatedSeller.getStoreName());
-            }
-            if (updatedSeller.getStoreLocation() != null && !updatedSeller.getStoreLocation().isEmpty()) {
-                existingSeller.setStoreLocation(updatedSeller.getStoreLocation());
-            }
-            if (updatedSeller.getStoreAddress() != null && !updatedSeller.getStoreAddress().isEmpty()) {
-                existingSeller.setStoreAddress(updatedSeller.getStoreAddress());
-            }
-            if (updatedSeller.getPaymentMethod() != null && !updatedSeller.getPaymentMethod().isEmpty()) {
-                existingSeller.setPaymentMethod(updatedSeller.getPaymentMethod());
-            }
-            if (updatedSeller.getProfileImagePath() != null && !updatedSeller.getProfileImagePath().isEmpty()) {
-                existingSeller.setProfileImagePath(updatedSeller.getProfileImagePath());
-            }
-        }
-
-        // Only update allowed fields - never update email or role through profile update
-        Optional.ofNullable(updatedUser.getName()).ifPresent(existingUser::setName);
-        Optional.ofNullable(updatedUser.getPhoneNo()).ifPresent(existingUser::setPhoneNo);
-        Optional.ofNullable(updatedUser.getAddress()).ifPresent(existingUser::setAddress);
-        Optional.ofNullable(updatedUser.getStatus()).ifPresent(existingUser::setStatus);
-
-        // Handle password separately - only update if it's different from current
         if (updatedUser.getPassword() != null &&
                 !updatedUser.getPassword().isEmpty() &&
                 !updatedUser.getPassword().equals(existingUser.getPassword())) {
@@ -269,64 +206,25 @@ public class UserService {
 
     public void hardDeleteUser(Long userId) {
         System.out.println("Starting hard delete for user ID: " + userId);
-        
-        // First delete from the specific user type table if it exists
+
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         System.out.println("Found user: " + user.getEmail() + " with role: " + user.getRole());
-        
-        // Delete from specific user type repositories based on role
+
         switch (user.getRole()) {
-            case ARTIST -> {
-                artistService.findByUserId(userId).ifPresent(artist -> {
-                    System.out.println("Deleting artist record for user: " + userId);
-                    artistService.deleteById(artist.getUserId());
-                });
-            }
-            case CUSTOMER -> {
-                customerService.findByUserId(userId).ifPresent(customer -> {
-                    System.out.println("Deleting customer record for user: " + userId);
-                    customerService.deleteById(customer.getUserId());
-                });
-            }
-            case COURSE_SELLER -> {
-                courseSellerService.findByUserId(userId).ifPresent(seller -> {
-                    System.out.println("Deleting course seller record for user: " + userId);
-                    courseSellerService.deleteById(seller.getUserId());
-                });
-            }
-            case ITEM_SELLER -> {
-                instrumentSellerService.findByUserId(userId).ifPresent(seller -> {
-                    System.out.println("Deleting instrument seller record for user: " + userId);
-                    instrumentSellerService.deleteById(seller.getUserId());
-                });
-            }
+            case ARTIST -> artistService.findByUserId(userId)
+                    .ifPresent(artist -> artistService.deleteById(artist.getUserId()));
+            case CUSTOMER -> customerService.findByUserId(userId)
+                    .ifPresent(customer -> customerService.deleteById(customer.getUserId()));
+            case COURSE_SELLER -> courseSellerService.findByUserId(userId)
+                    .ifPresent(seller -> courseSellerService.deleteById(seller.getUserId()));
+            case ITEM_SELLER -> instrumentSellerService.findByUserId(userId)
+                    .ifPresent(seller -> instrumentSellerService.deleteById(seller.getUserId()));
         }
-        
-        // Finally delete from the main users table
-        System.out.println("Deleting main user record for user: " + userId);
+
         userRepository.deleteById(userId);
         System.out.println("Hard delete completed for user: " + userId);
-
-        userRepository.delete(user);
-        try {
-            var user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-
-            System.out.println("DEBUG: Deleting user ID: " + userId + ", Role: " + user.getRole());
-
-            // Simply delete the user - Hibernate will handle the child tables automatically
-            // due to the JOINED inheritance strategy
-            userRepository.delete(user);
-
-            System.out.println("DEBUG: User deletion completed");
-
-        } catch (Exception e) {
-            System.out.println("DEBUG: Error during deletion: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Failed to delete user: " + e.getMessage());
-        }
     }
 
     public void changeUserRole(Long userId, String newRole) {
@@ -348,11 +246,11 @@ public class UserService {
     public boolean isEmailAvailable(String email) {
         Optional<User> user = userRepository.findByEmail(email);
         return user.isEmpty() || user.get().getStatus() != Status.ACTIVE;
+    }
+
     public void resetPassword(String email, String newPassword) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User with email " + email + " not found"));
-
-        // Encode the new password
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
@@ -365,5 +263,25 @@ public class UserService {
         return userRepository.findAll().stream()
                 .filter(user -> user.getStatus() == Status.ACTIVE)
                 .count();
+    }
+
+    public String saveProfileImage(Long userId, MultipartFile profileImage) throws IOException {
+        // Create uploads directory if it doesn't exist
+        String uploadDir = "uploads/profile/";
+        File directory = new File(uploadDir);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        // Generate unique filename
+        String originalFileName = profileImage.getOriginalFilename();
+        String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        String fileName = "profile_" + userId + "_" + System.currentTimeMillis() + fileExtension;
+
+        // Save file
+        Path filePath = Paths.get(uploadDir + fileName);
+        Files.copy(profileImage.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        return fileName;
     }
 }

@@ -11,13 +11,16 @@ import java.util.List;
 
 public class CustomUserDetails implements UserDetails {
 
-    private final User user;
+    private  User user;
 
     public CustomUserDetails(User user) {
         this.user = user;
     }
 
-    // Add this method to get the User object
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public User getUser() {
         return user;
     }

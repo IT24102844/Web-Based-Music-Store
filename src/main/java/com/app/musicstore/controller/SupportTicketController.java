@@ -68,7 +68,7 @@ public class SupportTicketController {
         List<SupportTicket> supportTickets = supportTicketService.getUserTickets(user);
         model.addAttribute("tickets", supportTickets);
         model.addAttribute("user", user);
-        return "my-tickets";
+        return "my-support-tickets";
     }
 
     // Admin views all tickets

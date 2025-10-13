@@ -472,11 +472,10 @@
     <div class="logo">TuneWave</div>
     <ul class="nav-links">
         <li><a th:href="@{/dashboard/customer}">Home</a></li>
-        <li><a href="#">Music</a></li>
-        <li><a href="#">Courses</a></li>
         <li><a href="/events">Events</a></li>
-        <li><a href="#">Instruments</a></li>
-        <li><a href="#">About</a></li>
+        <li><a th:href="@{/customer/songs}">Songs</a></li>
+        <li><a th:href="@{/buyer/dashboard}">Instruments</a></li>
+        <li><a href="#">Courses</a></li>
     </ul>
     <div class="auth-buttons">
         <div th:if="${currentUser == null}">

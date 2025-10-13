@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Orders - TuneWave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+    <script>
+        // Prevent white flash by setting theme immediately
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+        }
+    </script>
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <h2>TuneWave</h2>
+        
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <div class="profile-image-container">
+                <img th:if="${user.profileImagePath}" 
+                     th:src="'/uploads/profile/' + ${user.profileImagePath}" 
+                     th:alt="${user.name} + ' Profile Image'" 
+                     class="profile-image"
+                     onerror="this.src='https://via.placeholder.com/80x80/2333de/ffffff?text=' + this.alt.charAt(0)">
+                <img th:unless="${user.profileImagePath}" 
+                     src="https://via.placeholder.com/80x80/2333de/ffffff?text=U" 
+                     alt="Default Profile Image" 
+                     class="profile-image">
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" th:text="${user.name}">Seller Name</div>
+                <div class="profile-role" th:text="${user.role}">SELLER</div>
+                <div class="profile-details">
+                    <p><strong>Email:</strong> <span th:text="${user.email}">seller@example.com</span></p>
+                    <p><strong>Status:</strong> <span th:text="${user.status}">ACTIVE</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <ul>
+            <li><a th:href="@{/seller/dashboard}">Dashboard</a></li>
+            <li><a th:href="@{/seller/settings}">Settings</a></li>
+            <li><a th:href="@{/seller/orders}" class="active">Orders</a></li>
+            <li><a th:href="@{/seller/products}">Products</a></li>
+            <li><a th:href="@{/seller/reviews}">Reviews</a></li>
+            <li><a th:href="@{/seller/account}">Account</a></li>
+            <li><a th:href="@{/users/logout}" class="logout">Logout</a></li>
+        </ul>
+
+        <!-- Theme Toggle -->
+        <div class="theme-toggle">
+            <span class="theme-toggle-label">Theme</span>
+            <div class="toggle-switch" onclick="toggleTheme()"></div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="header">
+            <h1>Manage Orders</h1>
+            <p>View and process orders, shipments, and returns with real-time order management</p>
+        </div>
+
+        <div class="card">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${orders}">
+                    <td style="font-weight: 600; color: #3b82f6;" th:text="'#' + ${order.id}">#123</td>
+                    <td style="font-weight: 500;" th:text="${order.customerName}">John Doe</td>
+                    <td th:text="${#temporals.format(order.date, 'MMM dd, yyyy')}">Sep 25, 2025</td>
+                    <td>
+                        <span th:if="${order.status == 'PENDING'}" style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500;" th:text="${order.status}">PENDING</span>
+                        <span th:if="${order.status == 'SHIPPED'}" style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500;" th:text="${order.status}">SHIPPED</span>
+                        <span th:if="${order.status == 'COMPLETED'}" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #065f46; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500;" th:text="${order.status}">COMPLETED</span>
+                        <span th:if="${order.status == 'REFUNDED'}" style="background: linear-gradient(135deg, #fee2e2, #fecaca); color: #991b1b; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500;" th:text="${order.status}">REFUNDED</span>
+                    </td>
+                    <td style="font-weight: 600; color: #059669;" th:text="'LKR ' + ${order.total}">LKR 100.00</td>
+                    <td>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <form th:action="@{/seller/orders/ship/{id}(id=${order.id})}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-success" style="padding: 6px 12px; font-size: 0.8rem;"
+                                        th:disabled="${order.status != 'PENDING'}">Ship</button>
+                            </form>
+                            <form th:action="@{/seller/orders/refund/{id}(id=${order.id})}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-warning" style="padding: 6px 12px; font-size: 0.8rem;"
+                                        th:disabled="${order.status == 'REFUNDED'}">Refund</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(orders)}">
+                    <td colspan="6" style="text-align: center; padding: 60px; color: #64748b;">
+                        <h3 style="margin-bottom: 8px; color: #374151;">No orders found</h3>
+                        <p style="margin-bottom: 16px;">Orders will appear here when customers make purchases</p>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<script>
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+
+    // Load saved theme preference immediately to prevent flashing
+    (function() {
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard - TuneWave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <h2>TuneWave</h2>
+        
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <div class="profile-image-container">
+                <img th:if="${user.profileImagePath}" 
+                     th:src="'/uploads/profile/' + ${user.profileImagePath}" 
+                     th:alt="${user.name} + ' Profile Image'" 
+                     class="profile-image"
+                     onerror="this.src='https://via.placeholder.com/80x80/2333de/ffffff?text=' + this.alt.charAt(0)">
+                <img th:unless="${user.profileImagePath}" 
+                     src="https://via.placeholder.com/80x80/2333de/ffffff?text=U" 
+                     alt="Default Profile Image" 
+                     class="profile-image">
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" th:text="${user.name}">Seller Name</div>
+                <div class="profile-role" th:text="${user.role}">SELLER</div>
+                <div class="profile-details">
+                    <p><strong>Email:</strong> <span th:text="${user.email}">seller@example.com</span></p>
+                    <p><strong>Status:</strong> <span th:text="${user.status}">ACTIVE</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <ul>
+            <li><a th:href="@{/seller/dashboard}" class="active">Dashboard</a></li>
+            <li><a th:href="@{/seller/settings}">Settings</a></li>
+            <li><a th:href="@{/seller/orders}">Orders</a></li>
+            <li><a th:href="@{/seller/products}">Products</a></li>
+            <li><a th:href="@{/seller/reviews}">Reviews</a></li>
+            <li><a th:href="@{/seller/account}">Account</a></li>
+            <li><a th:href="@{/users/logout}" class="logout">Logout</a></li>
+        </ul>
+
+        <!-- Theme Toggle -->
+        <div class="theme-toggle">
+            <span class="theme-toggle-label">Theme</span>
+            <div class="toggle-switch" onclick="toggleTheme()"></div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="header">
+            <h1>Welcome to Your Seller Dashboard</h1>
+            <p>Monitor your sales, manage orders, and track your music business performance with real-time analytics.</p>
+        </div>
+
+        <div class="content-grid">
+            <div class="card">
+                <h3>Total Sales</h3>
+                <div class="stats" th:text="'LKR ' + ${#strings.replace(totalSales, '$', '')}">LKR2 0.00</div>
+                <p>This month's revenue from instrument sales</p>
+                <a th:href="@{/seller/account}" class="btn">View Details</a>
+            </div>
+
+            <div class="card">
+                <h3>Pending Orders</h3>
+                <div class="stats" th:text="${pendingOrders}">0</div>
+                <p>Orders awaiting processing</p>
+                <a th:href="@{/seller/orders}" class="btn">Manage Orders</a>
+            </div>
+
+            <div class="card">
+                <h3>Shipments in Transit</h3>
+                <div class="stats" th:text="${shipmentsInTransit}">0</div>
+                <p>Active shipments to customers</p>
+                <a th:href="@{/seller/orders}" class="btn">Track Shipments</a>
+            </div>
+
+            <div class="card">
+                <h3>Total Products</h3>
+                <div class="stats" th:text="${totalProducts}">0</div>
+                <p>Active listings in your store</p>
+                <a th:href="@{/seller/products}" class="btn">Manage Products</a>
+            </div>
+
+            <div class="card">
+                <h3>Customer Rating</h3>
+                <div class="stats" th:text="${averageRating}">0.0 / 5</div>
+                <p>Average rating from <span th:text="${totalReviews}">0</span> reviews</p>
+                <a th:href="@{/seller/reviews}" class="btn">View Reviews</a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+
+    // Load saved theme preference immediately to prevent flashing
+    (function() {
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    })();
+</script>
+
+<!-- Session Guard for Authentication Context Monitoring -->
+
+</body>
+</html>

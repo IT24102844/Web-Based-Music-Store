@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - TuneWave</title>
+    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+        }
+    </script>
+    <style>
+        .order-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .order-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e5e7eb; }
+        .order-items { padding: 16px; }
+        .order-item { display: grid; grid-template-columns: 80px 1fr 100px 100px; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+        .order-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; background: #f8fafc; }
+        .status { padding: 4px 10px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; }
+        .status.PENDING { background: #fef3c7; color: #92400e; }
+        .status.PROCESS, .status.SHIPPED { background: #dbeafe; color: #1e40af; }
+        .status.COMPLETED { background: #dcfce7; color: #166534; }
+        .status.REFUNDED { background: #fee2e2; color: #991b1b; }
+
+        /* Theme Toggle Styles */
+        .theme-toggle { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; margin-top: auto; border-top: 1px solid #e5e7eb; }
+        .theme-toggle-label { font-size: 14px; font-weight: 500; color: #374151; }
+        .toggle-switch { position: relative; width: 50px; height: 24px; background-color: #d1d5db; border-radius: 12px; cursor: pointer; transition: background-color 0.3s ease; }
+        .toggle-switch.active { background-color: #3b82f6; }
+        .toggle-slider { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background-color: white; border-radius: 50%; transition: transform 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .toggle-switch.active .toggle-slider { transform: translateX(26px); }
+
+        /* Dark Mode Styles (high specificity, override globals) */
+        html.dark-mode, html.dark-mode body { background-color: #12172b !important; color: #f9fafb !important; }
+        html.dark-mode .sidebar { background-color: #12172b !important; border-right-color: #374151 !important; }
+        html.dark-mode .main-content { background-color: #12172b !important; }
+        html.dark-mode .card,
+        html.dark-mode .order-card { background-color: #374151 !important; border-color: #4b5563 !important; }
+        html.dark-mode .order-header { border-bottom-color: #4b5563 !important; }
+        html.dark-mode .order-item { border-bottom-color: #4b5563 !important; }
+        html.dark-mode .theme-toggle-label { color: #f9fafb !important; }
+        html.dark-mode a { color: #93c5fd !important; }
+        html.dark-mode .header p { color: #cbd5e1 !important; }
+    </style>
+    </head>
+<body>
+<div class="dashboard-container">
+    <nav class="sidebar">
+        <h2>🎵 TuneWave</h2>
+        <div class="profile-section">
+            <div class="profile-image-container">
+                <img src="https://via.placeholder.com/80x80/3b82f6/ffffff?text=U" class="profile-image">
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" th:text="${user.name}">Customer Name</div>
+                <div class="profile-role" th:text="${user.role}">CUSTOMER</div>
+                <div class="profile-details">
+                    <p><strong>Email:</strong> <span th:text="${user.email}">customer@example.com</span></p>
+                    <p><strong>Status:</strong> <span th:text="${user.status}">ACTIVE</span></p>
+                </div>
+            </div>
+        </div>
+        <ul>
+            <li><a th:href="@{/buyer/products}">Browse Products</a></li>
+            <li><a th:href="@{/buyer/cart}">My Cart</a></li>
+            <li class="active"><a th:href="@{/buyer/orders}">My Orders</a></li>
+            <li><a th:href="@{/buyer/reviews}">My Reviews</a></li>
+        </ul>
+        <div class="theme-toggle" style="position: relative; z-index: 1000;">
+            <span class="theme-toggle-label">Theme</span>
+            <div class="toggle-switch" tabindex="0" role="switch" aria-checked="false">
+                <div class="toggle-slider"></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="header">
+            <h1>📦 My Orders</h1>
+            <p>View your recent purchases and their status</p>
+        </div>
+
+        <div th:if="${#lists.isEmpty(orders)}" class="card" style="padding: 40px; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 12px;">🛍️</div>
+            <h3>No orders yet</h3>
+            <p>Start shopping and your orders will appear here.</p>
+            <a th:href="@{/buyer/dashboard}" class="btn btn-primary">Browse Products</a>
+        </div>
+
+        <div th:each="order : ${orders}" class="order-card">
+            <div class="order-header">
+                <div>
+                    <div style="font-weight: 600;">Order #<span th:text="${order.id}">1001</span></div>
+                    <div style="color: #6b7280; font-size: 0.9rem;">Placed on <span th:text="${#temporals.format(order.date, 'yyyy-MM-dd HH:mm')}">2025-01-01</span></div>
+                </div>
+                <div>
+                    <span class="status" th:classappend=" ' ' + ${order.status}" th:text="${order.status}">PENDING</span>
+                </div>
+            </div>
+            <div class="order-items">
+                <div th:each="item : ${order.items}" class="order-item">
+                    <img th:if="${item.productImageUrl}" th:src="${item.productImageUrl}" alt="Product">
+                    <div th:unless="${item.productImageUrl}" style="width:80px;height:80px;background:#f3f4f6;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9ca3af;">No image</div>
+                    <div>
+                        <div style="font-weight: 600;" th:text="${item.productName}">Product Name</div>
+                        <div style="color:#6b7280; font-size: 0.9rem;">Qty: <span th:text="${item.quantity}">1</span></div>
+                    </div>
+                    <div style="font-weight:600; color:#059669;">$<span th:text="${#numbers.formatDecimal(item.unitPrice,1,2)}">0.00</span></div>
+                    <div style="text-align:right; font-weight:600;">$<span th:text="${#numbers.formatDecimal(item.unitPrice * item.quantity,1,2)}">0.00</span></div>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap: 24px; padding-top: 12px;">
+                    <div style="color:#6b7280;">Subtotal</div>
+                    <div style="font-weight:700; color:#111827;">$<span th:text="${#numbers.formatDecimal(order.total,1,2)}">0.00</span></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+function toggleTheme() {
+    const html = document.documentElement;
+    const toggleSwitch = document.querySelector('.toggle-switch');
+    html.classList.toggle('dark-mode');
+    if (toggleSwitch) toggleSwitch.classList.toggle('active');
+    localStorage.setItem('theme', html.classList.contains('dark-mode') ? 'dark' : 'light');
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    const toggleSwitch = document.querySelector('.toggle-switch');
+    if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+        if (toggleSwitch) toggleSwitch.classList.add('active');
+    } else {
+        document.documentElement.classList.remove('dark-mode');
+        if (toggleSwitch) toggleSwitch.classList.remove('active');
+    }
+    if (toggleSwitch) toggleSwitch.addEventListener('click', toggleTheme);
+});
+</script>
+</body>
+</html>
+
+

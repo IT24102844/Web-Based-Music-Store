@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Profile - Item Seller - Tune Wave</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #e0e0e0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            padding-top: 100px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px, 120px 120px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #00d4ff, #ffffff, #00d4ff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: textShimmer 3s ease-in-out infinite;
+            text-align: center;
+        }
+
+        @keyframes textShimmer {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .form-label {
+            color: #e0e0e0;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #e0e0e0;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #00d4ff;
+            color: #e0e0e0;
+            box-shadow: 0 0 0 0.25rem rgba(0, 212, 255, 0.25);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: #888;
+        }
+
+        .form-control[readonly] {
+            background: rgba(255, 255, 255, 0.05);
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-family: 'Monospace', monospace;
+            font-size: 28px;
+            font-weight: 600;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-nav {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-login {
+            background: transparent;
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+
+        .btn-signup {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-signup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .profile-image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .no-image {
+            color: #888;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                width: 95%;
+                padding: 12px 20px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .form-container {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="logo">TuneWave</div>
+    <div class="auth-buttons">
+        <a th:href="@{/users/logout}" class="btn-nav btn-login">Logout</a>
+        <a th:href="@{/dashboard/item-seller}" class="btn-nav btn-signup">⬅ Back to Dashboard</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="form-container">
+        <h2>Edit Seller Profile</h2>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${param.success}" class="alert alert-success" th:text="${param.success}"></div>
+        <div th:if="${param.error}" class="alert alert-danger" th:text="${param.error}"></div>
+
+        <form th:action="@{/users/update-item-seller-profile}" th:object="${user}" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:field="*{userId}"/>
+
+            <!-- Profile Image Section -->
+            <div class="mb-4">
+                <label class="form-label">Profile Image</label>
+                <div th:if="${profileImagePath}" class="mb-3">
+                    <img th:src="'/uploads/profile/' + ${profileImagePath}"
+                         alt="Profile Image"
+                         class="profile-image-preview"/>
+                </div>
+                <div th:unless="${profileImagePath}" class="no-image mb-3">
+                    No profile image uploaded
+                </div>
+                <input type="file" name="profileImage" class="form-control" accept="image/*"/>
+                <small style="color: #e0e0e0; font-size: 0.85rem; display: block; margin-top: 5px; opacity: 0.9;">
+                    Upload a new profile image (optional). Supported formats: JPG, PNG, GIF. Max size: 5MB
+                </small>
+            </div>
+
+            <!-- Personal Information -->
+            <h4 style="color: #00d4ff; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                Personal Information
+            </h4>
+
+            <div class="mb-3">
+                <label class="form-label">Name:</label>
+                <input type="text" th:field="*{name}" class="form-control" required/>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email:</label>
+                <input type="email" th:field="*{email}" class="form-control" readonly/>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Phone Number:</label>
+                <input type="text" th:field="*{phoneNo}" class="form-control" placeholder="Enter phone number"/>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Address:</label>
+                <textarea th:field="*{address}" class="form-control" rows="3" placeholder="Enter your address"></textarea>
+            </div>
+
+            <!-- Store Information -->
+            <h4 style="color: #00d4ff; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                Store Information
+            </h4>
+
+            <div class="mb-3">
+                <label class="form-label">Store Name:</label>
+                <input type="text" th:field="*{storeName}" class="form-control" placeholder="Enter your store name"/>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Store Location:</label>
+                <input type="text" th:field="*{storeLocation}" class="form-control" placeholder="Enter store location"/>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Payment Method:</label>
+                <input type="text" th:field="*{paymentMethod}" class="form-control" placeholder="Enter accepted payment methods"/>
+            </div>
+
+            <!-- Security -->
+            <h4 style="color: #00d4ff; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                Security
+            </h4>
+
+            <div class="mb-3">
+                <label class="form-label">Password (leave blank to keep current password):</label>
+                <input type="password" name="password" class="form-control" placeholder="Enter new password (optional)"/>
+                <small style="color: #e0e0e0; font-size: 0.85rem; display: block; margin-top: 5px; opacity: 0.9;">
+                    Must be at least 6 characters long
+                </small>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full">Update Seller Profile</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Add password validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordField = document.querySelector('input[name="password"]');
+        const form = document.querySelector('form');
+
+        form.addEventListener('submit', function(e) {
+            if (passwordField.value && passwordField.value.length < 6) {
+                e.preventDefault();
+                alert('Password must be at least 6 characters long');
+                passwordField.focus();
+            }
+        });
+    });
+</script>
+</body>
+</html>

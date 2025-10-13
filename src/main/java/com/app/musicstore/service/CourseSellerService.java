@@ -33,4 +33,9 @@ public class CourseSellerService {
         return courseSellerRepository.save(seller);
     }
 
+    public void deleteById(Long userId) {
+        courseSellerRepository.findByUserId(userId).ifPresent(seller -> {
+            courseSellerRepository.deleteById(seller.getUserId());
+        });
+    }
 }

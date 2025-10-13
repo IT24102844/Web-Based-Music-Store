@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Product - TuneWave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <h2>TuneWave</h2>
+        
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <div class="profile-image-container">
+                <img th:if="${user.profileImagePath}" 
+                     th:src="'/uploads/profile/' + ${user.profileImagePath}" 
+                     th:alt="${user.name} + ' Profile Image'" 
+                     class="profile-image"
+                     onerror="this.src='https://via.placeholder.com/80x80/2333de/ffffff?text=' + this.alt.charAt(0)">
+                <img th:unless="${user.profileImagePath}" 
+                     src="https://via.placeholder.com/80x80/2333de/ffffff?text=U" 
+                     alt="Default Profile Image" 
+                     class="profile-image">
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" th:text="${user.name}">Seller Name</div>
+                <div class="profile-role" th:text="${user.role}">SELLER</div>
+                <div class="profile-details">
+                    <p><strong>Email:</strong> <span th:text="${user.email}">seller@example.com</span></p>
+                    <p><strong>Status:</strong> <span th:text="${user.status}">ACTIVE</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <ul>
+            <li><a th:href="@{/seller/dashboard}">Dashboard</a></li>
+            <li><a th:href="@{/seller/settings}">Settings</a></li>
+            <li><a th:href="@{/seller/orders}">Orders</a></li>
+            <li><a th:href="@{/seller/products}">Products</a></li>
+            <li><a th:href="@{/seller/reviews}">Reviews</a></li>
+            <li><a th:href="@{/seller/account}">Account</a></li>
+            <li><a th:href="@{/users/logout}" class="logout">Logout</a></li>
+        </ul>
+
+        <!-- Theme Toggle -->
+        <div class="theme-toggle">
+            <span class="theme-toggle-label">Theme</span>
+            <div class="toggle-switch" onclick="toggleTheme()"></div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="header">
+            <h1>Add New Product</h1>
+            <p>Create a new product listing for your music store</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Add Product Form -->
+        <div class="card">
+            <form th:action="@{/seller/products/add}" th:object="${product}" method="post" enctype="multipart/form-data">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                    <!-- Product Name -->
+                    <div class="form-group">
+                        <label for="name">Product Name *</label>
+                        <input type="text" id="name" th:field="*{name}" class="form-control" placeholder="Enter product name" required>
+                    </div>
+
+                    <!-- Instrument Type -->
+                    <div class="form-group">
+                        <label for="instrumentType">Instrument Type *</label>
+                        <select id="instrumentType" th:field="*{instrumentType}" class="form-control" required>
+                            <option value="">Select instrument type</option>
+                            <option value="GUITAR">Guitar</option>
+                            <option value="BASS">Bass</option>
+                            <option value="DRUMS">Drums</option>
+                            <option value="PIANO">Piano</option>
+                            <option value="VIOLIN">Violin</option>
+                            <option value="SAXOPHONE">Saxophone</option>
+                            <option value="TRUMPET">Trumpet</option>
+                            <option value="FLUTE">Flute</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                    <!-- Price -->
+                    <div class="form-group">
+                        <label for="price">Price *</label>
+                        <input type="number" id="price" th:field="*{price}" class="form-control" placeholder="0.00" step="0.01" min="0" required>
+                    </div>
+
+                    <!-- Stock -->
+                    <div class="form-group">
+                        <label for="stock">Stock Quantity *</label>
+                        <input type="number" id="stock" th:field="*{stock}" class="form-control" placeholder="0" min="0" required>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label for="description">Description *</label>
+                    <textarea id="description" th:field="*{description}" class="form-control" rows="4" placeholder="Describe your product..." required></textarea>
+                </div>
+
+                <!-- Specifications -->
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label for="specifications">Specifications (Optional)</label>
+                    <textarea id="specifications" th:field="*{specifications}" class="form-control" rows="3" placeholder="Technical specifications, features, etc..."></textarea>
+                </div>
+
+                <!-- Product Images -->
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label for="images">Product Images <span style="color: red;">*</span></label>
+                    <input type="file" id="images" name="images" class="form-control" multiple accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" required>
+                    <small style="color: #64748b; font-size: 0.875rem;">
+                        Upload up to 10 images (JPG, PNG, GIF, WEBP). Max 10MB per file. First image will be the main product image.
+                    </small>
+                    <div id="fileError" style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; display: none;"></div>
+                </div>
+
+                <!-- Image Preview -->
+                <div id="imagePreview" style="display: none; margin-bottom: 24px;">
+                    <h4 style="color: #374151; margin-bottom: 12px;">Image Preview</h4>
+                    <div id="previewContainer" style="display: flex; gap: 12px; flex-wrap: wrap;"></div>
+                </div>
+
+                <!-- Form Actions -->
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <a th:href="@{/seller/products}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-success">Add Product</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script>
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    }
+
+    // Load saved theme
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+    }
+
+    // File validation constants
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    const MAX_FILES = 10;
+    const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+
+    // File validation functions
+    function validateFile(file) {
+        const errors = [];
+        
+        // Check file type
+        if (!ALLOWED_TYPES.includes(file.type.toLowerCase())) {
+            errors.push(`File "${file.name}" has invalid type. Allowed: JPG, PNG, GIF, WEBP`);
+        }
+        
+        // Check file extension
+        const extension = '.' + file.name.split('.').pop().toLowerCase();
+        if (!ALLOWED_EXTENSIONS.includes(extension)) {
+            errors.push(`File "${file.name}" has invalid extension. Allowed: .jpg, .jpeg, .png, .gif, .webp`);
+        }
+        
+        // Check file size
+        if (file.size > MAX_FILE_SIZE) {
+            errors.push(`File "${file.name}" is too large. Maximum size: 10MB`);
+        }
+        
+        // Check if file is empty
+        if (file.size === 0) {
+            errors.push(`File "${file.name}" is empty`);
+        }
+        
+        return errors;
+    }
+
+    function validateFiles(files) {
+        const allErrors = [];
+        
+        // Check number of files
+        if (files.length > MAX_FILES) {
+            allErrors.push(`Too many files selected. Maximum ${MAX_FILES} files allowed`);
+        }
+        
+        // Validate each file
+        Array.from(files).forEach(file => {
+            const errors = validateFile(file);
+            allErrors.push(...errors);
+        });
+        
+        return allErrors;
+    }
+
+    function showFileError(message) {
+        const errorDiv = document.getElementById('fileError');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+
+    function hideFileError() {
+        const errorDiv = document.getElementById('fileError');
+        errorDiv.style.display = 'none';
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Image preview functionality with validation
+    document.getElementById('images').addEventListener('change', function(e) {
+        const files = e.target.files;
+        const previewContainer = document.getElementById('previewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        
+        // Clear previous previews and errors
+        previewContainer.innerHTML = '';
+        hideFileError();
+        
+        if (files.length > 0) {
+            // Validate files
+            const errors = validateFiles(files);
+            if (errors.length > 0) {
+                showFileError(errors.join('; '));
+                // Clear the file input
+                e.target.value = '';
+                return;
+            }
+            
+            imagePreview.style.display = 'block';
+            
+            Array.from(files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.style.position = 'relative';
+                    imgContainer.style.display = 'inline-block';
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.width = '100px';
+                    img.style.height = '100px';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '8px';
+                    img.style.border = '2px solid #e5e7eb';
+                    img.title = `${file.name} (${formatFileSize(file.size)})`;
+                    
+                    // Add file info overlay
+                    const infoOverlay = document.createElement('div');
+                    infoOverlay.style.position = 'absolute';
+                    infoOverlay.style.bottom = '0';
+                    infoOverlay.style.left = '0';
+                    infoOverlay.style.right = '0';
+                    infoOverlay.style.background = 'rgba(0,0,0,0.7)';
+                    infoOverlay.style.color = 'white';
+                    infoOverlay.style.fontSize = '10px';
+                    infoOverlay.style.padding = '2px';
+                    infoOverlay.style.borderRadius = '0 0 6px 6px';
+                    infoOverlay.style.textAlign = 'center';
+                    infoOverlay.textContent = `${index + 1}`;
+                    
+                    imgContainer.appendChild(img);
+                    imgContainer.appendChild(infoOverlay);
+                    previewContainer.appendChild(imgContainer);
+                };
+                reader.readAsDataURL(file);
+            });
+        } else {
+            imagePreview.style.display = 'none';
+        }
+    });
+
+    // Form submission validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const fileInput = document.getElementById('images');
+        const files = fileInput.files;
+        
+        // Check if files are selected
+        if (files.length === 0) {
+            e.preventDefault();
+            showFileError('Please select at least one image file');
+            return;
+        }
+        
+        // Validate files before submission
+        const errors = validateFiles(files);
+        if (errors.length > 0) {
+            e.preventDefault();
+            showFileError(errors.join('; '));
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = document.querySelector('button[type="submit"]');
+        submitBtn.textContent = 'Adding Product...';
+        submitBtn.disabled = true;
+    });
+</script>
+</body>
+</html>

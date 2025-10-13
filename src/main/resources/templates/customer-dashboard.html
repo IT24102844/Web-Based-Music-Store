@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard - TuneWave</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .dashboard-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .music-store-theme {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .section-title {
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+            margin: 2rem 0 1rem 0;
+        }
+        .welcome-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            color: white;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark music-store-theme">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-music me-2"></i>
+            TuneWave
+        </a>
+        <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    Welcome, <span th:text="${user.name}">User</span>!
+                </span>
+            <a class="nav-link" href="/users/logout">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold">Welcome to Your Music Hub</h1>
+                <p class="lead mb-0">Discover instruments, attend events, and enjoy music in one place</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <i class="fas fa-headphones" style="font-size: 4rem; opacity: 0.8;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="section-title">Quick Actions</h3>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-search card-icon text-primary"></i>
+                    <h5 class="card-title">Browse Products</h5>
+                    <p class="card-text">Explore our collection of musical instruments</p>
+                    <a href="/buyer/dashboard" class="btn btn-primary">Shop Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-calendar-alt card-icon text-success"></i>
+                    <h5 class="card-title">Events</h5>
+                    <p class="card-text">Discover upcoming concerts and music events</p>
+                    <a href="/events" class="btn btn-success">View Events</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-shopping-cart card-icon text-warning"></i>
+                    <h5 class="card-title">My Cart</h5>
+                    <p class="card-text">Manage your shopping cart items</p>
+                    <a href="/buyer/cart" class="btn btn-warning">View Cart</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-ticket-alt card-icon text-info"></i>
+                    <h5 class="card-title">My Tickets</h5>
+                    <p class="card-text">Access your event tickets</p>
+                    <a href="/my-tickets" class="btn btn-info">View Tickets</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shopping Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="section-title">Shopping & Products</h3>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-guitar me-2 text-primary"></i>
+                        Instrument Store
+                    </h5>
+                    <p class="card-text">Browse and purchase musical instruments from our sellers.</p>
+                    <div class="d-grid gap-2">
+                        <a href="/buyer/dashboard" class="btn btn-outline-primary">Browse All Products</a>
+                        <a href="/buyer/products" class="btn btn-outline-secondary">Search & Filter</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-shopping-bag me-2 text-success"></i>
+                        My Orders
+                    </h5>
+                    <p class="card-text">Track your orders and purchase history.</p>
+                    <div class="d-grid gap-2">
+                        <a href="/buyer/orders" class="btn btn-outline-success">View Orders</a>
+                        <a href="/buyer/reviews" class="btn btn-outline-info">Write Reviews</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-star me-2 text-warning"></i>
+                        Product Reviews
+                    </h5>
+                    <p class="card-text">Share your experience with purchased products.</p>
+                    <a href="/buyer/reviews" class="btn btn-warning">Manage Reviews</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events & Entertainment Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="section-title">Events & Entertainment</h3>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-music me-2 text-danger"></i>
+                        Music Events
+                    </h5>
+                    <p class="card-text">Discover concerts, festivals, and live performances from artists.</p>
+                    <div class="d-grid gap-2">
+                        <a href="/events" class="btn btn-danger">View All Events</a>
+                        <a href="/my-tickets" class="btn btn-outline-danger">My Event Tickets</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-compact-disc me-2 text-info"></i>
+                        Artist Songs
+                    </h5>
+                    <p class="card-text">Explore and purchase songs from talented artists.</p>
+                    <a th:href="@{/customer/songs}" class="btn btn-info">Browse Songs</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support & Account Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="section-title">Support & Account</h3>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-life-ring me-2 text-secondary"></i>
+                        Support Tickets
+                    </h5>
+                    <p class="card-text">Get help with any issues or questions.</p>
+                    <div class="d-grid gap-2">
+                        <a href="/tickets/create" class="btn btn-outline-secondary">Create Ticket</a>
+                        <a href="/tickets/my-tickets" class="btn btn-outline-dark">My Tickets</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-wallet me-2 text-success"></i>
+                        Payment History
+                    </h5>
+                    <p class="card-text">View your transaction history and receipts.</p>
+                    <a href="/my-tickets" class="btn btn-outline-success">View Payments</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-user-cog me-2 text-primary"></i>
+                        Account Settings
+                    </h5>
+                    <p class="card-text">Manage your profile and preferences.</p>
+                    <a href="/users/edit-profile" class="btn btn-outline-primary">Manage Account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity (Placeholder) -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-clock fa-2x mb-3"></i>
+                        <p>Your recent activity will appear here</p>
+                        <small>Orders, tickets, and interactions will be tracked</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-light mt-5 py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h5><i class="fas fa-music me-2"></i>TuneWave</h5>
+                <p class="mb-0">Your complete music experience platform</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <p class="mb-0">&copy; 2024 TuneWave. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+  <title>Ticket Details - Tune Wave</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      color: #e0e0e0;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      padding-top: 100px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+              radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+              radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+              radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+      background-size: 50px 50px, 80px 80px, 120px 120px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+
+    .content-container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #00d4ff, #ffffff, #00d4ff);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: textShimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes textShimmer {
+      0%, 100% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 20px;
+    }
+
+    .card-header h5 {
+      color: #00d4ff;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    .card-footer {
+      background: rgba(255, 255, 255, 0.05);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 20px;
+    }
+
+    .badge {
+      font-size: 0.8rem;
+      padding: 6px 12px;
+      border-radius: 20px;
+    }
+
+    .bg-success {
+      background: linear-gradient(135deg, #2ed573, #1dd1a1) !important;
+    }
+
+    .bg-warning {
+      background: linear-gradient(135deg, #ff9f43, #ff7f00) !important;
+    }
+
+    .bg-danger {
+      background: linear-gradient(135deg, #ff6b81, #ff4757) !important;
+    }
+
+    .bg-info {
+      background: linear-gradient(135deg, #00d4ff, #0099cc) !important;
+    }
+
+    .bg-secondary {
+      background: linear-gradient(135deg, #747d8c, #57606f) !important;
+    }
+
+    .form-label {
+      color: #e0e0e0;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .form-control, .form-select {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: #e0e0e0;
+      padding: 12px 15px;
+    }
+
+    .form-control:focus, .form-select:focus {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #00d4ff;
+      color: #e0e0e0;
+      box-shadow: 0 0 0 0.25rem rgba(0, 212, 255, 0.25);
+    }
+
+    .form-control::placeholder {
+      color: #888;
+    }
+
+    .btn {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 30px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #e0e0e0;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #00d4ff;
+      color: #00d4ff;
+    }
+
+    .alert {
+      border-radius: 10px;
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e0e0e0;
+      padding: 15px;
+    }
+
+    .alert-success {
+      border-color: rgba(46, 213, 115, 0.3);
+      color: #2ed573;
+    }
+
+    .alert-danger {
+      border-color: rgba(255, 71, 87, 0.3);
+      color: #ff6b81;
+    }
+
+    .border {
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .bg-light {
+      background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 1200px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo {
+      font-family: 'Monospace', monospace;
+      font-size: 28px;
+      font-weight: 600;
+      color: #00d4ff;
+      text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .btn-nav {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 25px;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .btn-login {
+      background: transparent;
+      color: #e0e0e0;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-login:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #00d4ff;
+      color: #00d4ff;
+    }
+
+    .btn-signup {
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+    }
+
+    .btn-signup:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        width: 95%;
+        padding: 12px 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .container {
+        padding: 20px;
+      }
+
+      .content-container {
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="logo">TuneWave</div>
+  <div class="auth-buttons">
+    <a th:href="@{/users/logout}" class="btn-nav btn-login">Logout</a>
+    <a th:href="@{/dashboard/admin}" class="btn-nav btn-signup">⬅ Back</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="content-container">
+    <h2 class="mb-4">Ticket Details</h2>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div th:if="${supportTicket}" class="card">
+      <div class="card-header">
+        <h5>Complaint ID: <span th:text="${supportTicket.complaintId}"></span></h5>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong>User:</strong> <span th:text="${supportTicket.user.name}"></span>
+          </div>
+          <div class="col-md-6">
+            <strong>Email:</strong> <span th:text="${supportTicket.user.email}"></span>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong>Role:</strong> <span th:text="${supportTicket.userRole}"></span>
+          </div>
+          <div class="col-md-6">
+            <strong>Status:</strong>
+            <span th:switch="${supportTicket.status}">
+                            <span th:case="RESOLVED" class="badge bg-success" th:text="${supportTicket.status}"></span>
+                            <span th:case="PENDING" class="badge bg-warning" th:text="${supportTicket.status}"></span>
+                            <span th:case="NOT_RESOLVED" class="badge bg-danger" th:text="${supportTicket.status}"></span>
+                            <span th:case="IN_PROGRESS" class="badge bg-info" th:text="${supportTicket.status}"></span>
+                            <span th:case="CLOSED" class="badge bg-secondary" th:text="${supportTicket.status}"></span>
+                            <span th:case="*" class="badge bg-secondary" th:text="${supportTicket.status}"></span>
+                        </span>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong>Created:</strong> <span th:text="${#temporals.format(supportTicket.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+          </div>
+          <div class="col-md-6">
+            <strong>Last Updated:</strong> <span th:text="${#temporals.format(supportTicket.updatedAt, 'yyyy-MM-dd HH:mm')}"></span>
+          </div>
+        </div>
+        <div class="mb-3">
+          <strong>Message:</strong>
+          <p class="border p-3 rounded" th:text="${supportTicket.message}"></p>
+        </div>
+        <div class="mb-3" th:if="${supportTicket.adminResponse}">
+          <strong>Admin Response:</strong>
+          <p class="border p-3 rounded bg-light" th:text="${supportTicket.adminResponse}"></p>
+        </div>
+
+        <form th:action="@{/supportTickets/admin/update-status/{id}(id=${supportTicket.ticketId})}" method="post" class="mt-4">
+          <div class="row">
+            <div class="col-md-4">
+              <label for="status" class="form-label">Update Status:</label>
+              <select class="form-select" id="status" name="status" required>
+                <option th:each="status : ${T(com.app.musicstore.model.TicketStatus).values()}"
+                        th:value="${status}"
+                        th:text="${status}"
+                        th:selected="${status == supportTicket.status}">
+                </option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="adminResponse" class="form-label">Admin Response:</label>
+              <textarea class="form-control" id="adminResponse" name="adminResponse"
+                        rows="3" placeholder="Enter your response..."
+                        th:value="${supportTicket.adminResponse}"></textarea>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary w-100">Update</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="card-footer">
+        <a th:href="@{/supportTickets/admin}" class="btn btn-secondary">Back to Tickets</a>
+      </div>
+    </div>
+
+    <div th:unless="${supportTicket}" class="alert alert-danger">
+      Ticket not found.
+    </div>
+  </div>
+</div>
+</body>
+</html>

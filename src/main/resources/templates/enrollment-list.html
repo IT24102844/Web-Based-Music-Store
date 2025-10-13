@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Enrollments - Course Seller</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            background: #2c3e50;
+            min-height: 100vh;
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: #ecf0f1;
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        .sidebar .nav-link:hover {
+            background: #34495e;
+            color: #3498db;
+        }
+        .sidebar .nav-link.active {
+            background: #3498db;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+            <div class="position-sticky pt-3">
+                <div class="text-center mb-4">
+                    <h4>Music Store</h4>
+                    <small>Course Seller Portal</small>
+                </div>
+
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/dashboard/course-seller}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/course-seller/courses}">
+                            <i class="fas fa-book me-2"></i>My Courses
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/course-seller/courses/create}">
+                            <i class="fas fa-plus-circle me-2"></i>Create Course
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="@{/course-seller/courses/enrollments}">
+                            <i class="fas fa-users me-2"></i>Enrollments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/users/edit-profile}">
+                            <i class="fas fa-user-edit me-2"></i>Update Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/tickets/create}">
+                            <i class="fas fa-headset me-2"></i>Help & Support
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" th:href="@{/users/logout}">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-users me-2"></i>Course Enrollments
+                </h1>
+                <a th:href="@{/course-seller/courses}" class="btn btn-outline-primary">
+                    <i class="fas fa-book me-1"></i>View Courses
+                </a>
+            </div>
+
+            <!-- Alert Messages -->
+            <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${param.success}">Success message</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Debug Info (remove in production) -->
+            <div class="alert alert-info" th:if="${enrollments != null}">
+                <strong>Debug Info:</strong> Found <span th:text="${enrollments.size()}">0</span> enrollments
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>Student Enrollments
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${enrollments != null and !enrollments.empty}" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Email</th>
+                                <th>Course</th>
+                                <th>Price</th>
+                                <th>Enrollment Date</th>
+                                <th>Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="enrollment : ${enrollments}">
+                                <td th:text="${enrollment.customer?.name}">Student Name</td>
+                                <td th:text="${enrollment.customer?.email}">student@email.com</td>
+                                <td th:text="${enrollment.course?.title}">Course Title</td>
+                                <td>$<span th:text="${#numbers.formatDecimal(enrollment.course?.price, 1, 2)}">0.00</span></td>
+                                <td th:text="${#temporals.format(enrollment.enrollmentDate, 'MMM dd, yyyy HH:mm')}">Date</td>
+                                <td>
+                                        <span class="badge"
+                                              th:classappend="${enrollment.status == 'ACTIVE'} ? 'bg-success' :
+                                                             ${enrollment.status == 'COMPLETED'} ? 'bg-primary' : 'bg-danger'"
+                                              th:text="${enrollment.status}">Status</span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div th:if="${enrollments == null or enrollments.empty}" class="text-center py-5">
+                        <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                        <h4 class="text-muted">No Enrollments Yet</h4>
+                        <p class="text-muted">Students haven't enrolled in any of your courses yet.</p>
+                        <div class="mt-4">
+                            <a th:href="@{/course-seller/courses/create}" class="btn btn-primary me-2">
+                                <i class="fas fa-plus-circle me-2"></i>Create a Course
+                            </a>
+                            <a th:href="@{/course-seller/courses}" class="btn btn-outline-secondary">
+                                <i class="fas fa-book me-2"></i>View Your Courses
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enrollment Statistics -->
+            <div th:if="${enrollments != null and !enrollments.empty}" class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-pie me-2"></i>Enrollment Statistics
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-3 mb-3">
+                                    <div class="border rounded p-3 bg-primary text-white">
+                                        <h3 th:text="${enrollments.size()}">0</h3>
+                                        <p class="mb-0">Total Enrollments</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="border rounded p-3 bg-success text-white">
+                                        <h3 th:text="${#lists.size(#lists.select(enrollments, ${enrollment.status == 'ACTIVE'}))}">0</h3>
+                                        <p class="mb-0">Active Students</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="border rounded p-3 bg-info text-white">
+                                        <h3 th:text="${#lists.size(#lists.select(enrollments, ${enrollment.status == 'COMPLETED'}))}">0</h3>
+                                        <p class="mb-0">Completed</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="border rounded p-3 bg-warning text-white">
+                                        <h3 th:text="${#lists.size(#lists.select(enrollments, ${enrollment.status == 'CANCELLED'}))}">0</h3>
+                                        <p class="mb-0">Cancelled</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>forgot-password
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

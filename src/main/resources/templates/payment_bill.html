@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TuneWave - Payment Receipt</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #e0e0e0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px, 120px 120px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .bill-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .bill {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #00d4ff, #0099cc);
+        }
+
+        .bill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-family: 'Monospace', monospace;
+            font-size: 28px;
+            font-weight: 600;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .receipt-title {
+            font-size: 24px;
+            font-weight: 500;
+            color: #ffffff;
+        }
+
+        .transaction-id {
+            color: #b0b0b0;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .bill-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .bill-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: #00d4ff;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 8px;
+        }
+
+        .item-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .item-name {
+            font-size: 20px;
+            font-weight: 500;
+            color: #ffffff;
+        }
+
+        .item-type {
+            color: #b0b0b0;
+            font-size: 14px;
+        }
+
+        .amount-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .amount {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .currency {
+            font-size: 16px;
+            color: #b0b0b0;
+            margin-right: 5px;
+        }
+
+        .payment-date {
+            color: #b0b0b0;
+            font-size: 14px;
+        }
+
+        .status-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-success {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .payer-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .payer-label {
+            color: #b0b0b0;
+            font-size: 14px;
+        }
+
+        .payer-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: #ffffff;
+        }
+
+        .bill-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-back {
+            background: transparent;
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .watermark {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            opacity: 0.05;
+            font-size: 120px;
+            font-weight: 700;
+            color: #00d4ff;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @media (max-width: 768px) {
+            .bill {
+                padding: 30px 20px;
+            }
+
+            .bill-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .bill-footer {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+
+            .watermark {
+                font-size: 80px;
+                bottom: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="bill-container">
+    <div class="bill">
+        <div class="bill-header">
+            <div>
+                <div class="logo">TuneWave</div>
+                <div class="receipt-title">Payment Receipt</div>
+                <div class="transaction-id" th:text="'Transaction: ' + ${payment.transactionId}">TXN</div>
+            </div>
+            <div class="receipt-date" th:text="${#temporals.format(payment.paymentDate, 'MMM dd, yyyy')}">Date</div>
+        </div>
+
+        <div class="bill-content">
+            <div class="bill-section">
+                <div class="section-title">
+                    <i>📄</i> Item Details
+                </div>
+                <div class="item-details">
+                    <div class="item-name" th:text="${payment.itemName}">Name</div>
+                    <div class="item-type" th:text="${payment.itemType}">TYPE</div>
+                </div>
+            </div>
+
+            <div class="bill-section">
+                <div class="section-title">
+                    <i>💰</i> Payment Details
+                </div>
+                <div class="amount-details">
+                    <div class="amount">
+                        <span class="currency">LKR</span>
+                        <span th:text="${#numbers.formatDecimal(payment.amount,1,2)}">0.00</span>
+                    </div>
+                    <div class="payment-date" th:text="${#temporals.format(payment.paymentDate, 'yyyy-MM-dd HH:mm')}">date</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bill-section">
+            <div class="section-title">
+                <i>👤</i> Customer Information
+            </div>
+            <div class="status-section">
+                <div><strong>Status:</strong></div>
+                <div class="status-badge status-success" th:text="${payment.status}">SUCCESS</div>
+            </div>
+            <div class="payer-info">
+                <div class="payer-label">Payer:</div>
+                <div class="payer-name" th:text="${payment.user.name}">User</div>
+            </div>
+        </div>
+
+        <div class="bill-footer">
+            <a th:href="@{/payments/history}" class="btn btn-back">
+                <i>←</i> Back to History
+            </a>
+            <a th:href="@{/payments/bill/{id}/download(id=${payment.id})}" class="btn btn-download">
+                <i>📥</i> Download PDF
+            </a>
+        </div>
+
+        <div class="watermark">TuneWave</div>
+    </div>
+</div>
+</body>
+
+</html>

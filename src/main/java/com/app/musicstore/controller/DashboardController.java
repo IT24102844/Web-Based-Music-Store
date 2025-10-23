@@ -1,14 +1,8 @@
 package com.app.musicstore.controller;
 
-import com.app.musicstore.model.Artist;
-import com.app.musicstore.model.Song;
-import com.app.musicstore.model.Ticket;
-import com.app.musicstore.model.User;
+import com.app.musicstore.model.*;
 import com.app.musicstore.security.CustomUserDetails;
-import com.app.musicstore.service.ArtistService;
-import com.app.musicstore.service.EventService;
-import com.app.musicstore.service.PaymentService;
-import com.app.musicstore.service.SongService;
+import com.app.musicstore.service.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -17,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 public class DashboardController {
@@ -25,15 +20,23 @@ public class DashboardController {
     private final SongService songService;
     private final EventService eventService;
     private final PaymentService paymentService;
+    private final UserService userService;
+    private final CourseService courseService;
+    private final CourseSellerService courseSellerService;
+    private final EnrollmentService enrollmentService;
 
     public DashboardController(ArtistService artistService,
                                SongService songService,
                                EventService eventService,
-                               PaymentService paymentService) {
+                               PaymentService paymentService, UserService userService, CourseService courseService, CourseSellerService courseSellerService, EnrollmentService enrollmentService) {
         this.artistService = artistService;
         this.songService = songService;
         this.eventService = eventService;
         this.paymentService = paymentService;
+        this.userService = userService;
+        this.courseService = courseService;
+        this.courseSellerService = courseSellerService;
+        this.enrollmentService = enrollmentService;
     }
 
     // -------------------- ADMIN DASHBOARD --------------------
@@ -94,11 +97,37 @@ public class DashboardController {
     // -------------------- COURSE SELLER DASHBOARD --------------------
     @GetMapping("/dashboard/course-seller")
     public String courseSellerDashboard(Model model) {
-        User user = getAuthenticatedUser();
+        User user = getFreshAuthenticatedUser();
         if (user == null) {
             return "redirect:/users/login";
         }
+
+        // Get course seller specific data
+        CourseSeller seller = courseSellerService.findByUserId(user.getUserId())
+                .orElseThrow(() -> new RuntimeException("Course seller profile not found"));
+
+        List<Course> recentCourses = courseService.findByCourseSellerId(user.getUserId())
+                .stream()
+                .limit(5)
+                .collect(Collectors.toList());
+
+        // Calculate stats
+        long totalCourses = courseService.findByCourseSellerId(user.getUserId()).size();
+        long totalEnrollments = enrollmentService.getSellerEnrollments(user.getUserId()).size();
+        long activeStudents = enrollmentService.getSellerEnrollments(user.getUserId())
+                .stream()
+                .filter(e -> e.getStatus() == EnrollmentStatus.ACTIVE)
+                .count();
+
+        double totalRevenue = courseService.findByCourseSellerId(user.getUserId())
+                .stream()
+                .mapToDouble(course -> course.getPrice() * course.getEnrollments().size())
+                .sum();
+
         model.addAttribute("user", user);
+        model.addAttribute("recentCourses", recentCourses);
+        model.addAttribute("stats", new DashboardStats(totalCourses, totalEnrollments, activeStudents, totalRevenue));
+
         return "course-seller-dashboard";
     }
 
@@ -127,12 +156,18 @@ public class DashboardController {
 
         System.out.println("🎫 Customer dashboard - User: " + user.getEmail() + ", Tickets: " + eventsAttendedCount);
 
+        List<Enrollment> recentEnrollments = enrollmentService.getCustomerEnrollments(user.getUserId())
+                .stream()
+                .limit(5)
+                .collect(Collectors.toList());
+
         model.addAttribute("user", user);
         model.addAttribute("totalSongs", totalSongs);
         model.addAttribute("totalGenres", totalGenres);
         model.addAttribute("totalArtists", totalArtists);
         model.addAttribute("genres", genres);
         model.addAttribute("eventsAttendedCount", eventsAttendedCount);
+        model.addAttribute("recentEnrollments", recentEnrollments);
 
         return "customer-dashboard";
     }
@@ -147,5 +182,48 @@ public class DashboardController {
             return userDetails.getUser();
         }
         return null;
+    }
+
+    /**
+     * Get FRESH user data from database instead of using the cached version
+     */
+    private User getFreshAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null &&
+                authentication.isAuthenticated() &&
+                authentication.getPrincipal() instanceof CustomUserDetails) {
+
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+            // Get the user ID from the authenticated user, but fetch FRESH data from database
+            Long userId = userDetails.getUser().getUserId();
+            return userService.getUserById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+        }
+
+        return null;
+    }
+
+    /**
+     * Inner class to hold dashboard statistics
+     */
+    public static class DashboardStats {
+        private final long totalCourses;
+        private final long totalEnrollments;
+        private final long activeStudents;
+        private final double totalRevenue;
+
+        public DashboardStats(long totalCourses, long totalEnrollments, long activeStudents, double totalRevenue) {
+            this.totalCourses = totalCourses;
+            this.totalEnrollments = totalEnrollments;
+            this.activeStudents = activeStudents;
+            this.totalRevenue = totalRevenue;
+        }
+
+        public long getTotalCourses() { return totalCourses; }
+        public long getTotalEnrollments() { return totalEnrollments; }
+        public long getActiveStudents() { return activeStudents; }
+        public double getTotalRevenue() { return totalRevenue; }
     }
 }

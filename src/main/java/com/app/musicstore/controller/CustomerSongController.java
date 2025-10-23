@@ -51,7 +51,7 @@ public class CustomerSongController {
 
         List<Song> songs;
 
-        //  search or filter
+        // search or filter
         if (search != null && !search.trim().isEmpty()) {
             songs = songService.searchSongs(search);
         } else if (genre != null && !genre.trim().isEmpty()) {
@@ -60,7 +60,7 @@ public class CustomerSongController {
             songs = songService.getAllSongs();
         }
 
-        //  genres for filter dropdown
+        // genres for filter dropdown
         List<String> genres = songService.getAllGenres();
 
         model.addAttribute("songs", songs);
@@ -96,7 +96,7 @@ public class CustomerSongController {
         return "customer-songs-details";
     }
 
-    // Handle purchase request (placeholder for now)
+    // Redirect to unified payment checkout for a song
     @PostMapping("/songs/{id}/purchase")
     public String purchaseSong(@PathVariable Long id, Model model) {
         User currentUser = getAuthenticatedUser();
@@ -104,8 +104,22 @@ public class CustomerSongController {
             return "redirect:/users/login";
         }
 
+        var songOpt = songService.getSongById(id);
+        if (songOpt.isEmpty()) {
+            return "redirect:/customer/songs?error=Song not found";
+        }
+        Song song = songOpt.get();
 
-        // For now, just redirect with a success message
-        return "redirect:/customer/songs?success=Purchase functionality coming soon! Song ID: " + id;
+        String itemType = "SONG";
+        Long itemId = song.getId();
+        String itemName = song.getName();
+        Double amount = song.getPrice() != null ? song.getPrice() : 0.0;
+
+        String url = String.format("redirect:/payments/checkout?itemType=%s&itemId=%d&itemName=%s&amount=%s",
+                java.net.URLEncoder.encode(itemType, java.nio.charset.StandardCharsets.UTF_8),
+                itemId,
+                java.net.URLEncoder.encode(itemName, java.nio.charset.StandardCharsets.UTF_8),
+                java.net.URLEncoder.encode(String.valueOf(amount), java.nio.charset.StandardCharsets.UTF_8));
+        return url;
     }
 }

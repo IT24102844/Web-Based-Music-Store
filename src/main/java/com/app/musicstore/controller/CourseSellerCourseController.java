@@ -1,13 +1,11 @@
 package com.app.musicstore.controller;
 
-import com.app.musicstore.model.Course;
-import com.app.musicstore.model.CourseSeller;
-import com.app.musicstore.model.Enrollment;
-import com.app.musicstore.model.User;
+import com.app.musicstore.model.*;
 import com.app.musicstore.security.CustomUserDetails;
 import com.app.musicstore.service.CourseService;
 import com.app.musicstore.service.CourseSellerService;
 import com.app.musicstore.service.EnrollmentService;
+import com.app.musicstore.service.CourseFeedbackService;
 import org.springframework.core.io.UrlResource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,15 +25,17 @@ public class CourseSellerCourseController {
     private final CourseService courseService;
     private final CourseSellerService courseSellerService;
     private final EnrollmentService enrollmentService;
+    private final CourseFeedbackService courseFeedbackService;
 
     public CourseSellerCourseController(CourseService courseService,
-                                        CourseSellerService courseSellerService,
-                                        EnrollmentService enrollmentService) {
+            CourseSellerService courseSellerService,
+            EnrollmentService enrollmentService,
+            CourseFeedbackService courseFeedbackService) {
         this.courseService = courseService;
         this.courseSellerService = courseSellerService;
         this.enrollmentService = enrollmentService;
+        this.courseFeedbackService = courseFeedbackService;
     }
-
 
     @GetMapping("/courses")
     public String listCourses(Model model) {
@@ -134,7 +134,8 @@ public class CourseSellerCourseController {
 
     // Process update course form
     @PostMapping("/courses/update/{id}")
-    public String updateCourse(@PathVariable Long id, @ModelAttribute Course course, RedirectAttributes redirectAttributes) {
+    public String updateCourse(@PathVariable Long id, @ModelAttribute Course course,
+            RedirectAttributes redirectAttributes) {
         CourseSeller seller = getAuthenticatedCourseSeller();
         if (seller == null) {
             return "redirect:/users/login";
@@ -195,6 +196,38 @@ public class CourseSellerCourseController {
         List<Enrollment> enrollments = enrollmentService.getSellerEnrollments(seller.getUserId());
         model.addAttribute("enrollments", enrollments);
         return "enrollment-list";
+    }
+
+    // Feedback management endpoints
+    @GetMapping("/feedback")
+    public String viewFeedback(Model model) {
+        CourseSeller seller = getAuthenticatedCourseSeller();
+        if (seller == null) {
+            return "redirect:/users/login";
+        }
+
+        List<CourseFeedback> feedbacks = courseFeedbackService.getSellerFeedback(seller.getUserId());
+        model.addAttribute("feedbacks", feedbacks);
+        return "seller-feedback-management";
+    }
+
+    @PostMapping("/feedback/{feedbackId}/reply")
+    public String replyToFeedback(@PathVariable Long feedbackId,
+            @RequestParam String sellerReply,
+            RedirectAttributes redirectAttributes) {
+        CourseSeller seller = getAuthenticatedCourseSeller();
+        if (seller == null) {
+            return "redirect:/users/login";
+        }
+
+        try {
+            courseFeedbackService.replyToFeedback(feedbackId, sellerReply, seller.getUserId());
+            redirectAttributes.addFlashAttribute("success", "Reply submitted successfully!");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/course-seller/feedback";
     }
 
     private CourseSeller getAuthenticatedCourseSeller() {

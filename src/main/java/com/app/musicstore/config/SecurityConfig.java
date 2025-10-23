@@ -48,7 +48,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/", "/home", "/users/register", "/users/login", "/users/forgot-password",
-                                "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
+                                "/css/**", "/js/**", "/images/**", "/uploads/**")
+                        .permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/artist/**").hasAuthority("ARTIST")
                         .requestMatchers("/dashboard/admin").hasAuthority("ADMIN")
@@ -58,16 +59,14 @@ public class SecurityConfig {
                         .requestMatchers("/dashboard/customer").hasAuthority("CUSTOMER")
                         .requestMatchers("/tickets/create", "/tickets/my-tickets").authenticated()
                         .requestMatchers("/tickets/admin/**").hasAuthority("ADMIN")
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .formLogin(form -> form
                         .usernameParameter("email")
                         .loginPage("/users/login")
                         .loginProcessingUrl("/users/login")
                         .successHandler(roleBasedAuthenticationSuccessHandler())
                         .failureUrl("/users/login?error=true")
-                        .permitAll()
-                )
+                        .permitAll())
                 .logout(logout -> logout
                         .logoutUrl("/users/logout")
                         .logoutSuccessUrl("/users/login?logout=true")
@@ -77,8 +76,7 @@ public class SecurityConfig {
                                 sessionUserService.clearCachedUser(session);
                             }
                         })
-                        .permitAll()
-                )
+                        .permitAll())
                 .csrf(csrf -> csrf.disable()) // disable for development; enable in production
                 .httpBasic(withDefaults());
 
@@ -93,8 +91,8 @@ public class SecurityConfig {
         return new AuthenticationSuccessHandler() {
             @Override
             public void onAuthenticationSuccess(HttpServletRequest request,
-                                                HttpServletResponse response,
-                                                Authentication authentication)
+                    HttpServletResponse response,
+                    Authentication authentication)
                     throws IOException, ServletException {
 
                 // Initialize or refresh session cache

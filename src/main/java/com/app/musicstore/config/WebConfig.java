@@ -9,10 +9,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Serve files from the uploads directory in the project root
+        // Serve files from the resources/static/uploads directory
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:uploads/");
+                .addResourceLocations("classpath:/static/uploads/");
+
+        System.out.println("🔧 WebConfig: Serving /uploads/** from classpath:/static/uploads/");
     }
 }
-
-

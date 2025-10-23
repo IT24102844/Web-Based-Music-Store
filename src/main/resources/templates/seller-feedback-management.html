@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Management - TuneWave</title>
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+    <style>
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, .06);
+            margin-bottom: 20px
+        }
+
+        .feedback-item {
+            border-left: 4px solid #2563eb;
+            padding-left: 16px
+        }
+
+        .rating {
+            display: flex;
+            gap: 4px;
+            margin: 8px 0
+        }
+
+        .star {
+            color: #ffc107;
+            font-size: 18px
+        }
+
+        .star.empty {
+            color: #ddd
+        }
+
+        .reply-form {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            resize: vertical
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #fff
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #333
+        }
+
+        .no-feedback {
+            text-align: center;
+            padding: 40px;
+            color: #64748b
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 16px 0
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #bbf7d0
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <h2>🎵 TuneWave</h2>
+            <ul>
+                <li><a th:href="@{/course-seller/courses}">My Courses</a></li>
+                <li><a th:href="@{/course-seller/enrollments}">Enrollments</a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <div class="header">
+                <h1>Course Feedback Management</h1>
+                <p>View and reply to student feedback</p>
+            </div>
+
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+            <div th:if="${feedbacks != null and !feedbacks.isEmpty()}">
+                <div th:each="feedback : ${feedbacks}" class="card feedback-item">
+                    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px">
+                        <div>
+                            <h3 th:text="${feedback.course.title}">Course Title</h3>
+                            <p style="color:#64748b;margin:4px 0">
+                                <strong th:text="${feedback.student.name}">Student Name</strong> •
+                                <span th:text="${#temporals.format(feedback.feedbackDate, 'MMMM dd, yyyy')}">Date</span>
+                            </p>
+                        </div>
+                        <div class="rating">
+                            <span th:each="i : ${#numbers.sequence(1, 5)}"
+                                th:class="${i <= feedback.rating} ? 'star' : 'star empty'">⭐</span>
+                        </div>
+                    </div>
+
+                    <div style="margin:12px 0">
+                        <p th:text="${feedback.feedback}">Student feedback text here...</p>
+                    </div>
+
+                    <!-- Existing Reply -->
+                    <div th:if="${feedback.sellerReply != null}"
+                        style="background:#e0f2fe;border:1px solid #0891b2;border-radius:8px;padding:16px;margin-top:12px">
+                        <div style="font-weight:600;color:#0c4a6e;margin-bottom:8px">Your Reply:</div>
+                        <p th:text="${feedback.sellerReply}">Your reply here...</p>
+                        <small style="color:#0c4a6e"
+                            th:text="'Replied on: ' + ${#temporals.format(feedback.replyDate, 'MMMM dd, yyyy')}">Reply
+                            date</small>
+                    </div>
+
+                    <!-- Reply Form -->
+                    <div th:unless="${feedback.sellerReply != null}" class="reply-form">
+                        <form th:action="@{/course-seller/feedback/{id}/reply(id=${feedback.id})}" method="post">
+                            <div style="font-weight:600;margin-bottom:8px">Reply to this feedback:</div>
+                            <textarea name="sellerReply" placeholder="Write your reply to the student..."
+                                required></textarea>
+                            <div style="margin-top:12px">
+                                <button type="submit" class="btn btn-primary">Submit Reply</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div th:unless="${feedbacks != null and !feedbacks.isEmpty()}" class="card no-feedback">
+                <h3>No Feedback Received Yet</h3>
+                <p>Students haven't submitted any feedback for your courses yet.</p>
+                <p>Encourage your enrolled students to share their experience!</p>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

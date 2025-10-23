@@ -17,18 +17,18 @@ public class BuyerController {
 
     @Autowired
     private ProductService productService;
-    
+
     @Autowired
     private ReviewService reviewService;
     @Autowired
     private OrderService orderService;
-    
+
     @Autowired
     private UserService userService;
 
     @Autowired
     private CartService cartService;
-    
+
     @Autowired
     private SessionUserService sessionUserService;
 
@@ -36,64 +36,67 @@ public class BuyerController {
     @GetMapping("/dashboard")
     public String customerDashboard(Model model, HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
-        if (!isCustomer(user)) return "redirect:/users/login?error=Please log in as a customer";
+        if (!isCustomer(user))
+            return "redirect:/users/login?error=Please log in as a customer";
 
         // Get all available products
         List<Product> products = productService.getAllProducts();
         model.addAttribute("user", user);
         model.addAttribute("products", products);
 
-        // Average rating and review count per product for listing cards (batch to avoid N+1)
+        // Average rating and review count per product for listing cards (batch to avoid
+        // N+1)
         List<Long> productIds = products.stream().map(Product::getId).toList();
         java.util.Map<Long, Double> averageByProduct = reviewService.getAverageRatingsForProducts(productIds);
         java.util.Map<Long, Long> countByProduct = reviewService.getReviewCountsForProducts(productIds);
         model.addAttribute("averageByProduct", averageByProduct);
         model.addAttribute("countByProduct", countByProduct);
-        
+
         // Get unique instrument types for filter
         List<String> instrumentTypes = products.stream()
                 .map(Product::getInstrumentType)
                 .distinct()
                 .toList();
         model.addAttribute("instrumentTypes", instrumentTypes);
-        
+
         return "customer-instrument-dashboard";
     }
 
     // Search and Filter Products
     @GetMapping("/products")
     public String searchProducts(@RequestParam(value = "search", required = false) String search,
-                                @RequestParam(value = "instrumentType", required = false) String instrumentType,
-                                @RequestParam(value = "minPrice", required = false) Double minPrice,
-                                @RequestParam(value = "maxPrice", required = false) Double maxPrice,
-                                Model model, HttpSession session) {
+            @RequestParam(value = "instrumentType", required = false) String instrumentType,
+            @RequestParam(value = "minPrice", required = false) Double minPrice,
+            @RequestParam(value = "maxPrice", required = false) Double maxPrice,
+            Model model, HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
-        if (!isCustomer(user)) return "redirect:/users/login?error=Please log in as a customer";
+        if (!isCustomer(user))
+            return "redirect:/users/login?error=Please log in as a customer";
 
         List<Product> products = productService.getAllProducts();
-        
+
         // Apply filters
         if (search != null && !search.trim().isEmpty()) {
             String s = search.toLowerCase();
             products = products.stream()
                     .filter(p -> (p.getName() != null && p.getName().toLowerCase().contains(s)) ||
-                                 (p.getDescription() != null && p.getDescription().toLowerCase().contains(s)))
+                            (p.getDescription() != null && p.getDescription().toLowerCase().contains(s)))
                     .toList();
         }
-        
+
         if (instrumentType != null && !instrumentType.trim().isEmpty()) {
             String it = instrumentType.toLowerCase();
             products = products.stream()
                     .filter(p -> p.getInstrumentType() != null && p.getInstrumentType().toLowerCase().equals(it))
                     .toList();
         }
-        
+
         if (minPrice != null) {
             products = products.stream()
                     .filter(p -> p.getPrice() >= minPrice)
                     .toList();
         }
-        
+
         if (maxPrice != null) {
             products = products.stream()
                     .filter(p -> p.getPrice() <= maxPrice)
@@ -110,23 +113,23 @@ public class BuyerController {
         model.addAttribute("selectedInstrumentType", instrumentType);
         model.addAttribute("minPrice", minPrice);
         model.addAttribute("maxPrice", maxPrice);
-        
+
         // Get unique instrument types for filter dropdown
         List<String> instrumentTypes = productService.getAllProducts().stream()
                 .map(Product::getInstrumentType)
                 .distinct()
                 .toList();
         model.addAttribute("instrumentTypes", instrumentTypes);
-        
+
         return "customer-products";
     }
-
 
     // Product Detail View
     @GetMapping("/products/{id}")
     public String productDetail(@PathVariable Long id, Model model, HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
-        if (!isCustomer(user)) return "redirect:/users/login?error=Please log in as a customer";
+        if (!isCustomer(user))
+            return "redirect:/users/login?error=Please log in as a customer";
 
         Optional<Product> productOpt = productService.getProductById(id);
         if (productOpt.isEmpty()) {
@@ -134,37 +137,38 @@ public class BuyerController {
         }
 
         Product product = productOpt.get();
-        
+
         // Get seller information
         Optional<User> sellerOpt = userService.getUserById(product.getSellerId());
         User seller = sellerOpt.orElse(null);
-        
+
         // Get product reviews
         List<Review> reviews = reviewService.getReviewsByProductId(id);
-        
+
         // Calculate average rating
         double averageRating = reviews.stream()
                 .mapToDouble(Review::getRating)
                 .average()
                 .orElse(0.0);
-        
+
         model.addAttribute("user", user);
         model.addAttribute("product", product);
         model.addAttribute("seller", seller);
         model.addAttribute("reviews", reviews);
         model.addAttribute("averageRating", averageRating);
         model.addAttribute("reviewCount", reviews.size());
-        
+
         return "customer-product-detail";
     }
 
     // Add to Cart (placeholder for future implementation)
     @PostMapping("/cart/add/{productId}")
     public String addToCart(@PathVariable Long productId,
-                           @RequestParam(value = "quantity", defaultValue = "1") int quantity,
-                           HttpSession session) {
+            @RequestParam(value = "quantity", defaultValue = "1") int quantity,
+            HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
-        if (!isCustomer(user)) return "redirect:/users/login?error=Please log in as a customer";
+        if (!isCustomer(user))
+            return "redirect:/users/login?error=Please log in as a customer";
 
         // Persist to DB cart
         cartService.addToCart(user.getUserId(), productId, quantity);
@@ -175,9 +179,10 @@ public class BuyerController {
     // View cart page
     @GetMapping("/cart")
     public String viewCart(Model model,
-                           HttpSession session) {
+            HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
-        if (!isCustomer(user)) return "redirect:/users/login?error=Please log in as a customer";
+        if (!isCustomer(user))
+            return "redirect:/users/login?error=Please log in as a customer";
 
         var dbItems = cartService.getCartItems(user.getUserId());
         List<CartViewItem> items = dbItems.stream()
@@ -195,9 +200,10 @@ public class BuyerController {
     // Remove item from cart
     @PostMapping("/cart/remove/{productId}")
     public String removeFromCart(@PathVariable Long productId,
-                                 HttpSession session) {
+            HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
-        if (!isCustomer(user)) return "redirect:/users/login?error=Please log in as a customer";
+        if (!isCustomer(user))
+            return "redirect:/users/login?error=Please log in as a customer";
 
         cartService.removeFromCart(user.getUserId(), productId);
         return "redirect:/buyer/cart?success=Item removed";
@@ -206,10 +212,11 @@ public class BuyerController {
     // Update quantities
     @PostMapping("/cart/update")
     public String updateCart(@RequestParam("productId") List<Long> productIds,
-                             @RequestParam("quantity") List<Integer> quantities,
-                             HttpSession session) {
+            @RequestParam("quantity") List<Integer> quantities,
+            HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
-        if (!isCustomer(user)) return "redirect:/users/login?error=Please log in as a customer";
+        if (!isCustomer(user))
+            return "redirect:/users/login?error=Please log in as a customer";
 
         cartService.updateQuantities(user.getUserId(), productIds, quantities);
         return "redirect:/buyer/cart?success=Cart updated";
@@ -218,10 +225,11 @@ public class BuyerController {
     // Checkout selected products from cart → payment
     @PostMapping("/cart/checkout")
     public String checkoutFromCart(@RequestParam(value = "selectedIds", required = false) List<Long> selectedIds,
-                                   Model model,
-                                   HttpSession session) {
+            Model model,
+            HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
-        if (!isCustomer(user)) return "redirect:/users/login?error=Please log in as a customer";
+        if (!isCustomer(user))
+            return "redirect:/users/login?error=Please log in as a customer";
 
         if (selectedIds == null || selectedIds.isEmpty()) {
             return "redirect:/buyer/cart?error=Please select at least one item";
@@ -248,10 +256,11 @@ public class BuyerController {
 
     @PostMapping("/place-order")
     public String placeOrder(@RequestParam("selectedIds") List<Long> selectedIds,
-                             HttpSession session,
-                             Model model) {
+            HttpSession session,
+            Model model) {
         User user = sessionUserService.getAuthenticatedUser(session);
-        if (!isCustomer(user)) return "redirect:/users/login?error=Please log in as a customer";
+        if (!isCustomer(user))
+            return "redirect:/users/login?error=Please log in as a customer";
 
         // Build per-seller totals and create orders per seller
         var dbItems = cartService.getCartItems(user.getUserId());
@@ -262,7 +271,8 @@ public class BuyerController {
         java.util.Map<Long, List<Product>> bySeller = new java.util.HashMap<>();
         for (Long pid : selectedIds) {
             var product = productService.getProductById(pid).orElse(null);
-            if (product == null) continue;
+            if (product == null)
+                continue;
             bySeller.computeIfAbsent(product.getSellerId(), k -> new java.util.ArrayList<>()).add(product);
         }
 
@@ -284,7 +294,8 @@ public class BuyerController {
     @GetMapping("/orders")
     public String myOrders(Model model, HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
-        if (!isCustomer(user)) return "redirect:/users/login?error=Please log in as a customer";
+        if (!isCustomer(user))
+            return "redirect:/users/login?error=Please log in as a customer";
 
         List<Order> orders = orderService.getOrdersByCustomerId(user.getUserId());
         model.addAttribute("user", user);
@@ -295,7 +306,8 @@ public class BuyerController {
     @GetMapping("/reviews")
     public String myReviews(Model model, HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
-        if (!isCustomer(user)) return "redirect:/users/login?error=Please log in as a customer";
+        if (!isCustomer(user))
+            return "redirect:/users/login?error=Please log in as a customer";
 
         // Only allow reviewing items from completed or shipped orders
         List<String> reviewableStatuses = List.of("COMPLETED", "SHIPPED");
@@ -311,7 +323,8 @@ public class BuyerController {
             for (OrderItem item : order.getItems()) {
                 if (!existingByProduct.containsKey(item.getProductId())) {
                     Review existing = reviewService.getByProductAndCustomer(item.getProductId(), user.getUserId());
-                    if (existing != null) existingByProduct.put(item.getProductId(), existing);
+                    if (existing != null)
+                        existingByProduct.put(item.getProductId(), existing);
                 }
             }
         }
@@ -324,11 +337,12 @@ public class BuyerController {
 
     @PostMapping("/reviews")
     public String submitReview(@RequestParam Long productId,
-                               @RequestParam Integer rating,
-                               @RequestParam(required = false) String comment,
-                               HttpSession session) {
+            @RequestParam Integer rating,
+            @RequestParam(required = false) String comment,
+            HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
-        if (!isCustomer(user)) return "redirect:/users/login?error=Please log in as a customer";
+        if (!isCustomer(user))
+            return "redirect:/users/login?error=Please log in as a customer";
 
         // Validate rating
         if (rating == null || rating < 1 || rating > 5) {
@@ -363,7 +377,8 @@ public class BuyerController {
             reviewService.createReview(review);
             return "redirect:/buyer/reviews?success=Thank you for your review!";
         } catch (IllegalArgumentException ex) {
-            return "redirect:/buyer/reviews?error=" + java.net.URLEncoder.encode(ex.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
+            return "redirect:/buyer/reviews?error="
+                    + java.net.URLEncoder.encode(ex.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
         } catch (Exception ex) {
             System.err.println("Error creating review: " + ex.getMessage());
             ex.printStackTrace();
@@ -372,15 +387,17 @@ public class BuyerController {
     }
 
     // simple immutable holder for cart view
-    public record CartViewItem(Product product, int quantity) {}
+    public record CartViewItem(Product product, int quantity) {
+    }
 
-    // Checkout selected products → payment page
+    // Checkout selected products → unified payment
     @PostMapping("/checkout")
     public String checkoutSelected(@RequestParam(value = "selectedIds", required = false) List<Long> selectedIds,
-                                   Model model,
-                                   HttpSession session) {
+            Model model,
+            HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
-        if (!isCustomer(user)) return "redirect:/users/login?error=Please log in as a customer";
+        if (!isCustomer(user))
+            return "redirect:/users/login?error=Please log in as a customer";
 
         if (selectedIds == null || selectedIds.isEmpty()) {
             return "redirect:/buyer/products?error=Please select at least one product";
@@ -396,18 +413,64 @@ public class BuyerController {
                 .mapToDouble(Product::getPrice)
                 .sum();
 
-        model.addAttribute("user", user);
-        model.addAttribute("items", selectedProducts);
-        model.addAttribute("total", total);
-        return "payment";
+        // Redirect to unified checkout as a single cart purchase item
+        String itemType = "INSTRUMENT_CART";
+        String itemName = "Cart Checkout (" + selectedProducts.size() + " items)";
+        String successRedirect = "/buyer/after-unified-cart?selectedIds="
+                + selectedIds.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(","));
+        String url = String.format(
+                "redirect:/payments/checkout?itemType=%s&itemId=%d&itemName=%s&amount=%s&successRedirect=%s",
+                java.net.URLEncoder.encode(itemType, java.nio.charset.StandardCharsets.UTF_8),
+                0L,
+                java.net.URLEncoder.encode(itemName, java.nio.charset.StandardCharsets.UTF_8),
+                java.net.URLEncoder.encode(String.valueOf(total), java.nio.charset.StandardCharsets.UTF_8),
+                java.net.URLEncoder.encode(successRedirect, java.nio.charset.StandardCharsets.UTF_8));
+        return url;
+    }
+
+    // After unified payment for cart → place orders and clear items
+    @GetMapping("/after-unified-cart")
+    public String afterUnifiedCart(@RequestParam("selectedIds") String selectedIdsCsv,
+            @RequestParam(value = "unifiedPaymentId", required = false) Long unifiedPaymentId,
+            HttpSession session) {
+        User user = sessionUserService.getAuthenticatedUser(session);
+        if (!isCustomer(user))
+            return "redirect:/users/login?error=Please log in as a customer";
+
+        List<Long> selectedIds = java.util.Arrays.stream(selectedIdsCsv.split(","))
+                .filter(s -> !s.isBlank())
+                .map(Long::valueOf)
+                .toList();
+
+        // Reuse existing place-order logic
+        var dbItems = cartService.getCartItems(user.getUserId());
+        java.util.Map<Long, Integer> qtyByProduct = dbItems.stream()
+                .collect(java.util.stream.Collectors.toMap(ci -> ci.getProduct().getId(), ci -> ci.getQuantity()));
+
+        java.util.Map<Long, List<Product>> bySeller = new java.util.HashMap<>();
+        for (Long pid : selectedIds) {
+            var product = productService.getProductById(pid).orElse(null);
+            if (product == null)
+                continue;
+            bySeller.computeIfAbsent(product.getSellerId(), k -> new java.util.ArrayList<>()).add(product);
+        }
+        for (var entry : bySeller.entrySet()) {
+            Long sellerId = entry.getKey();
+            List<Product> sellerProducts = entry.getValue();
+            orderService.createOrderWithItems(sellerId, user.getUserId(), user.getName(), sellerProducts, qtyByProduct);
+        }
+        for (Long pid : selectedIds) {
+            cartService.removeFromCart(user.getUserId(), pid);
+        }
+        return "redirect:/buyer/dashboard?success=Payment successful. Order placed.";
     }
 
     // Helper methods
 
     private boolean isCustomer(User user) {
         // Allow both customers AND sellers to access customer features (dual access)
-        return user != null && (user.getRole() == Role.CUSTOMER || 
-                               user.getRole() == Role.ITEM_SELLER || 
-                               user.getRole() == Role.COURSE_SELLER);
+        return user != null && (user.getRole() == Role.CUSTOMER ||
+                user.getRole() == Role.ITEM_SELLER ||
+                user.getRole() == Role.COURSE_SELLER);
     }
 }

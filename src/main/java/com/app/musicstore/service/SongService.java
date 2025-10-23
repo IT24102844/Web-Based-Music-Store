@@ -25,7 +25,7 @@ public class SongService {
     private final SongRepository songRepository;
     private final ArtistRepository artistRepository;
 
-//    @Value("${file.upload-dir:C:/Users/acer/Desktop/SE/SE_project/Web-Based-Music-Store/uploads}")
+    // @Value("${file.upload-dir:C:/Users/acer/Desktop/SE/SE_project/Web-Based-Music-Store/uploads}")
     @Value("${file.upload-dir:uploads/}")
     private String uploadDir;
 
@@ -64,7 +64,7 @@ public class SongService {
         return songRepository.findByArtistId(artistId);
     }
 
-    public Optional<Song> getSongById(Long id) {  // Changed from songId to id
+    public Optional<Song> getSongById(Long id) { // Changed from songId to id
         return songRepository.findById(id);
     }
 
@@ -77,7 +77,7 @@ public class SongService {
 
     // Enhanced methods for file handling and business logic
     public Song createSong(String name, String genre, Double price, Artist artist,
-                           String audioFilePath, String previewClipPath, String songImagePath) {
+            String audioFilePath, String previewClipPath, String songImagePath) {
 
         // Check for duplicate song name for this artist
         if (songRepository.existsByNameAndArtist(name, artist)) {
@@ -121,7 +121,6 @@ public class SongService {
             throw new IllegalArgumentException("File is empty");
         }
 
-
         String uploadDir = "uploads/";
         Path directoryPath = Paths.get(uploadDir);
 
@@ -137,7 +136,6 @@ public class SongService {
 
         return "/uploads/" + fileName;
     }
-
 
     public boolean isArtistOwner(Long songId, Long artistId) {
         return songRepository.findById(songId)

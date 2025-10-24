@@ -36,30 +36,51 @@ public class PaymentController {
                 User user = sessionUserService.getAuthenticatedUser(session);
                 if (user == null)
                         return "redirect:/users/login?error=loginRequired";
+
                 model.addAttribute("user", user);
                 model.addAttribute("itemType", itemType);
                 model.addAttribute("itemId", itemId);
                 model.addAttribute("itemName", itemName);
                 model.addAttribute("amount", amount);
+
+                // Add available payment methods based on item type
+                java.util.List<String> availablePaymentMethods = new java.util.ArrayList<>();
+                availablePaymentMethods.add("CREDIT_CARD");
+                availablePaymentMethods.add("DEBIT_CARD");
+                availablePaymentMethods.add("WALLET");
+
+                // Cash on Delivery only for physical items (INSTRUMENT)
+                if ("INSTRUMENT".equals(itemType)) {
+                        availablePaymentMethods.add("CASH_ON_DELIVERY");
+                }
+
+                model.addAttribute("paymentMethods", availablePaymentMethods);
+
                 if (successRedirect != null) {
                         model.addAttribute("successRedirect", successRedirect);
                 }
                 return "payment_checkout";
         }
 
-        // POST from checkout → process mock payment
+        // POST from checkout → process payment with Strategy Pattern
         @PostMapping("/pay")
         public String pay(@RequestParam String itemType,
                         @RequestParam Long itemId,
                         @RequestParam String itemName,
                         @RequestParam Double amount,
+                        @RequestParam(required = false, defaultValue = "CREDIT_CARD") String paymentMethod,
                         @RequestParam(required = false) String successRedirect,
                         HttpSession session) {
                 User user = sessionUserService.getAuthenticatedUser(session);
                 if (user == null)
                         return "redirect:/users/login?error=loginRequired";
-                UnifiedPayment payment = unifiedPaymentService.processMockPayment(user, itemType, itemId, itemName,
-                                amount);
+
+                System.out.println("🔄 Payment Controller - Selected method: " + paymentMethod);
+
+                // Process payment using Strategy Pattern
+                UnifiedPayment payment = unifiedPaymentService.processPayment(
+                                user, itemType, itemId, itemName, amount, paymentMethod);
+
                 if (successRedirect != null && successRedirect.startsWith("/")) {
                         String redirectUrl = successRedirect + (successRedirect.contains("?") ? "&" : "?")
                                         + "unifiedPaymentId="
@@ -129,7 +150,7 @@ public class PaymentController {
         private byte[] generateModernPdfBill(UnifiedPayment payment) throws Exception {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 com.lowagie.text.Document document = new com.lowagie.text.Document(com.lowagie.text.PageSize.A4);
-                com.lowagie.text.pdf.PdfWriter writer = com.lowagie.text.pdf.PdfWriter.getInstance(document, baos);
+                com.lowagie.text.pdf.PdfWriter.getInstance(document, baos);
 
                 document.open();
 

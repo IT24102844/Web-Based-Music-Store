@@ -31,6 +31,9 @@ public class UnifiedPayment {
     @Column(nullable = false, length = 24)
     private String status; // PENDING, SUCCESS, FAILED
 
+    @Column(length = 50)
+    private String paymentMethod; // CREDIT_CARD, DEBIT_CARD, WALLET, CASH_ON_DELIVERY
+
     @Column(nullable = false, length = 64, unique = true)
     private String transactionId;
 
@@ -126,5 +129,12 @@ public class UnifiedPayment {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
-}
 
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+}

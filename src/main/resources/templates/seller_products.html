@@ -1,195 +1,675 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Products - TuneWave</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Products - TuneWave</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #ffffff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            padding-top: 100px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px, 120px 120px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-family: 'Monospace', monospace;
+            font-size: 28px;
+            font-weight: 600;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #00d4ff;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00d4ff, #0099cc);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* User info styling */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-email {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-email i {
+            color: #00d4ff;
+        }
+
+        .seller-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .seller-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        .seller-links a:hover {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        /* Logout Button Specific Styling */
+        .logout-btn {
+            background: rgba(255, 71, 87, 0.2);
+            border: 1px solid rgba(255, 71, 87, 0.4);
+            color: #ff6b81 !important;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 71, 87, 0.3);
+            border-color: #ff4757;
+            color: #ff4757 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+        }
+
+        /* Page Title */
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00d4ff, #ffffff, #00d4ff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: textShimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes textShimmer {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .page-subtitle {
+            color: #b0b0b0;
+            margin-bottom: 30px;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .card-header {
+            background: rgba(0, 212, 255, 0.15) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+        }
+
+        .card-body {
+            padding: 30px;
+            color: #ffffff;
+        }
+
+        .card-title {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ed573, #1eae5c);
+            border: none;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(46, 213, 115, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 213, 115, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffa502, #e67e22);
+            border: none;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 165, 2, 0.3);
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 165, 2, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            border: none;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+        }
+
+        /* Table Styles */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #ffffff;
+        }
+
+        .table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 600;
+            color: #ffffff;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .table td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            vertical-align: middle;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Badges */
+        .badge {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            font-weight: 500;
+            padding: 8px 12px;
+        }
+
+        /* Content Container */
+        .content-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Alerts */
+        .alert {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: #ffffff;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            border-color: rgba(46, 213, 115, 0.3);
+            background: rgba(46, 213, 115, 0.1);
+        }
+
+        .alert-error {
+            border-color: rgba(255, 71, 87, 0.3);
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                width: 95%;
+                padding: 12px 20px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .content-container {
+                padding: 30px 20px;
+            }
+
+            .auth-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .user-info {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .seller-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .user-email {
+                font-size: 0.9rem;
+                padding: 6px 12px;
+            }
+
+            .logout-btn {
+                font-size: 0.9rem;
+                padding: 6px 12px;
+            }
+
+            .table {
+                font-size: 0.9rem;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
+
 <body>
-<div class="dashboard-container">
-  <!-- Sidebar -->
-  <nav class="sidebar">
-        <h2>TuneWave</h2>
-        
-        <!-- Profile Section -->
-        <div class="profile-section">
-            <div class="profile-image-container">
-                <img th:if="${user.profileImagePath}" 
-                     th:src="'/uploads/profile/' + ${user.profileImagePath}" 
-                     th:alt="${user.name} + ' Profile Image'" 
-                     class="profile-image"
-                     onerror="this.src='https://via.placeholder.com/80x80/2333de/ffffff?text=' + this.alt.charAt(0)">
-                <img th:unless="${user.profileImagePath}" 
-                     src="https://via.placeholder.com/80x80/2333de/ffffff?text=U" 
-                     alt="Default Profile Image" 
-                     class="profile-image">
+<!-- Navigation -->
+<nav class="navbar">
+    <div class="logo">TuneWave</div>
+    <ul class="nav-links">
+        <li><a th:href="@{/seller/dashboard}">Home</a></li>
+        <li><a th:href="@{/seller/settings}">Settings</a></li>
+        <li><a th:href="@{/seller/orders}">Orders</a></li>
+        <li><a th:href="@{/seller/products}">Products</a></li>
+        <li><a th:href="@{/seller/reviews}">Reviews</a></li>
+        <li><a th:href="@{/seller/account}">Account</a></li>
+        <li><a th:href="@{/users/logout}" class="logout">Logout</a></li>
+    </ul>
+    <div class="auth-buttons">
+        <div th:if="${currentUser != null}" class="user-info">
+            <span class="user-email">
+                <i class="fas fa-user me-1"></i>
+                <span th:text="${currentUser.email}">user@example.com</span>
+            </span>
+            <div th:if="${currentUser.role == 'SELLER'}" class="seller-links">
+                <a href="/seller/products">My Products</a>
+                <a href="/seller/orders">Manage Orders</a>
             </div>
-            <div class="profile-info">
-                <div class="profile-name" th:text="${user.name}">Seller Name</div>
-                <div class="profile-role" th:text="${user.role}">SELLER</div>
-                <div class="profile-details">
-                    <p><strong>Email:</strong> <span th:text="${user.email}">seller@example.com</span></p>
-                    <p><strong>Status:</strong> <span th:text="${user.status}">ACTIVE</span></p>
+            <a class="logout-btn" href="/users/logout">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="content-container">
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <h1 class="page-title">Manage Products</h1>
+            <p class="page-subtitle">View and manage your instrument products inventory</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Top Bar with Add Button -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-box me-2"></i>Your Products
+                        <span class="badge bg-primary ms-2" th:text="${#lists.size(products)}">0</span>
+                    </h3>
+                    <a th:href="@{/seller/products/add}" class="btn btn-success">
+                        <i class="fas fa-plus me-1"></i>Add New Product
+                    </a>
                 </div>
             </div>
         </div>
 
-        <!-- Navigation -->
-        <ul>
-            <li><a th:href="@{/seller/dashboard}">Dashboard</a></li>
-            <li><a th:href="@{/seller/settings}">Settings</a></li>
-            <li><a th:href="@{/seller/orders}">Orders</a></li>
-            <li><a th:href="@{/seller/products}" class="active">Products</a></li>
-            <li><a th:href="@{/seller/reviews}">Reviews</a></li>
-            <li><a th:href="@{/seller/account}">Account</a></li>
-            <li><a th:href="@{/users/logout}" class="logout">Logout</a></li>
-        </ul>
-
-    <!-- Theme Toggle -->
-    <div class="theme-toggle">
-      <span class="theme-toggle-label">Theme</span>
-      <div class="toggle-switch" onclick="toggleTheme()"></div>
-    </div>
-  </nav>
-
-  <!-- Main Content -->
-  <main class="main-content">
-    <div class="header">
-      <h1>Manage Products</h1>
-      <p>View and manage your instrument products inventory</p>
-    </div>
-
-    <!-- Success/Error Messages -->
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
-
-    <!-- Top Bar with Add Button -->
-    <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="margin: 0; color: #1e293b;">Your Products (<span th:text="${#lists.size(products)}">0</span>)</h3>
-        <a th:href="@{/seller/products/add}" class="btn btn-success">+ Add New Product</a>
-      </div>
-    </div>
-
-    <!-- Products Table -->
-    <div class="card">
-      <table class="table">
-        <thead>
-        <tr>
-          <th>Image</th>
-          <th>Product Name</th>
-          <th>Instrument Type</th>
-          <th>Price</th>
-          <th>Stock</th>
-          <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="product : ${products}">
-          <td>
-            <div th:if="${product.getPrimaryImageUrl()}" style="width: 80px; height: 60px; border-radius: 8px; overflow: hidden;">
-              <img th:src="${product.getPrimaryImageUrl()}" alt="Product Image" style="width: 100%; height: 100%; object-fit: cover;">
+        <!-- Products Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Product Name</th>
+                            <th>Instrument Type</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Images</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="product : ${products}">
+                            <td>
+                                <div th:if="${product.getPrimaryImageUrl()}" style="width: 80px; height: 60px; border-radius: 8px; overflow: hidden;">
+                                    <img th:src="${product.getPrimaryImageUrl()}" alt="Product Image" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <div th:unless="${product.getPrimaryImageUrl()}" style="width: 80px; height: 60px; background: rgba(255, 255, 255, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #b0b0b0; font-size: 0.8rem;">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            </td>
+                            <td class="fw-bold" th:text="${product.name}">Product Name</td>
+                            <td>
+                                <span class="badge" th:text="${product.instrumentType}">Instrument Type</span>
+                            </td>
+                            <td class="fw-bold text-success" th:text="'LKR ' + ${product.price}">LKR 0.00</td>
+                            <td>
+                                <span th:if="${product.stock > 0}" class="text-success fw-bold" th:text="${product.stock}">0</span>
+                                <span th:unless="${product.stock > 0}" class="text-danger fw-bold">Out of Stock</span>
+                            </td>
+                            <td>
+                                <span class="badge" th:text="${#lists.size(product.images)}">0</span> images
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <a th:href="@{'/seller/products/edit/' + ${product.id}}" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </a>
+                                    <button class="btn btn-danger btn-sm"
+                                            th:data-product-id="${product.id}"
+                                            th:data-product-name="${product.name}"
+                                            onclick="deleteProduct(this)">
+                                        <i class="fas fa-trash me-1"></i>Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(products)}">
+                            <td colspan="7" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-box-open fa-3x mb-3"></i>
+                                    <h4 class="mb-2">No products found</h4>
+                                    <p class="mb-3">Start building your music store inventory</p>
+                                    <a th:href="@{/seller/products/add}" class="btn btn-success">
+                                        <i class="fas fa-plus me-1"></i>Add Your First Product
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div th:unless="${product.getPrimaryImageUrl()}" style="width: 80px; height: 60px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 0.8rem;">
-              No Image
-            </div>
-          </td>
-          <td style="font-weight: 600;" th:text="${product.name}">Product Name</td>
-          <td>
-            <span style="background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0369a1; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500;" th:text="${product.instrumentType}">Instrument Type</span>
-          </td>
-          <td style="font-weight: 600; color: #059669;" th:text="'LKR ' + ${product.price}">LKR 0.00</td>
-          <td>
-            <span th:if="${product.stock > 0}" style="color: #059669; font-weight: 600;" th:text="${product.stock}">0</span>
-            <span th:unless="${product.stock > 0}" style="color: #dc2626; font-weight: 600;">Out of Stock</span>
-          </td>
-          <td>
-            <span style="background: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 8px; font-size: 0.8rem;" th:text="${#lists.size(product.images)}">0</span> images
-          </td>
-          <td>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <a th:href="@{'/seller/products/edit/' + ${product.id}}" class="btn btn-warning" style="padding: 6px 12px; font-size: 0.8rem;">Edit</a>
-              <button class="btn btn-danger" style="padding: 6px 12px; font-size: 0.8rem;" th:data-product-id="${product.id}" th:data-product-name="${product.name}" onclick="deleteProduct(this)">Delete</button>
-            </div>
-          </td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(products)}">
-          <td colspan="7" style="text-align: center; padding: 60px; color: #64748b;">
-            <h3 style="margin-bottom: 8px; color: #374151;">No products found</h3>
-            <p style="margin-bottom: 16px;">Start building your music store inventory</p>
-            <a th:href="@{/seller/products/add}" class="btn btn-success">+ Add Your First Product</a>
-          </td>
-        </tr>
-        </tbody>
-      </table>
+        </div>
     </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
-      <div class="card" style="max-width: 500px; width: 90%; margin: 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <h3 style="color: #dc2626; margin: 0;">Confirm Delete</h3>
-          <span onclick="closeDeleteModal()" style="font-size: 24px; cursor: pointer; color: #64748b;">&times;</span>
-        </div>
-        <div style="margin-bottom: 24px;">
-          <p style="margin-bottom: 12px; color: #374151;">Are you sure you want to delete the product:</p>
-          <p style="font-weight: 600; color: #1e293b; margin-bottom: 12px;"><strong id="deleteProductName"></strong></p>
-          <p style="color: #dc2626; font-weight: 500;">This action cannot be undone!</p>
-        </div>
-        <div style="display: flex; justify-content: flex-end; gap: 12px;">
-          <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
-          <button class="btn btn-danger" id="confirmDelete">Delete</button>
-        </div>
-      </div>
-    </div>
-  </main>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal-overlay">
+    <div class="card" style="max-width: 500px; width: 90%; margin: 20px;">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0 text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete</h3>
+            <span onclick="closeDeleteModal()" style="font-size: 24px; cursor: pointer; color: #b0b0b0;">&times;</span>
+        </div>
+        <div class="card-body">
+            <div class="mb-4">
+                <p class="mb-3">Are you sure you want to delete the product:</p>
+                <p class="fw-bold text-center fs-5 mb-3" id="deleteProductName"></p>
+                <p class="text-danger text-center fw-bold"><i class="fas fa-exclamation-circle me-1"></i>This action cannot be undone!</p>
+            </div>
+            <div class="d-flex justify-content-end gap-3">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn btn-danger" id="confirmDelete">
+                    <i class="fas fa-trash me-1"></i>Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // Theme toggle functionality
-  function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
-    localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-  }
+    let productToDelete = null;
 
-  // Load saved theme preference immediately to prevent flashing
-  (function() {
-    if (localStorage.getItem('theme') === 'dark') {
-      document.body.classList.add('dark-mode');
+    function deleteProduct(button) {
+        const productId = button.getAttribute('data-product-id');
+        const productName = button.getAttribute('data-product-name');
+
+        productToDelete = productId;
+        document.getElementById('deleteProductName').textContent = productName;
+        document.getElementById('deleteModal').style.display = 'flex';
     }
-  })();
 
-  let productToDelete = null;
-
-  function deleteProduct(button) {
-    const productId = button.getAttribute('data-product-id');
-    const productName = button.getAttribute('data-product-name');
-
-    productToDelete = productId;
-    document.getElementById('deleteProductName').textContent = productName;
-    document.getElementById('deleteModal').style.display = 'flex';
-  }
-
-  function closeDeleteModal() {
-    document.getElementById('deleteModal').style.display = 'none';
-    productToDelete = null;
-  }
-
-  document.getElementById('confirmDelete').addEventListener('click', () => {
-    if (productToDelete) {
-      window.location.href = '/seller/products/delete/' + productToDelete;
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+        productToDelete = null;
     }
-  });
 
-  // Close modal when clicking outside
-  window.addEventListener('click', (event) => {
-    const deleteModal = document.getElementById('deleteModal');
-    if (event.target === deleteModal) {
-      closeDeleteModal();
-    }
-  });
+    document.getElementById('confirmDelete').addEventListener('click', () => {
+        if (productToDelete) {
+            window.location.href = '/seller/products/delete/' + productToDelete;
+        }
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (event) => {
+        const deleteModal = document.getElementById('deleteModal');
+        if (event.target === deleteModal) {
+            closeDeleteModal();
+        }
+    });
+
+    // Add hover effects for cards
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    });
 </script>
 </body>
 </html>

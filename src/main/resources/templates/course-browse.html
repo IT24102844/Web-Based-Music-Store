@@ -446,7 +446,7 @@
 
                                 <div class="mb-3">
                                     <th:block th:if="${course.price > 0}">
-                                            <span class="price-tag">$<span
+                                            <span class="price-tag">LKR <span
                                                     th:text="${#numbers.formatDecimal(course.price, 1, 2)}">0.00</span></span>
                                     </th:block>
                                     <th:block th:if="${course.price == 0}">

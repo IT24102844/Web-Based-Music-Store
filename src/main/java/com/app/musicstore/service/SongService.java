@@ -121,8 +121,8 @@ public class SongService {
             throw new IllegalArgumentException("File is empty");
         }
 
-        String uploadDir = "uploads/";
-        Path directoryPath = Paths.get(uploadDir);
+        // Use the external uploads directory configured at the top of this class
+        Path directoryPath = Paths.get(uploadDir, "songs");
 
         // Create directory if it doesn't exist
         if (!Files.exists(directoryPath)) {
@@ -134,7 +134,7 @@ public class SongService {
 
         Files.copy(file.getInputStream(), filePath);
 
-        return "/uploads/" + fileName;
+        return "/uploads/songs/" + fileName;
     }
 
     public boolean isArtistOwner(Long songId, Long artistId) {

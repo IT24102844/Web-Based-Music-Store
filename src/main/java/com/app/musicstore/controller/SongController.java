@@ -13,7 +13,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -65,7 +64,6 @@ public class SongController {
         model.addAttribute("user", currentArtist);
         return "song-upload-form";
     }
-
 
     @PostMapping("/upload")
     public String uploadSong(
@@ -120,23 +118,26 @@ public class SongController {
         }
 
         // Validate file types
-//        if (!isValidAudioFile(audioFile)) {
-//            model.addAttribute("error", "Please upload a valid audio file (MP3, WAV, FLAC, AAC)");
-//            model.addAttribute("user", currentArtist);
-//            return "song-upload-form";
-//        }
-//
-//        if (!isValidAudioFile(previewClip)) {
-//            model.addAttribute("error", "Please upload a valid preview clip (MP3, WAV, FLAC, AAC)");
-//            model.addAttribute("user", currentArtist);
-//            return "song-upload-form";
-//        }
+        // if (!isValidAudioFile(audioFile)) {
+        // model.addAttribute("error", "Please upload a valid audio file (MP3, WAV,
+        // FLAC, AAC)");
+        // model.addAttribute("user", currentArtist);
+        // return "song-upload-form";
+        // }
+        //
+        // if (!isValidAudioFile(previewClip)) {
+        // model.addAttribute("error", "Please upload a valid preview clip (MP3, WAV,
+        // FLAC, AAC)");
+        // model.addAttribute("user", currentArtist);
+        // return "song-upload-form";
+        // }
 
-//        if (!isValidImageFile(songImage)) {
-//            model.addAttribute("error", "Please upload a valid image file (JPG, JPEG, PNG, GIF)");
-//            model.addAttribute("user", currentArtist);
-//            return "song-upload-form";
-//        }
+        // if (!isValidImageFile(songImage)) {
+        // model.addAttribute("error", "Please upload a valid image file (JPG, JPEG,
+        // PNG, GIF)");
+        // model.addAttribute("user", currentArtist);
+        // return "song-upload-form";
+        // }
 
         try {
             // save files and get paths
@@ -162,7 +163,8 @@ public class SongController {
 
     // Helper method to validate audio files
     private boolean isValidAudioFile(MultipartFile file) {
-        if (file.isEmpty()) return false;
+        if (file.isEmpty())
+            return false;
 
         String contentType = file.getContentType();
         String originalFilename = file.getOriginalFilename();
@@ -178,7 +180,8 @@ public class SongController {
 
     // Helper method to validate image files
     private boolean isValidImageFile(MultipartFile file) {
-        if (file.isEmpty()) return false;
+        if (file.isEmpty())
+            return false;
 
         String contentType = file.getContentType();
         String originalFilename = file.getOriginalFilename();
@@ -195,8 +198,8 @@ public class SongController {
     // List all songs for current artist
     @GetMapping
     public String listArtistSongs(Model model,
-                                  @RequestParam(required = false) String success,
-                                  @RequestParam(required = false) String error) {
+            @RequestParam(required = false) String success,
+            @RequestParam(required = false) String error) {
 
         Artist currentArtist = getCurrentArtist();
         if (currentArtist == null) {
@@ -208,8 +211,10 @@ public class SongController {
         model.addAttribute("songs", songs);
         model.addAttribute("user", currentArtist);
 
-        if (success != null) model.addAttribute("success", success);
-        if (error != null) model.addAttribute("error", error);
+        if (success != null)
+            model.addAttribute("success", success);
+        if (error != null)
+            model.addAttribute("error", error);
 
         return "artist-songs";
     }
@@ -258,10 +263,10 @@ public class SongController {
     // Handle song update
     @PostMapping("/edit/{id}")
     public String updateSong(@PathVariable Long id,
-                             @RequestParam String name,
-                             @RequestParam String genre,
-                             @RequestParam Double price,
-                             Model model) {
+            @RequestParam String name,
+            @RequestParam String genre,
+            @RequestParam Double price,
+            Model model) {
 
         Artist currentArtist = getCurrentArtist();
         if (currentArtist == null) {

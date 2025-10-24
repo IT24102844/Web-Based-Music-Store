@@ -65,10 +65,10 @@ public class BuyerController {
     // Search and Filter Products
     @GetMapping("/products")
     public String searchProducts(@RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "instrumentType", required = false) String instrumentType,
-            @RequestParam(value = "minPrice", required = false) Double minPrice,
-            @RequestParam(value = "maxPrice", required = false) Double maxPrice,
-            Model model, HttpSession session) {
+                                 @RequestParam(value = "instrumentType", required = false) String instrumentType,
+                                 @RequestParam(value = "minPrice", required = false) Double minPrice,
+                                 @RequestParam(value = "maxPrice", required = false) Double maxPrice,
+                                 Model model, HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
         if (!isCustomer(user))
             return "redirect:/users/login?error=Please log in as a customer";
@@ -164,8 +164,8 @@ public class BuyerController {
     // Add to Cart (placeholder for future implementation)
     @PostMapping("/cart/add/{productId}")
     public String addToCart(@PathVariable Long productId,
-            @RequestParam(value = "quantity", defaultValue = "1") int quantity,
-            HttpSession session) {
+                            @RequestParam(value = "quantity", defaultValue = "1") int quantity,
+                            HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
         if (!isCustomer(user))
             return "redirect:/users/login?error=Please log in as a customer";
@@ -179,7 +179,7 @@ public class BuyerController {
     // View cart page
     @GetMapping("/cart")
     public String viewCart(Model model,
-            HttpSession session) {
+                           HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
         if (!isCustomer(user))
             return "redirect:/users/login?error=Please log in as a customer";
@@ -200,7 +200,7 @@ public class BuyerController {
     // Remove item from cart
     @PostMapping("/cart/remove/{productId}")
     public String removeFromCart(@PathVariable Long productId,
-            HttpSession session) {
+                                 HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
         if (!isCustomer(user))
             return "redirect:/users/login?error=Please log in as a customer";
@@ -212,8 +212,8 @@ public class BuyerController {
     // Update quantities
     @PostMapping("/cart/update")
     public String updateCart(@RequestParam("productId") List<Long> productIds,
-            @RequestParam("quantity") List<Integer> quantities,
-            HttpSession session) {
+                             @RequestParam("quantity") List<Integer> quantities,
+                             HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
         if (!isCustomer(user))
             return "redirect:/users/login?error=Please log in as a customer";
@@ -222,11 +222,10 @@ public class BuyerController {
         return "redirect:/buyer/cart?success=Cart updated";
     }
 
-    // Checkout selected products from cart → payment
+    // Checkout selected products from cart → unified payment
     @PostMapping("/cart/checkout")
     public String checkoutFromCart(@RequestParam(value = "selectedIds", required = false) List<Long> selectedIds,
-            Model model,
-            HttpSession session) {
+                                   HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
         if (!isCustomer(user))
             return "redirect:/users/login?error=Please log in as a customer";
@@ -235,29 +234,48 @@ public class BuyerController {
             return "redirect:/buyer/cart?error=Please select at least one item";
         }
 
+        // Calculate total from selected items
         var dbItems = cartService.getCartItems(user.getUserId());
         java.util.Map<Long, Integer> qtyByProduct = dbItems.stream()
                 .collect(java.util.stream.Collectors.toMap(ci -> ci.getProduct().getId(), ci -> ci.getQuantity()));
 
-        List<CartViewItem> items = selectedIds.stream()
+        double total = selectedIds.stream()
                 .filter(qtyByProduct::containsKey)
-                .map(pid -> new CartViewItem(productService.getProductById(pid).orElse(null), qtyByProduct.get(pid)))
-                .filter(ci -> ci.product() != null)
-                .toList();
+                .mapToDouble(pid -> {
+                    var product = productService.getProductById(pid).orElse(null);
+                    return product != null ? product.getPrice() * qtyByProduct.get(pid) : 0.0;
+                })
+                .sum();
 
-        double total = items.stream().mapToDouble(ci -> ci.product().getPrice() * ci.quantity()).sum();
+        // Store selected IDs and quantities in session for after payment processing
+        String selectedIdsCsv = selectedIds.stream()
+                .map(String::valueOf)
+                .collect(java.util.stream.Collectors.joining(","));
 
-        model.addAttribute("user", user);
-        model.addAttribute("items", items);
-        model.addAttribute("total", total);
-        model.addAttribute("selectedIds", selectedIds);
-        return "summary";
+        String quantitiesCsv = selectedIds.stream()
+                .map(pid -> String.valueOf(qtyByProduct.get(pid)))
+                .collect(java.util.stream.Collectors.joining(","));
+
+        // Store in session for after-payment processing
+        session.setAttribute("pendingCartItems_" + user.getUserId(), selectedIdsCsv);
+        session.setAttribute("pendingCartQuantities_" + user.getUserId(), quantitiesCsv);
+
+        // Redirect to unified checkout - treat as single payment with calculated total
+        String successRedirect = "/buyer/after-unified-cart";
+        String url = String.format(
+                "redirect:/payments/checkout?itemType=%s&itemId=%d&itemName=%s&amount=%s&successRedirect=%s",
+                java.net.URLEncoder.encode("INSTRUMENT_CART", java.nio.charset.StandardCharsets.UTF_8),
+                0L, // Using 0 as itemId for cart checkout
+                java.net.URLEncoder.encode("Cart with " + selectedIds.size() + " items", java.nio.charset.StandardCharsets.UTF_8),
+                java.net.URLEncoder.encode(String.valueOf(total), java.nio.charset.StandardCharsets.UTF_8),
+                java.net.URLEncoder.encode(successRedirect, java.nio.charset.StandardCharsets.UTF_8));
+        return url;
     }
 
     @PostMapping("/place-order")
     public String placeOrder(@RequestParam("selectedIds") List<Long> selectedIds,
-            HttpSession session,
-            Model model) {
+                             HttpSession session,
+                             Model model) {
         User user = sessionUserService.getAuthenticatedUser(session);
         if (!isCustomer(user))
             return "redirect:/users/login?error=Please log in as a customer";
@@ -288,7 +306,7 @@ public class BuyerController {
             cartService.removeFromCart(user.getUserId(), pid);
         }
 
-        return "redirect:/buyer/dashboard?success=Order placed successfully";
+        return "redirect:/payments/pay";
     }
 
     @GetMapping("/orders")
@@ -337,9 +355,9 @@ public class BuyerController {
 
     @PostMapping("/reviews")
     public String submitReview(@RequestParam Long productId,
-            @RequestParam Integer rating,
-            @RequestParam(required = false) String comment,
-            HttpSession session) {
+                               @RequestParam Integer rating,
+                               @RequestParam(required = false) String comment,
+                               HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
         if (!isCustomer(user))
             return "redirect:/users/login?error=Please log in as a customer";
@@ -393,8 +411,8 @@ public class BuyerController {
     // Checkout selected products → unified payment
     @PostMapping("/checkout")
     public String checkoutSelected(@RequestParam(value = "selectedIds", required = false) List<Long> selectedIds,
-            Model model,
-            HttpSession session) {
+                                   Model model,
+                                   HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
         if (!isCustomer(user))
             return "redirect:/users/login?error=Please log in as a customer";
@@ -430,23 +448,41 @@ public class BuyerController {
 
     // After unified payment for cart → place orders and clear items
     @GetMapping("/after-unified-cart")
-    public String afterUnifiedCart(@RequestParam("selectedIds") String selectedIdsCsv,
-            @RequestParam(value = "unifiedPaymentId", required = false) Long unifiedPaymentId,
-            HttpSession session) {
+    public String afterUnifiedCart(@RequestParam(value = "unifiedPaymentId", required = false) Long unifiedPaymentId,
+                                   HttpSession session) {
         User user = sessionUserService.getAuthenticatedUser(session);
         if (!isCustomer(user))
             return "redirect:/users/login?error=Please log in as a customer";
+
+        // Retrieve selected IDs and quantities from session
+        String selectedIdsCsv = (String) session.getAttribute("pendingCartItems_" + user.getUserId());
+        String quantitiesCsv = (String) session.getAttribute("pendingCartQuantities_" + user.getUserId());
+
+        // Clean up session
+        session.removeAttribute("pendingCartItems_" + user.getUserId());
+        session.removeAttribute("pendingCartQuantities_" + user.getUserId());
+
+        if (selectedIdsCsv == null || selectedIdsCsv.isEmpty()) {
+            return "redirect:/buyer/cart?error=No pending cart items found";
+        }
 
         List<Long> selectedIds = java.util.Arrays.stream(selectedIdsCsv.split(","))
                 .filter(s -> !s.isBlank())
                 .map(Long::valueOf)
                 .toList();
 
-        // Reuse existing place-order logic
-        var dbItems = cartService.getCartItems(user.getUserId());
-        java.util.Map<Long, Integer> qtyByProduct = dbItems.stream()
-                .collect(java.util.stream.Collectors.toMap(ci -> ci.getProduct().getId(), ci -> ci.getQuantity()));
+        List<Integer> quantities = java.util.Arrays.stream(quantitiesCsv.split(","))
+                .filter(s -> !s.isBlank())
+                .map(Integer::valueOf)
+                .toList();
 
+        // Create quantity map
+        java.util.Map<Long, Integer> qtyByProduct = new java.util.HashMap<>();
+        for (int i = 0; i < selectedIds.size(); i++) {
+            qtyByProduct.put(selectedIds.get(i), quantities.get(i));
+        }
+
+        // Group by seller and create orders
         java.util.Map<Long, List<Product>> bySeller = new java.util.HashMap<>();
         for (Long pid : selectedIds) {
             var product = productService.getProductById(pid).orElse(null);
@@ -454,15 +490,19 @@ public class BuyerController {
                 continue;
             bySeller.computeIfAbsent(product.getSellerId(), k -> new java.util.ArrayList<>()).add(product);
         }
+
         for (var entry : bySeller.entrySet()) {
             Long sellerId = entry.getKey();
             List<Product> sellerProducts = entry.getValue();
             orderService.createOrderWithItems(sellerId, user.getUserId(), user.getName(), sellerProducts, qtyByProduct);
         }
+
+        // Remove selected items from cart
         for (Long pid : selectedIds) {
             cartService.removeFromCart(user.getUserId(), pid);
         }
-        return "redirect:/buyer/dashboard?success=Payment successful. Order placed.";
+
+        return "redirect:/buyer/orders?success=Payment successful. Order placed.";
     }
 
     // Helper methods

@@ -42,8 +42,8 @@ public class EventController {
     @Autowired
     private PaymentService paymentService;
 
-    // Use the static directory - this works with your current setup
-    private static final String UPLOAD_DIR = "src/main/resources/static/uploads/";
+    // Use the external uploads directory
+    private static final String UPLOAD_DIR = "uploads/";
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit
 
     @EventListener
@@ -105,8 +105,8 @@ public class EventController {
 
     @PostMapping("/artist/event/save")
     public String saveEvent(@ModelAttribute Event event,
-                            @RequestParam("imageFile") MultipartFile imageFile,
-                            Model model) {
+            @RequestParam("imageFile") MultipartFile imageFile,
+            Model model) {
 
         User currentUser = getCurrentUser();
         if (currentUser == null) {
@@ -168,8 +168,8 @@ public class EventController {
     // -------------------- Artist Only: My events --------------------
     @GetMapping("/artist/events")
     public String artistEvents(Model model,
-                               @RequestParam(required = false) String success,
-                               @RequestParam(required = false) String error) {
+            @RequestParam(required = false) String success,
+            @RequestParam(required = false) String error) {
 
         User currentUser = getCurrentUser();
         if (currentUser == null) {
@@ -210,8 +210,10 @@ public class EventController {
         model.addAttribute("approvedCount", approvedCount);
         model.addAttribute("rejectedCount", rejectedCount);
 
-        if (success != null) model.addAttribute("success", success);
-        if (error != null) model.addAttribute("error", error);
+        if (success != null)
+            model.addAttribute("success", success);
+        if (error != null)
+            model.addAttribute("error", error);
 
         return "artist_events";
     }
@@ -243,13 +245,13 @@ public class EventController {
 
     @PostMapping("/artist/event/update/{id}")
     public String updateEvent(@PathVariable("id") Long id,
-                              @RequestParam("title") String title,
-                              @RequestParam("description") String description,
-                              @RequestParam("date") LocalDate date,
-                              @RequestParam("venue") String venue,
-                              @RequestParam("ticketPrice") Double ticketPrice,
-                              @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-                              Model model) {
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("date") LocalDate date,
+            @RequestParam("venue") String venue,
+            @RequestParam("ticketPrice") Double ticketPrice,
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+            Model model) {
 
         User currentUser = getCurrentUser();
         if (currentUser == null) {
@@ -349,13 +351,13 @@ public class EventController {
 
     @PostMapping("/events/{id}/process-payment")
     public String processPayment(@PathVariable Long id,
-                                 @RequestParam("quantity") Integer quantity,
-                                 @RequestParam("paymentMethod") String paymentMethod,
-                                 @RequestParam("cardNumber") String cardNumber,
-                                 @RequestParam("expiryDate") String expiryDate,
-                                 @RequestParam("cvv") String cvv,
-                                 @RequestParam("cardholderName") String cardholderName,
-                                 Model model) {
+            @RequestParam("quantity") Integer quantity,
+            @RequestParam("paymentMethod") String paymentMethod,
+            @RequestParam("cardNumber") String cardNumber,
+            @RequestParam("expiryDate") String expiryDate,
+            @RequestParam("cvv") String cvv,
+            @RequestParam("cardholderName") String cardholderName,
+            Model model) {
 
         System.out.println("🔄 Processing payment for event: " + id);
         System.out.println("📦 Quantity: " + quantity);

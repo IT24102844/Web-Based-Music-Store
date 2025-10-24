@@ -466,10 +466,6 @@
                         <span class="detail-label">Status</span>
                         <span class="detail-value" th:text="${user.status}">ACTIVE</span>
                     </div>
-                    <div class="profile-detail">
-                        <span class="detail-label">Member Since</span>
-                        <span class="detail-value">2024</span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -535,45 +531,32 @@
                     <i class="fas fa-arrow-right"></i>
                 </div>
             </a>
+
+            <a th:href="@{/my-tickets}" class="nav-card">
+                <div class="nav-icon">
+                    <i class="fas fa-music"></i>
+                </div>
+                <h3>MY tickets</h3>
+                <p>View Tickets You Purchased</p>
+                <div class="nav-action">
+                    <span>View Your Tickets</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <a th:href="@{/tickets/my-tickets}" class="nav-card">
+                <div class="nav-icon">
+                    <i class="fas fa-music"></i>
+                </div>
+                <h3>Help & Support</h3>
+                <p>View Your Support tickets</p>
+                <div class="nav-action">
+                    <span>View Support Tickets</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
         </div>
 
-        <!-- Quick Stats -->
-        <div class="stats-section">
-            <h2 class="stats-title">
-                <i class="fas fa-chart-line"></i>
-                Your Music Journey
-            </h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-headphones"></i>
-                    </div>
-                    <div class="stat-value">24</div>
-                    <div class="stat-label">Songs Listened</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                    <div class="stat-value">3</div>
-                    <div class="stat-label">Items Purchased</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-play-circle"></i>
-                    </div>
-                    <div class="stat-value">5</div>
-                    <div class="stat-label">Courses Enrolled</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-ticket-alt"></i>
-                    </div>
-                    <div class="stat-value">2</div>
-                    <div class="stat-label">Events Attended</div>
-                </div>
-            </div>
-        </div>
 
         <!-- Upcoming Events Section -->
         <div class="stats-section">

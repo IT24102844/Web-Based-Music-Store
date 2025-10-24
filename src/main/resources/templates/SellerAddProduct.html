@@ -4,61 +4,495 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add New Product - TuneWave</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #ffffff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            padding-top: 100px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px, 120px 120px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-family: 'Monospace', monospace;
+            font-size: 28px;
+            font-weight: 600;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #00d4ff;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00d4ff, #0099cc);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* User info styling */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-email {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-email i {
+            color: #00d4ff;
+        }
+
+        .seller-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .seller-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        .seller-links a:hover {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        /* Logout Button Specific Styling */
+        .logout-btn {
+            background: rgba(255, 71, 87, 0.2);
+            border: 1px solid rgba(255, 71, 87, 0.4);
+            color: #ff6b81 !important;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 71, 87, 0.3);
+            border-color: #ff4757;
+            color: #ff4757 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+        }
+
+        /* Page Title */
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00d4ff, #ffffff, #00d4ff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: textShimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes textShimmer {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .page-subtitle {
+            color: #b0b0b0;
+            margin-bottom: 30px;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .card-header {
+            background: rgba(0, 212, 255, 0.15) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+        }
+
+        .card-body {
+            padding: 30px;
+            color: #ffffff;
+        }
+
+        .card-title {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .card-text {
+            color: #b0b0b0;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            color: #ffffff;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #ffffff;
+            padding: 12px 16px;
+            width: 100%;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-control::placeholder {
+            color: #b0b0b0;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Image Preview */
+        .image-preview-container {
+            margin-top: 20px;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .preview-index {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+
+        /* Alerts */
+        .alert {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: #ffffff;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            border-color: rgba(46, 213, 115, 0.3);
+            background: rgba(46, 213, 115, 0.1);
+        }
+
+        .alert-error {
+            border-color: rgba(255, 71, 87, 0.3);
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        /* Content Container */
+        .content-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                width: 95%;
+                padding: 12px 20px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .content-container {
+                padding: 30px 20px;
+            }
+
+            .auth-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .user-info {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .seller-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .user-email {
+                font-size: 0.9rem;
+                padding: 6px 12px;
+            }
+
+            .logout-btn {
+                font-size: 0.9rem;
+                padding: 6px 12px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-<div class="dashboard-container">
-    <!-- Sidebar -->
-    <nav class="sidebar">
-        <h2>TuneWave</h2>
-        
-        <!-- Profile Section -->
-        <div class="profile-section">
-            <div class="profile-image-container">
-                <img th:if="${user.profileImagePath}" 
-                     th:src="'/uploads/profile/' + ${user.profileImagePath}" 
-                     th:alt="${user.name} + ' Profile Image'" 
-                     class="profile-image"
-                     onerror="this.src='https://via.placeholder.com/80x80/2333de/ffffff?text=' + this.alt.charAt(0)">
-                <img th:unless="${user.profileImagePath}" 
-                     src="https://via.placeholder.com/80x80/2333de/ffffff?text=U" 
-                     alt="Default Profile Image" 
-                     class="profile-image">
+<!-- Navigation -->
+<nav class="navbar">
+    <div class="logo">TuneWave</div>
+    <ul class="nav-links">
+        <li><a th:href="@{/seller/dashboard}">Home</a></li>
+        <li><a th:href="@{/seller/settings}">Settings</a></li>
+        <li><a th:href="@{/seller/orders}">Orders</a></li>
+        <li><a th:href="@{/seller/products}">Products</a></li>
+        <li><a th:href="@{/seller/reviews}">Reviews</a></li>
+        <li><a th:href="@{/seller/account}">Account</a></li>
+        <li><a th:href="@{/users/logout}" class="logout">Logout</a></li>
+    </ul>
+    <div class="auth-buttons">
+        <div th:if="${currentUser != null}" class="user-info">
+            <span class="user-email">
+                <i class="fas fa-user me-1"></i>
+                <span th:text="${currentUser.email}">user@example.com</span>
+            </span>
+            <div th:if="${currentUser.role == 'SELLER'}" class="seller-links">
+                <a href="/seller/products">My Products</a>
+                <a href="/seller/orders">Manage Orders</a>
             </div>
-            <div class="profile-info">
-                <div class="profile-name" th:text="${user.name}">Seller Name</div>
-                <div class="profile-role" th:text="${user.role}">SELLER</div>
-                <div class="profile-details">
-                    <p><strong>Email:</strong> <span th:text="${user.email}">seller@example.com</span></p>
-                    <p><strong>Status:</strong> <span th:text="${user.status}">ACTIVE</span></p>
-                </div>
-            </div>
+            <a class="logout-btn" href="/users/logout">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </a>
         </div>
+    </div>
+</nav>
 
-        <!-- Navigation -->
-        <ul>
-            <li><a th:href="@{/seller/dashboard}">Dashboard</a></li>
-            <li><a th:href="@{/seller/settings}">Settings</a></li>
-            <li><a th:href="@{/seller/orders}">Orders</a></li>
-            <li><a th:href="@{/seller/products}">Products</a></li>
-            <li><a th:href="@{/seller/reviews}">Reviews</a></li>
-            <li><a th:href="@{/seller/account}">Account</a></li>
-            <li><a th:href="@{/users/logout}" class="logout">Logout</a></li>
-        </ul>
-
-        <!-- Theme Toggle -->
-        <div class="theme-toggle">
-            <span class="theme-toggle-label">Theme</span>
-            <div class="toggle-switch" onclick="toggleTheme()"></div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="header">
-            <h1>Add New Product</h1>
-            <p>Create a new product listing for your music store</p>
+<div class="container">
+    <div class="content-container">
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <h1 class="page-title">Add New Product</h1>
+            <p class="page-subtitle">Create a new product listing for your music store</p>
         </div>
 
         <!-- Success/Error Messages -->
@@ -67,95 +501,92 @@
 
         <!-- Add Product Form -->
         <div class="card">
-            <form th:action="@{/seller/products/add}" th:object="${product}" method="post" enctype="multipart/form-data">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
-                    <!-- Product Name -->
-                    <div class="form-group">
-                        <label for="name">Product Name *</label>
-                        <input type="text" id="name" th:field="*{name}" class="form-control" placeholder="Enter product name" required>
+            <div class="card-header">
+                <h3 class="card-title mb-0"><i class="fas fa-plus-circle me-2"></i>Product Information</h3>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/seller/products/add}" th:object="${product}" method="post" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="name">Product Name *</label>
+                                <input type="text" id="name" th:field="*{name}" class="form-control" placeholder="Enter product name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="instrumentType">Instrument Type *</label>
+                                <select id="instrumentType" th:field="*{instrumentType}" class="form-control" required>
+                                    <option value="">Select instrument type</option>
+                                    <option value="GUITAR">Guitar</option>
+                                    <option value="BASS">Bass</option>
+                                    <option value="DRUMS">Drums</option>
+                                    <option value="PIANO">Piano</option>
+                                    <option value="VIOLIN">Violin</option>
+                                    <option value="SAXOPHONE">Saxophone</option>
+                                    <option value="TRUMPET">Trumpet</option>
+                                    <option value="FLUTE">Flute</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Instrument Type -->
-                    <div class="form-group">
-                        <label for="instrumentType">Instrument Type *</label>
-                        <select id="instrumentType" th:field="*{instrumentType}" class="form-control" required>
-                            <option value="">Select instrument type</option>
-                            <option value="GUITAR">Guitar</option>
-                            <option value="BASS">Bass</option>
-                            <option value="DRUMS">Drums</option>
-                            <option value="PIANO">Piano</option>
-                            <option value="VIOLIN">Violin</option>
-                            <option value="SAXOPHONE">Saxophone</option>
-                            <option value="TRUMPET">Trumpet</option>
-                            <option value="FLUTE">Flute</option>
-                            <option value="OTHER">Other</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
-                    <!-- Price -->
-                    <div class="form-group">
-                        <label for="price">Price *</label>
-                        <input type="number" id="price" th:field="*{price}" class="form-control" placeholder="0.00" step="0.01" min="0" required>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="price">Price *</label>
+                                <input type="number" id="price" th:field="*{price}" class="form-control" placeholder="0.00" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="stock">Stock Quantity *</label>
+                                <input type="number" id="stock" th:field="*{stock}" class="form-control" placeholder="0" min="0" required>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Stock -->
                     <div class="form-group">
-                        <label for="stock">Stock Quantity *</label>
-                        <input type="number" id="stock" th:field="*{stock}" class="form-control" placeholder="0" min="0" required>
+                        <label class="form-label" for="description">Description *</label>
+                        <textarea id="description" th:field="*{description}" class="form-control" rows="4" placeholder="Describe your product..." required></textarea>
                     </div>
-                </div>
 
-                <!-- Description -->
-                <div class="form-group" style="margin-bottom: 24px;">
-                    <label for="description">Description *</label>
-                    <textarea id="description" th:field="*{description}" class="form-control" rows="4" placeholder="Describe your product..." required></textarea>
-                </div>
+                    <div class="form-group">
+                        <label class="form-label" for="specifications">Specifications (Optional)</label>
+                        <textarea id="specifications" th:field="*{specifications}" class="form-control" rows="3" placeholder="Technical specifications, features, etc..."></textarea>
+                    </div>
 
-                <!-- Specifications -->
-                <div class="form-group" style="margin-bottom: 24px;">
-                    <label for="specifications">Specifications (Optional)</label>
-                    <textarea id="specifications" th:field="*{specifications}" class="form-control" rows="3" placeholder="Technical specifications, features, etc..."></textarea>
-                </div>
+                    <div class="form-group">
+                        <label class="form-label" for="images">Product Images <span style="color: #ff4757;">*</span></label>
+                        <input type="file" id="images" name="images" class="form-control" multiple accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" required>
+                        <small style="color: #b0b0b0; font-size: 0.875rem;">
+                            Upload up to 10 images (JPG, PNG, GIF, WEBP). Max 10MB per file. First image will be the main product image.
+                        </small>
+                        <div id="fileError" style="color: #ff4757; font-size: 0.875rem; margin-top: 4px; display: none;"></div>
+                    </div>
 
-                <!-- Product Images -->
-                <div class="form-group" style="margin-bottom: 24px;">
-                    <label for="images">Product Images <span style="color: red;">*</span></label>
-                    <input type="file" id="images" name="images" class="form-control" multiple accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" required>
-                    <small style="color: #64748b; font-size: 0.875rem;">
-                        Upload up to 10 images (JPG, PNG, GIF, WEBP). Max 10MB per file. First image will be the main product image.
-                    </small>
-                    <div id="fileError" style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; display: none;"></div>
-                </div>
+                    <!-- Image Preview -->
+                    <div id="imagePreview" style="display: none;">
+                        <label class="form-label">Image Preview</label>
+                        <div id="previewContainer" class="preview-grid"></div>
+                    </div>
 
-                <!-- Image Preview -->
-                <div id="imagePreview" style="display: none; margin-bottom: 24px;">
-                    <h4 style="color: #374151; margin-bottom: 12px;">Image Preview</h4>
-                    <div id="previewContainer" style="display: flex; gap: 12px; flex-wrap: wrap;"></div>
-                </div>
-
-                <!-- Form Actions -->
-                <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <a th:href="@{/seller/products}" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-success">Add Product</button>
-                </div>
-            </form>
+                    <!-- Form Actions -->
+                    <div class="d-flex gap-3 justify-content-end mt-4">
+                        <a th:href="@{/seller/products}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Add Product
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </main>
+    </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    function toggleTheme() {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-    }
-
-    // Load saved theme
-    if (localStorage.getItem('darkMode') === 'true') {
-        document.body.classList.add('dark-mode');
-    }
-
     // File validation constants
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     const MAX_FILES = 10;
@@ -165,45 +596,45 @@
     // File validation functions
     function validateFile(file) {
         const errors = [];
-        
+
         // Check file type
         if (!ALLOWED_TYPES.includes(file.type.toLowerCase())) {
             errors.push(`File "${file.name}" has invalid type. Allowed: JPG, PNG, GIF, WEBP`);
         }
-        
+
         // Check file extension
         const extension = '.' + file.name.split('.').pop().toLowerCase();
         if (!ALLOWED_EXTENSIONS.includes(extension)) {
             errors.push(`File "${file.name}" has invalid extension. Allowed: .jpg, .jpeg, .png, .gif, .webp`);
         }
-        
+
         // Check file size
         if (file.size > MAX_FILE_SIZE) {
             errors.push(`File "${file.name}" is too large. Maximum size: 10MB`);
         }
-        
+
         // Check if file is empty
         if (file.size === 0) {
             errors.push(`File "${file.name}" is empty`);
         }
-        
+
         return errors;
     }
 
     function validateFiles(files) {
         const allErrors = [];
-        
+
         // Check number of files
         if (files.length > MAX_FILES) {
             allErrors.push(`Too many files selected. Maximum ${MAX_FILES} files allowed`);
         }
-        
+
         // Validate each file
         Array.from(files).forEach(file => {
             const errors = validateFile(file);
             allErrors.push(...errors);
         });
-        
+
         return allErrors;
     }
 
@@ -231,11 +662,11 @@
         const files = e.target.files;
         const previewContainer = document.getElementById('previewContainer');
         const imagePreview = document.getElementById('imagePreview');
-        
+
         // Clear previous previews and errors
         previewContainer.innerHTML = '';
         hideFileError();
-        
+
         if (files.length > 0) {
             // Validate files
             const errors = validateFiles(files);
@@ -245,41 +676,25 @@
                 e.target.value = '';
                 return;
             }
-            
+
             imagePreview.style.display = 'block';
-            
+
             Array.from(files).forEach((file, index) => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const imgContainer = document.createElement('div');
-                    imgContainer.style.position = 'relative';
-                    imgContainer.style.display = 'inline-block';
-                    
+                    imgContainer.className = 'preview-item';
+
                     const img = document.createElement('img');
                     img.src = e.target.result;
-                    img.style.width = '100px';
-                    img.style.height = '100px';
-                    img.style.objectFit = 'cover';
-                    img.style.borderRadius = '8px';
-                    img.style.border = '2px solid #e5e7eb';
-                    img.title = `${file.name} (${formatFileSize(file.size)})`;
-                    
-                    // Add file info overlay
-                    const infoOverlay = document.createElement('div');
-                    infoOverlay.style.position = 'absolute';
-                    infoOverlay.style.bottom = '0';
-                    infoOverlay.style.left = '0';
-                    infoOverlay.style.right = '0';
-                    infoOverlay.style.background = 'rgba(0,0,0,0.7)';
-                    infoOverlay.style.color = 'white';
-                    infoOverlay.style.fontSize = '10px';
-                    infoOverlay.style.padding = '2px';
-                    infoOverlay.style.borderRadius = '0 0 6px 6px';
-                    infoOverlay.style.textAlign = 'center';
-                    infoOverlay.textContent = `${index + 1}`;
-                    
+                    img.alt = `Preview ${index + 1}`;
+
+                    const indexBadge = document.createElement('div');
+                    indexBadge.className = 'preview-index';
+                    indexBadge.textContent = index + 1;
+
                     imgContainer.appendChild(img);
-                    imgContainer.appendChild(infoOverlay);
+                    imgContainer.appendChild(indexBadge);
                     previewContainer.appendChild(imgContainer);
                 };
                 reader.readAsDataURL(file);
@@ -293,14 +708,14 @@
     document.querySelector('form').addEventListener('submit', function(e) {
         const fileInput = document.getElementById('images');
         const files = fileInput.files;
-        
+
         // Check if files are selected
         if (files.length === 0) {
             e.preventDefault();
             showFileError('Please select at least one image file');
             return;
         }
-        
+
         // Validate files before submission
         const errors = validateFiles(files);
         if (errors.length > 0) {
@@ -308,11 +723,24 @@
             showFileError(errors.join('; '));
             return;
         }
-        
+
         // Show loading state
         const submitBtn = document.querySelector('button[type="submit"]');
-        submitBtn.textContent = 'Adding Product...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Adding Product...';
         submitBtn.disabled = true;
+    });
+
+    // Add hover effects for cards
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
     });
 </script>
 </body>

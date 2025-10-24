@@ -4,137 +4,519 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Reviews - TuneWave</title>
-    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
-    <script>
-        if (localStorage.getItem('theme') === 'dark') {
-            document.documentElement.classList.add('dark-mode');
-        }
-    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .product-review { display: grid; grid-template-columns: 80px 1fr auto; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
-        .product-review img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; background: #f8fafc; }
-        .stars input { display:none; }
-        .stars label { font-size: 1.4rem; color: #cbd5e1; cursor: pointer; transition: color 0.2s ease; }
-        .stars input:checked ~ label, .stars label:hover, .stars label:hover ~ label { color: #f59e0b; }
-        .stars label:hover { transform: scale(1.1); }
-        .product-name { font-weight: 600; }
-        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .btn-outline-primary:hover { background: #3b82f6; color: white; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        /* Theme Toggle Styles */
-        .theme-toggle { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; margin-top: auto; border-top: 1px solid #e5e7eb; }
-        .theme-toggle-label { font-size: 14px; font-weight: 500; color: #374151; }
-        .toggle-switch { position: relative; width: 50px; height: 24px; background-color: #d1d5db; border-radius: 12px; cursor: pointer; transition: background-color 0.3s ease; }
-        .toggle-switch.active { background-color: #3b82f6; }
-        .toggle-slider { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background-color: white; border-radius: 50%; transition: transform 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .toggle-switch.active .toggle-slider { transform: translateX(26px); }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #ffffff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            padding-top: 100px;
+        }
 
-        /* Dark Mode Styles (high specificity, override globals) */
-        html.dark-mode, html.dark-mode body { background-color: #12172b !important; color: #f9fafb !important; }
-        html.dark-mode .sidebar { background-color: #12172b !important; border-right-color: #374151 !important; }
-        html.dark-mode .main-content { background-color: #12172b !important; }
-        html.dark-mode .card { background-color: #374151 !important; border-color: #4b5563 !important; }
-        html.dark-mode .theme-toggle-label { color: #f9fafb !important; }
-        html.dark-mode a { color: #93c5fd !important; }
-        html.dark-mode .header p { color: #cbd5e1 !important; }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px, 120px 120px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-family: 'Monospace', monospace;
+            font-size: 28px;
+            font-weight: 600;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #00d4ff;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00d4ff, #0099cc);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* User info styling */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-email {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-email i {
+            color: #00d4ff;
+        }
+
+        /* Page Title */
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00d4ff, #ffffff, #00d4ff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: textShimmer 3s ease-in-out infinite;
+        }
+
+        .page-subtitle {
+            color: #b0b0b0;
+            margin-bottom: 30px;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .card-header {
+            background: rgba(0, 212, 255, 0.15) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+        }
+
+        .card-body {
+            padding: 30px;
+            color: #ffffff;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+        }
+
+        .btn-outline-primary {
+            background: transparent;
+            border: 2px solid #00d4ff;
+            color: #00d4ff;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-primary:hover {
+            background: #00d4ff;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Review Styles */
+        .product-review {
+            display: grid;
+            grid-template-columns: 80px 1fr auto;
+            gap: 20px;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .product-review:last-child {
+            border-bottom: none;
+        }
+
+        .product-review img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .stars input {
+            display: none;
+        }
+
+        .stars label {
+            font-size: 1.6rem;
+            color: #b0b0b0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 0 2px;
+        }
+
+        .stars input:checked ~ label,
+        .stars label:hover,
+        .stars label:hover ~ label {
+            color: #f59e0b;
+        }
+
+        .stars label:hover {
+            transform: scale(1.2);
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        /* Form Styles */
+        .form-control {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #ffffff;
+            padding: 12px 16px;
+            width: 100%;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-control::placeholder {
+            color: #b0b0b0;
+        }
+
+        /* Badges */
+        .badge {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            font-weight: 500;
+            padding: 8px 12px;
+        }
+
+        /* Alerts */
+        .alert {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: #ffffff;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            border-color: rgba(46, 213, 115, 0.3);
+            background: rgba(46, 213, 115, 0.1);
+        }
+
+        .alert-danger {
+            border-color: rgba(255, 71, 87, 0.3);
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        /* Content Container */
+        .content-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                width: 95%;
+                padding: 12px 20px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .content-container {
+                padding: 30px 20px;
+            }
+
+            .auth-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .user-info {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .user-email {
+                font-size: 0.9rem;
+                padding: 6px 12px;
+            }
+
+            .product-review {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                text-align: center;
+            }
+
+            .stars {
+                justify-content: center;
+            }
+        }
     </style>
 </head>
-<body>
-<div class="dashboard-container">
-    <nav class="sidebar">
-        <h2>🎵 TuneWave</h2>
-        <div class="profile-section">
-            <div class="profile-image-container">
-                <img src="https://via.placeholder.com/80x80/3b82f6/ffffff?text=U" class="profile-image">
-            </div>
-            <div class="profile-info">
-                <div class="profile-name" th:text="${user.name}">Customer Name</div>
-                <div class="profile-role" th:text="${user.role}">CUSTOMER</div>
-                <div class="profile-details">
-                    <p><strong>Email:</strong> <span th:text="${user.email}">customer@example.com</span></p>
-                    <p><strong>Status:</strong> <span th:text="${user.status}">ACTIVE</span></p>
-                </div>
-            </div>
-        </div>
-        <ul>
-            <li><a th:href="@{/buyer/dashboard}"> Dashboard</a></li>
-            <li><a th:href="@{/buyer/products}">Browse Products</a></li>
-            <li><a th:href="@{/buyer/cart}">My Cart</a></li>
-            <li><a th:href="@{/buyer/orders}">My Orders</a></li>
-            <li class="active"><a th:href="@{/buyer/reviews}"> My Reviews</a></li>
-        </ul>
-        <div class="theme-toggle" style="position: relative; z-index: 1000;">
-            <span class="theme-toggle-label">Theme</span>
-            <div class="toggle-switch" tabindex="0" role="switch" aria-checked="false">
-                <div class="toggle-slider"></div>
-            </div>
-        </div>
-    </nav>
 
-    <main class="main-content">
-        <div class="header">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <div>
-                    <h1>My Reviews</h1>
-                    <p>Rate products you received</p>
-            </div>
+<body>
+<!-- Navigation -->
+<nav class="navbar">
+    <div class="logo">TuneWave</div>
+    <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="#">Music</a></li>
+        <li><a href="#">Courses</a></li>
+        <li><a href="/events">Events</a></li>
+        <li><a href="#">Instruments</a></li>
+        <li><a href="#">About</a></li>
+    </ul>
+    <div class="auth-buttons">
+        <div th:if="${currentUser != null}" class="user-info">
+            <span class="user-email">
+                <i class="fas fa-user me-1"></i>
+                <span th:text="${currentUser.email}">user@example.com</span>
+            </span>
+            <a class="btn btn-secondary" th:href="@{/buyer/products}">
+                <i class="fas fa-store me-1"></i>Shop
+            </a>
+            <a class="btn btn-secondary" th:href="@{/buyer/orders}">
+                <i class="fas fa-box me-1"></i>Orders
+            </a>
+            <a class="logout-btn" href="/users/logout">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="content-container">
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <h1 class="page-title">My Reviews</h1>
+            <p class="page-subtitle">Rate products you received</p>
         </div>
 
         <!-- Success/Error Messages -->
-        <div th:if="${param.success}" class="alert alert-success" style="margin-bottom: 20px; padding: 12px; background: #d1fae5; color: #065f46; border-radius: 8px; border-left: 4px solid #10b981;">
+        <div th:if="${param.success}" class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>
             <span th:text="${param.success[0]}">Success message</span>
         </div>
-        <div th:if="${param.error}" class="alert alert-danger" style="margin-bottom: 20px; padding: 12px; background: #fee2e2; color: #991b1b; border-radius: 8px; border-left: 4px solid #ef4444;">
+        <div th:if="${param.error}" class="alert alert-danger">
+            <i class="fas fa-exclamation-circle me-2"></i>
             <span th:text="${param.error[0]}">Error message</span>
         </div>
 
-        <div class="card" th:if="${#lists.isEmpty(orders)}" style="padding: 40px; text-align: center;">
-            <div style="font-size: 3rem; margin-bottom: 12px;">📭</div>
-            <h3>No products to review</h3>
-            <p>Products appear here after your orders are shipped or completed.</p>
-            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
-                <a th:href="@{/buyer/orders}" class="btn btn-outline-primary" style="padding: 10px 20px; text-decoration: none; border: 2px solid #3b82f6; color: #3b82f6; border-radius: 6px;">
-                    📦 View My Orders
-                </a>
-                <a th:href="@{/buyer/products}" class="btn btn-primary" style="padding: 10px 20px; text-decoration: none; background: #3b82f6; color: white; border-radius: 6px;">
-                    🛍️ Browse Products
-                </a>
+        <div th:if="${#lists.isEmpty(orders)}" class="card text-center">
+            <div class="card-body">
+                <div style="font-size: 4rem; margin-bottom: 16px; color: #00d4ff;">
+                    <i class="fas fa-comment-alt"></i>
+                </div>
+                <h3 style="color: #ffffff; margin-bottom: 8px;">No products to review</h3>
+                <p style="color: #b0b0b0; margin-bottom: 16px;">Products appear here after your orders are shipped or completed.</p>
+                <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px; flex-wrap: wrap;">
+                    <a th:href="@{/buyer/orders}" class="btn btn-outline-primary">
+                        <i class="fas fa-box me-1"></i>View My Orders
+                    </a>
+                    <a th:href="@{/buyer/products}" class="btn btn-primary">
+                        <i class="fas fa-store me-1"></i>Browse Products
+                    </a>
+                </div>
             </div>
         </div>
 
-        <div th:each="order : ${orders}" class="card" style="margin-bottom: 20px;">
-            <div style="display:flex; justify-content: space-between; align-items:center; padding: 16px 20px; border-bottom:1px solid #e5e7eb;">
-                <div style="font-weight:600;">Order #<span th:text="${order.id}">1</span></div>
-                <div><span class="badge" th:text="${order.status}">SHIPPED</span></div>
+        <div th:each="order : ${orders}" class="card">
+            <div class="card-header">
+                <div style="display:flex; justify-content: space-between; align-items:center;">
+                    <div style="font-weight:600; color: #ffffff; font-size: 1.1rem;">Order #<span th:text="${order.id}">1</span></div>
+                    <div><span class="badge" th:text="${order.status}">SHIPPED</span></div>
+                </div>
             </div>
-            <div style="padding: 16px;">
+            <div class="card-body">
                 <div th:each="item : ${order.items}" class="product-review">
-                    <img th:if="${item.productImageUrl}" th:src="${item.productImageUrl}" alt="Product">
-                    <div th:unless="${item.productImageUrl}" style="width:80px;height:80px;background:#f3f4f6;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9ca3af;">No image</div>
+                    <div style="width:80px; height:80px; border-radius:12px; overflow:hidden; background:rgba(255,255,255,0.05);">
+                        <img th:if="${item.productImageUrl}" th:src="${item.productImageUrl}" alt="Product">
+                        <div th:unless="${item.productImageUrl}" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#b0b0b0; font-size:1.5rem;">
+                            <i class="fas fa-music"></i>
+                        </div>
+                    </div>
                     <div>
                         <div class="product-name" th:text="${item.productName}">Product Name</div>
-                        <div style="color:#6b7280; font-size:0.9rem;">Qty: <span th:text="${item.quantity}">1</span></div>
+                        <div style="color:#b0b0b0; font-size:0.9rem;">Qty: <span th:text="${item.quantity}">1</span></div>
                     </div>
                     <div th:with="r=${existingReviews[item.productId]}">
-                        <div th:if="${r != null}" style="grid-column: 1 / -1; margin-top: 8px; padding: 12px; background:#e8f5e8; border-radius:8px; border-left: 4px solid #10b981;">
-                            <div style="font-size:0.9rem; color:#065f46; font-weight: 500; margin-bottom: 8px;">
-                                ✓ You already reviewed this product
+                        <div th:if="${r != null}" style="grid-column: 1 / -1; margin-top: 16px; padding: 16px; background:rgba(46, 213, 115, 0.1); border-radius:12px; border-left: 4px solid #2ed573;">
+                            <div style="font-size:0.9rem; color:#2ed573; font-weight: 500; margin-bottom: 8px;">
+                                <i class="fas fa-check-circle me-1"></i>You already reviewed this product
                             </div>
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                                 <div style="display: flex; gap: 2px;">
-                                    <span th:each="i : ${#numbers.sequence(1, 5)}" 
-                                          th:style="'color: ' + (${i <= r.rating} ? '#f59e0b' : '#cbd5e1') + '; font-size: 1.2rem;'">★</span>
+                                    <span th:each="i : ${#numbers.sequence(1, 5)}"
+                                          th:style="'color: ' + (${i <= r.rating} ? '#f59e0b' : '#b0b0b0') + '; font-size: 1.2rem;'">★</span>
                                 </div>
-                                <span style="color:#6b7280; font-size: 0.9rem;" th:text="'(' + ${r.rating} + ' out of 5 stars)'"></span>
+                                <span style="color:#b0b0b0; font-size: 0.9rem;" th:text="'(' + ${r.rating} + ' out of 5 stars)'"></span>
                             </div>
-                            <div th:if="${r.comment != null and !r.comment.trim().isEmpty()}" style="color:#374151; font-style: italic; margin-top: 4px;">
+                            <div th:if="${r.comment != null and !r.comment.trim().isEmpty()}" style="color:#ffffff; font-style: italic; margin-top: 8px;">
                                 "<span th:text="${r.comment}"></span>"
                             </div>
-                            <div th:if="${r.comment == null or r.comment.trim().isEmpty()}" style="color:#9ca3af; font-size: 0.85rem; margin-top: 4px;">
+                            <div th:if="${r.comment == null or r.comment.trim().isEmpty()}" style="color:#b0b0b0; font-size: 0.85rem; margin-top: 8px;">
                                 No comment provided
                             </div>
                         </div>
-                        <form th:if="${r == null}" th:action="@{/buyer/reviews}" method="post" style="display:flex; align-items:center; gap: 12px;">
+                        <form th:if="${r == null}" th:action="@{/buyer/reviews}" method="post" style="display:flex; align-items:center; gap: 16px; flex-wrap: wrap;">
                             <input type="hidden" name="productId" th:value="${item.productId}" />
                             <div class="stars" style="display:flex; flex-direction:row-reverse; gap:4px;">
                                 <input type="radio" th:id="${'star5-' + order.id + '-' + item.productId}" name="rating" value="5" required><label th:for="${'star5-' + order.id + '-' + item.productId}">★</label>
@@ -150,124 +532,108 @@
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function toggleTheme() {
-    const html = document.documentElement;
-    const toggleSwitch = document.querySelector('.toggle-switch');
-    html.classList.toggle('dark-mode');
-    if (toggleSwitch) toggleSwitch.classList.toggle('active');
-    localStorage.setItem('theme', html.classList.contains('dark-mode') ? 'dark' : 'light');
-}
+    // Star rating interaction
+    function initStarRatings() {
+        document.querySelectorAll('.stars').forEach(starGroup => {
+            const inputs = starGroup.querySelectorAll('input[type="radio"]');
+            const labels = starGroup.querySelectorAll('label');
 
-// Star rating interaction
-function initStarRatings() {
-    document.querySelectorAll('.stars').forEach(starGroup => {
-        const inputs = starGroup.querySelectorAll('input[type="radio"]');
-        const labels = starGroup.querySelectorAll('label');
-        
-        // Function to update star colors based on rating
-        function updateStars(rating) {
+            function updateStars(rating) {
+                labels.forEach((label, index) => {
+                    if (index < rating) {
+                        label.style.color = '#f59e0b';
+                    } else {
+                        label.style.color = '#b0b0b0';
+                    }
+                });
+            }
+
             labels.forEach((label, index) => {
-                if (index < rating) {
-                    label.style.color = '#f59e0b';
-                } else {
-                    label.style.color = '#cbd5e1';
-                }
-            });
-        }
-        
-        // Add hover effects
-        labels.forEach((label, index) => {
-            label.addEventListener('mouseenter', () => {
-                // Highlight stars up to hovered star
-                for (let i = 0; i <= index; i++) {
-                    labels[i].style.color = '#f59e0b';
-                }
-                // Dim stars after hovered star
-                for (let i = index + 1; i < labels.length; i++) {
-                    labels[i].style.color = '#cbd5e1';
-                }
-            });
-            
-            label.addEventListener('mouseleave', () => {
-                // Reset to checked state or default
-                const checkedInput = starGroup.querySelector('input:checked');
-                if (checkedInput) {
-                    const checkedIndex = Array.from(inputs).indexOf(checkedInput);
-                    updateStars(checkedIndex + 1);
-                } else {
-                    updateStars(0);
-                }
-            });
-        });
-        
-        // Add click handlers
-        inputs.forEach((input, index) => {
-            input.addEventListener('change', () => {
-                updateStars(index + 1);
-            });
-        });
-        
-        // Initialize with current state
-        const checkedInput = starGroup.querySelector('input:checked');
-        if (checkedInput) {
-            const checkedIndex = Array.from(inputs).indexOf(checkedInput);
-            updateStars(checkedIndex + 1);
-        }
-    });
-}
+                label.addEventListener('mouseenter', () => {
+                    for (let i = 0; i <= index; i++) {
+                        labels[i].style.color = '#f59e0b';
+                    }
+                    for (let i = index + 1; i < labels.length; i++) {
+                        labels[i].style.color = '#b0b0b0';
+                    }
+                });
 
-// Form validation
-function validateReviewForm(form) {
-    const rating = form.querySelector('input[name="rating"]:checked');
-    if (!rating) {
-        alert('Please select a rating before submitting your review.');
-        return false;
-    }
-    return true;
-}
+                label.addEventListener('mouseleave', () => {
+                    const checkedInput = starGroup.querySelector('input:checked');
+                    if (checkedInput) {
+                        const checkedIndex = Array.from(inputs).indexOf(checkedInput);
+                        updateStars(checkedIndex + 1);
+                    } else {
+                        updateStars(0);
+                    }
+                });
+            });
 
-// Add form validation to all review forms
-function initFormValidation() {
-    document.querySelectorAll('form[action*="/buyer/reviews"]').forEach(form => {
-        form.addEventListener('submit', (e) => {
-            if (!validateReviewForm(form)) {
-                e.preventDefault();
+            inputs.forEach((input, index) => {
+                input.addEventListener('change', () => {
+                    updateStars(index + 1);
+                });
+            });
+
+            const checkedInput = starGroup.querySelector('input:checked');
+            if (checkedInput) {
+                const checkedIndex = Array.from(inputs).indexOf(checkedInput);
+                updateStars(checkedIndex + 1);
             }
         });
-    });
-}
-
-window.addEventListener('DOMContentLoaded', function() {
-    const savedTheme = localStorage.getItem('theme');
-    const toggleSwitch = document.querySelector('.toggle-switch');
-    if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark-mode');
-        if (toggleSwitch) toggleSwitch.classList.add('active');
-    } else {
-        document.documentElement.classList.remove('dark-mode');
-        if (toggleSwitch) toggleSwitch.classList.remove('active');
     }
-    if (toggleSwitch) toggleSwitch.addEventListener('click', toggleTheme);
 
-    initStarRatings();
-    initFormValidation();
+    // Form validation
+    function validateReviewForm(form) {
+        const rating = form.querySelector('input[name="rating"]:checked');
+        if (!rating) {
+            alert('Please select a rating before submitting your review.');
+            return false;
+        }
+        return true;
+    }
 
-    // Auto-hide success/error messages after 5 seconds
-    setTimeout(() => {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(alert => {
-            alert.style.transition = 'opacity 0.5s ease';
-            alert.style.opacity = '0';
-            setTimeout(() => alert.remove(), 500);
+    // Add form validation to all review forms
+    function initFormValidation() {
+        document.querySelectorAll('form[action*="/buyer/reviews"]').forEach(form => {
+            form.addEventListener('submit', (e) => {
+                if (!validateReviewForm(form)) {
+                    e.preventDefault();
+                }
+            });
         });
-    }, 5000);
-});
+    }
+
+    // Add hover effects for cards
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        initStarRatings();
+        initFormValidation();
+
+        // Auto-hide success/error messages after 5 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+    });
 </script>
 </body>
 </html>
-
-

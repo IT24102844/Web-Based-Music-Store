@@ -340,15 +340,15 @@
           </div>
 
           <div class="mb-3">
-            <label for="price" class="form-label">Price ($) *</label>
+            <label for="price" class="form-label">Price (LKR) *</label>
             <input type="number" class="form-control" id="price" name="price"
                    th:value="${song.price}" step="0.01" min="0" required>
           </div>
 
-<!--          <div class="alert alert-info">-->
-<!--            <i class="fas fa-info-circle me-2"></i>-->
-<!--            To update audio files or images, please use the file update feature.-->
-<!--          </div>-->
+          <!--          <div class="alert alert-info">-->
+          <!--            <i class="fas fa-info-circle me-2"></i>-->
+          <!--            To update audio files or images, please use the file update feature.-->
+          <!--          </div>-->
 
           <div class="d-grid gap-2 d-md-flex justify-content-md-end">
             <a th:href="@{/artist/songs}" class="btn btn-secondary me-md-2">

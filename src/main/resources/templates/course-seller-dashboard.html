@@ -610,7 +610,7 @@
 <nav class="navbar">
     <div class="logo">TuneWave</div>
     <ul class="nav-links">
-        <li><a href="/">Home</a></li>
+        <li><a href="/dashboard/course-seller">Home</a></li>
         <li><a href="#">Music</a></li>
         <li><a href="#">Courses</a></li>
         <li><a href="/events">Events</a></li>
@@ -623,10 +623,6 @@
                 <i class="fas fa-user me-1"></i>
                 <span th:text="${currentUser.email}">user@example.com</span>
             </span>
-            <div th:if="${currentUser.role == 'COURSE_SELLER'}" class="course-seller-links">
-                <a th:href="@{/course-seller/courses}">My Courses</a>
-                <a th:href="@{/course-seller/courses/create}">Create Course</a>
-            </div>
             <a class="logout-btn" th:href="@{/users/logout}">
                 <i class="fas fa-sign-out-alt me-1"></i>Logout
             </a>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,9 +34,9 @@
             width: 100%;
             height: 100%;
             background-image:
-                    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+                radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
             background-size: 50px 50px, 80px 80px, 120px 120px;
             pointer-events: none;
             z-index: 1;
@@ -85,9 +86,12 @@
         }
 
         @keyframes textShimmer {
-            0%, 100% {
+
+            0%,
+            100% {
                 background-position: 0% 50%;
             }
+
             50% {
                 background-position: 100% 50%;
             }
@@ -101,14 +105,21 @@
 
         /* Profile Section */
         .profile-section {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.05), rgba(0, 153, 204, 0.05));
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(0, 212, 255, 0.15);
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 25px;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .profile-section:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 12px 40px rgba(0, 212, 255, 0.15);
         }
 
         .profile-image-container {
@@ -116,17 +127,23 @@
         }
 
         .profile-placeholder {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
             background: linear-gradient(135deg, #00d4ff, #0099cc);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 2rem;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+            font-size: 2.5rem;
+            font-weight: 700;
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .profile-placeholder:hover {
+            transform: scale(1.05);
         }
 
         .profile-info {
@@ -134,41 +151,45 @@
         }
 
         .profile-name {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #ffffff;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 5px;
         }
 
         .profile-role {
             color: #00d4ff;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-            font-weight: 500;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            opacity: 0.9;
         }
 
         .profile-details {
             display: flex;
-            gap: 20px;
+            gap: 30px;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         .profile-detail {
             display: flex;
-            flex-direction: column;
-        }
-
-        .detail-label {
-            font-size: 0.8rem;
-            color: #b0b0b0;
-            margin-bottom: 2px;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 212, 255, 0.1);
         }
 
         .detail-value {
-            font-size: 0.9rem;
-            color: #ffffff;
+            font-size: 0.95rem;
+            color: #e0e0e0;
             font-weight: 500;
         }
 
@@ -284,6 +305,150 @@
         .stat-label {
             font-size: 0.9rem;
             color: #b0b0b0;
+        }
+
+        /* Horizontal Sections */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .explore-more-btn {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .explore-more-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+            color: white;
+        }
+
+        .horizontal-scroll {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 15px;
+            margin-bottom: 40px;
+        }
+
+        .horizontal-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .horizontal-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .horizontal-scroll::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .horizontal-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 212, 255, 0.5);
+        }
+
+        .item-card {
+            min-width: 250px;
+            max-width: 250px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .item-card-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .item-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-card-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .item-card-body {
+            padding: 15px;
+        }
+
+        .item-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .item-card-subtitle {
+            font-size: 0.85rem;
+            color: #b0b0b0;
+            margin-bottom: 10px;
+        }
+
+        .item-card-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #00d4ff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #b0b0b0;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.1);
+            margin-bottom: 15px;
         }
 
         /* Navbar */
@@ -432,197 +597,269 @@
         }
     </style>
 </head>
+
 <body>
-<!-- Navbar -->
-<nav class="navbar">
-    <div class="logo">TuneWave</div>
-    <div class="auth-buttons">
-        <a th:href="@{/users/logout}" class="btn-nav btn-login">Logout</a>
-        <a th:href="@{/users/edit-profile}" class="btn-nav btn-signup">Edit Profile</a>
-    </div>
-</nav>
-
-<div class="container">
-    <div class="content-container">
-        <h1>Customer Dashboard</h1>
-        <p class="welcome-text">Welcome back! Explore music, instruments, courses, and exciting events tailored for you.</p>
-
-        <!-- Profile Section -->
-        <div class="profile-section">
-            <div class="profile-image-container">
-                <div class="profile-placeholder">
-                    <span th:text="${user.name.charAt(0)}">U</span>
-                </div>
-            </div>
-            <div class="profile-info">
-                <div class="profile-name" th:text="${user.name}">Customer Name</div>
-                <div class="profile-role" th:text="${user.role}">CUSTOMER</div>
-                <div class="profile-details">
-                    <div class="profile-detail">
-                        <span class="detail-label">Email</span>
-                        <span class="detail-value" th:text="${user.email}">customer@example.com</span>
-                    </div>
-                    <div class="profile-detail">
-                        <span class="detail-label">Status</span>
-                        <span class="detail-value" th:text="${user.status}">ACTIVE</span>
-                    </div>
-                </div>
-            </div>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">TuneWave</div>
+        <div class="auth-buttons">
+            <a th:href="@{/users/logout}" class="btn-nav btn-login">Logout</a>
+            <a th:href="@{/users/edit-profile}" class="btn-nav btn-signup">Edit Profile</a>
         </div>
+    </nav>
 
-        <!-- Navigation Grid -->
-        <div class="navigation-grid">
-            <a th:href="@{/customer/songs}" class="nav-card">
-                <div class="nav-icon">
+    <div class="container">
+        <div class="content-container">
+            <h1>Welcome to TuneWave</h1>
+            <p class="welcome-text">Your ultimate destination for music, instruments, learning, and live events. Ride
+                the wave of sound! 🎵</p>
+
+            <!-- Profile Section -->
+            <div class="profile-section">
+                <div class="profile-image-container">
+                    <div class="profile-placeholder">
+                        <span th:text="${user.name.charAt(0)}">U</span>
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <div class="profile-name" th:text="${user.name}">Customer Name</div>
+                    <div class="profile-role">TuneWave Member</div>
+                    <div class="profile-details">
+                        <div class="profile-detail">
+                            <i class="fas fa-envelope" style="color: #00d4ff; margin-right: 5px;"></i>
+                            <span class="detail-value" th:text="${user.email}">customer@example.com</span>
+                        </div>
+                        <div class="profile-detail">
+                            <i class="fas fa-check-circle" style="color: #00d4ff; margin-right: 5px;"></i>
+                            <span class="detail-value">Active Member</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Grid -->
+            <!-- Songs Section -->
+            <div class="mb-5">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-music"></i>
+                        Trending Tracks
+                    </h2>
+                    <a th:href="@{/customer/songs}" class="explore-more-btn">
+                        Explore All Music
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="horizontal-scroll" th:if="${!#lists.isEmpty(featuredSongs)}">
+                    <div th:each="song : ${featuredSongs}" class="item-card"
+                        th:onclick="'window.location.href=\'' + @{/customer/songs/{id}(id=${song.id})} + '\''">
+                        <div class="item-card-image">
+                            <img th:if="${song.songImage}" th:src="@{${song.songImage}}" alt="Song cover">
+                            <div th:unless="${song.songImage}" class="item-card-placeholder">
+                                <i class="fas fa-music"></i>
+                            </div>
+                        </div>
+                        <div class="item-card-body">
+                            <div class="item-card-title" th:text="${song.name}">Song Name</div>
+                            <div class="item-card-subtitle"
+                                th:text="${song.artist != null ? song.artist.stageName : 'Unknown Artist'}">Artist</div>
+                            <div class="item-card-price">LKR <span
+                                    th:text="${#numbers.formatDecimal(song.price, 1, 2)}">0.00</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${#lists.isEmpty(featuredSongs)}" class="empty-state">
                     <i class="fas fa-music"></i>
+                    <p>New tracks coming soon to TuneWave!</p>
                 </div>
-                <h3>Songs & Music</h3>
-                <p>Discover and listen to tracks and albums from talented artists worldwide.</p>
-                <div class="nav-action">
-                    <span>Browse Music</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
+            </div>
 
-            <a th:href="@{/buyer/products}" class="nav-card">
-                <div class="nav-icon">
+            <!-- Instruments Section -->
+            <div class="mb-5">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-guitar"></i>
+                        Gear & Instruments
+                    </h2>
+                    <a th:href="@{/buyer/products}" class="explore-more-btn">
+                        Shop Instruments
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="horizontal-scroll" th:if="${!#lists.isEmpty(featuredInstruments)}">
+                    <div th:each="product : ${featuredInstruments}" class="item-card"
+                        th:onclick="'window.location.href=\'' + @{/buyer/products/{id}(id=${product.id})} + '\''">
+                        <div class="item-card-image">
+                            <img th:if="${!#lists.isEmpty(product.images)}" th:src="@{${product.images[0].imageUrl}}"
+                                alt="Product image">
+                            <div th:if="${#lists.isEmpty(product.images)}" class="item-card-placeholder">
+                                <i class="fas fa-guitar"></i>
+                            </div>
+                        </div>
+                        <div class="item-card-body">
+                            <div class="item-card-title" th:text="${product.name}">Product Name</div>
+                            <div class="item-card-subtitle" th:text="${product.instrumentType}">Type</div>
+                            <div class="item-card-price">LKR <span
+                                    th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${#lists.isEmpty(featuredInstruments)}" class="empty-state">
                     <i class="fas fa-guitar"></i>
+                    <p>New instruments arriving soon!</p>
                 </div>
-                <h3>Instruments</h3>
-                <p>Shop guitars, keyboards, drums, and professional music equipment.</p>
-                <div class="nav-action">
-                    <span>Browse Instruments</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
+            </div>
 
-            <a th:href="@{/customer/courses}" class="nav-card">
-                <div class="nav-icon">
+            <!-- Courses Section -->
+            <div class="mb-5">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-book-open"></i>
+                        Learn & Master
+                    </h2>
+                    <a th:href="@{/customer/courses}" class="explore-more-btn">
+                        View All Courses
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="horizontal-scroll" th:if="${!#lists.isEmpty(featuredCourses)}">
+                    <div th:each="course : ${featuredCourses}" class="item-card"
+                        th:onclick="'window.location.href=\'' + @{/customer/courses/{id}(id=${course.courseId})} + '\''">
+                        <div class="item-card-image">
+                            <div class="item-card-placeholder">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                        </div>
+                        <div class="item-card-body">
+                            <div class="item-card-title" th:text="${course.title}">Course Title</div>
+                            <div class="item-card-subtitle"
+                                th:text="${course.description != null ? (course.description.length() > 40 ? course.description.substring(0, 40) + '...' : course.description) : 'No description'}">
+                                Description</div>
+                            <div class="item-card-price">LKR <span
+                                    th:text="${#numbers.formatDecimal(course.price, 1, 2)}">0.00</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${#lists.isEmpty(featuredCourses)}" class="empty-state">
                     <i class="fas fa-book-open"></i>
+                    <p>New courses launching soon!</p>
                 </div>
-                <h3>Music Courses</h3>
-                <p>Learn from expert instructors with comprehensive music lessons and tutorials.</p>
-                <div class="nav-action">
-                    <span>Browse Courses</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
+            </div>
 
-            <a th:href="@{/events}" class="nav-card event-ticket-card">
-                <div class="nav-icon">
+            <!-- Events Section -->
+            <div class="mb-5">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-ticket-alt"></i>
+                        Live Events
+                    </h2>
+                    <a th:href="@{/events}" class="explore-more-btn">
+                        See All Events
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="horizontal-scroll" th:if="${!#lists.isEmpty(featuredEvents)}">
+                    <div th:each="event : ${featuredEvents}" class="item-card"
+                        th:onclick="'window.location.href=\'' + @{/events/{id}(id=${event.id})} + '\''">
+                        <div class="item-card-image">
+                            <img th:if="${event.imagePath}" th:src="@{${event.imagePath}}" alt="Event image">
+                            <div th:unless="${event.imagePath}" class="item-card-placeholder">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                        </div>
+                        <div class="item-card-body">
+                            <div class="item-card-title" th:text="${event.title}">Event Title</div>
+                            <div class="item-card-subtitle" th:text="${event.venue}">Venue</div>
+                            <div class="item-card-price">LKR <span
+                                    th:text="${#numbers.formatDecimal(event.ticketPrice, 1, 2)}">0.00</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${#lists.isEmpty(featuredEvents)}" class="empty-state">
                     <i class="fas fa-ticket-alt"></i>
+                    <p>Exciting events coming to TuneWave soon!</p>
                 </div>
-                <h3>Event Tickets</h3>
-                <p>Get tickets for concerts, festivals, and live music events near you.</p>
-                <div class="nav-action">
-                    <span>Browse Events</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
+            </div>
 
-            <a th:href="@{/payments/history}" class="nav-card">
-                <div class="nav-icon">
-                    <i class="fas fa-music"></i>
-                </div>
-                <h3>Payment History</h3>
-                <p>Check Your Payment.</p>
-                <div class="nav-action">
-                    <span>Payment History</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
+            <!-- Quick Links Grid -->
+            <div class="stats-section">
+                <h2 class="stats-title">
+                    <i class="fas fa-bolt"></i>
+                    Quick Access
+                </h2>
+                <div class="navigation-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                    <a th:href="@{/payments/history}" class="nav-card">
+                        <div class="nav-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <h3>Payment History</h3>
+                        <p>View all your transactions</p>
+                        <div class="nav-action">
+                            <span>View History</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </a>
 
-            <a th:href="@{/my-tickets}" class="nav-card">
-                <div class="nav-icon">
-                    <i class="fas fa-music"></i>
-                </div>
-                <h3>MY tickets</h3>
-                <p>View Tickets You Purchased</p>
-                <div class="nav-action">
-                    <span>View Your Tickets</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
+                    <a th:href="@{/my-tickets}" class="nav-card">
+                        <div class="nav-icon">
+                            <i class="fas fa-ticket-alt"></i>
+                        </div>
+                        <h3>My Tickets</h3>
+                        <p>View tickets you purchased</p>
+                        <div class="nav-action">
+                            <span>View Tickets</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </a>
 
-            <a th:href="@{/tickets/my-tickets}" class="nav-card">
-                <div class="nav-icon">
-                    <i class="fas fa-music"></i>
-                </div>
-                <h3>Help & Support</h3>
-                <p>View Your Support tickets</p>
-                <div class="nav-action">
-                    <span>View Support Tickets</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
-        </div>
-
-
-        <!-- Upcoming Events Section -->
-        <div class="stats-section">
-            <h2 class="stats-title">
-                <i class="fas fa-calendar-alt"></i>
-                Upcoming Events
-            </h2>
-            <div class="navigation-grid">
-                <div class="nav-card">
-                    <div class="nav-icon" style="color: #ff6b81;">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <h3>Summer Music Festival</h3>
-                    <p>3-day outdoor festival featuring top artists. July 15-17, 2024.</p>
-                    <div class="nav-action" style="color: #ff6b81;">
-                        <span>Get Tickets</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                </div>
-                <div class="nav-card">
-                    <div class="nav-icon" style="color: #a55eea;">
-                        <i class="fas fa-microphone"></i>
-                    </div>
-                    <h3>Jazz Night Live</h3>
-                    <p>Intimate jazz performances at the Blue Note Club. Every Friday night.</p>
-                    <div class="nav-action" style="color: #a55eea;">
-                        <span>Book Now</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
+                    <a th:href="@{/tickets/my-tickets}" class="nav-card">
+                        <div class="nav-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <h3>Support</h3>
+                        <p>View your support tickets</p>
+                        <div class="nav-action">
+                            <span>Get Support</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    // Add any interactive functionality here
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add hover effects for cards
-        const cards = document.querySelectorAll('.nav-card, .stat-card');
-        cards.forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-5px)';
+    <script>
+        // Add any interactive functionality here
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add hover effects for cards
+            const cards = document.querySelectorAll('.nav-card, .stat-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                card.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(0)';
+                });
             });
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
+
+            // Add count-up animation for stats
+            const statValues = document.querySelectorAll('.stat-value');
+            statValues.forEach(stat => {
+                const target = parseInt(stat.textContent);
+                let current = 0;
+                const increment = target / 50;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        stat.textContent = target;
+                        clearInterval(timer);
+                    } else {
+                        stat.textContent = Math.floor(current);
+                    }
+                }, 30);
             });
         });
-
-        // Add count-up animation for stats
-        const statValues = document.querySelectorAll('.stat-value');
-        statValues.forEach(stat => {
-            const target = parseInt(stat.textContent);
-            let current = 0;
-            const increment = target / 50;
-            const timer = setInterval(() => {
-                current += increment;
-                if (current >= target) {
-                    stat.textContent = target;
-                    clearInterval(timer);
-                } else {
-                    stat.textContent = Math.floor(current);
-                }
-            }, 30);
-        });
-    });
-</script>
+    </script>
 </body>
+
 </html>

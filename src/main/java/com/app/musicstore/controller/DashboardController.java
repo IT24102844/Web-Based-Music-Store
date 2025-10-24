@@ -24,11 +24,17 @@ public class DashboardController {
     private final CourseService courseService;
     private final CourseSellerService courseSellerService;
     private final EnrollmentService enrollmentService;
+    private final ProductService productService;
 
     public DashboardController(ArtistService artistService,
-                               SongService songService,
-                               EventService eventService,
-                               PaymentService paymentService, UserService userService, CourseService courseService, CourseSellerService courseSellerService, EnrollmentService enrollmentService) {
+            SongService songService,
+            EventService eventService,
+            PaymentService paymentService,
+            UserService userService,
+            CourseService courseService,
+            CourseSellerService courseSellerService,
+            EnrollmentService enrollmentService,
+            ProductService productService) {
         this.artistService = artistService;
         this.songService = songService;
         this.eventService = eventService;
@@ -37,6 +43,7 @@ public class DashboardController {
         this.courseService = courseService;
         this.courseSellerService = courseSellerService;
         this.enrollmentService = enrollmentService;
+        this.productService = productService;
     }
 
     // -------------------- ADMIN DASHBOARD --------------------
@@ -139,6 +146,24 @@ public class DashboardController {
             return "redirect:/users/login";
         }
 
+        // Fetch limited items for horizontal display (4 items each)
+        List<Song> featuredSongs = songService.getAllSongs().stream()
+                .limit(4)
+                .collect(Collectors.toList());
+
+        List<Product> featuredInstruments = productService.getAllProducts().stream()
+                .limit(4)
+                .collect(Collectors.toList());
+
+        List<Course> featuredCourses = courseService.findAll().stream()
+                .limit(4)
+                .collect(Collectors.toList());
+
+        List<Event> featuredEvents = eventService.getApprovedEvents().stream()
+                .limit(4)
+                .collect(Collectors.toList());
+
+        // Statistics
         List<Song> allSongs = songService.getAllSongs();
         List<String> genres = songService.getAllGenres();
 
@@ -154,14 +179,20 @@ public class DashboardController {
                 .filter(ticket -> "ACTIVE".equals(ticket.getStatus()) || "USED".equals(ticket.getStatus()))
                 .count();
 
-        System.out.println("🎫 Customer dashboard - User: " + user.getEmail() + ", Tickets: " + eventsAttendedCount);
-
         List<Enrollment> recentEnrollments = enrollmentService.getCustomerEnrollments(user.getUserId())
                 .stream()
                 .limit(5)
                 .collect(Collectors.toList());
 
         model.addAttribute("user", user);
+
+        // Featured items for horizontal display
+        model.addAttribute("featuredSongs", featuredSongs);
+        model.addAttribute("featuredInstruments", featuredInstruments);
+        model.addAttribute("featuredCourses", featuredCourses);
+        model.addAttribute("featuredEvents", featuredEvents);
+
+        // Statistics
         model.addAttribute("totalSongs", totalSongs);
         model.addAttribute("totalGenres", totalGenres);
         model.addAttribute("totalArtists", totalArtists);
@@ -196,7 +227,8 @@ public class DashboardController {
 
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-            // Get the user ID from the authenticated user, but fetch FRESH data from database
+            // Get the user ID from the authenticated user, but fetch FRESH data from
+            // database
             Long userId = userDetails.getUser().getUserId();
             return userService.getUserById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
@@ -221,9 +253,20 @@ public class DashboardController {
             this.totalRevenue = totalRevenue;
         }
 
-        public long getTotalCourses() { return totalCourses; }
-        public long getTotalEnrollments() { return totalEnrollments; }
-        public long getActiveStudents() { return activeStudents; }
-        public double getTotalRevenue() { return totalRevenue; }
+        public long getTotalCourses() {
+            return totalCourses;
+        }
+
+        public long getTotalEnrollments() {
+            return totalEnrollments;
+        }
+
+        public long getActiveStudents() {
+            return activeStudents;
+        }
+
+        public double getTotalRevenue() {
+            return totalRevenue;
+        }
     }
 }

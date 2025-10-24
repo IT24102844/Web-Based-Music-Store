@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,9 +34,9 @@
       width: 100%;
       height: 100%;
       background-image:
-              radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-              radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-              radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
       background-size: 50px 50px, 80px 80px, 120px 120px;
       pointer-events: none;
       z-index: 1;
@@ -45,9 +46,11 @@
       0% {
         background-position: 0% 50%;
       }
+
       50% {
         background-position: 100% 50%;
       }
+
       100% {
         background-position: 0% 50%;
       }
@@ -83,9 +86,12 @@
     }
 
     @keyframes textShimmer {
-      0%, 100% {
+
+      0%,
+      100% {
         background-position: 0% 50%;
       }
+
       50% {
         background-position: 100% 50%;
       }
@@ -367,7 +373,8 @@
         padding: 20px;
       }
 
-      .table th, .table td {
+      .table th,
+      .table td {
         padding: 8px 10px;
         font-size: 0.9rem;
       }
@@ -385,128 +392,170 @@
     }
   </style>
 </head>
+
 <body>
-<!-- Navbar -->
-<nav class="navbar">
-  <div class="logo">TuneWave</div>
-  <div class="auth-buttons">
-    <a th:href="@{/dashboard/customer}" class="btn-nav btn-login">Dashboard</a>
-    <a th:href="@{/customer/songs}" class="btn-nav btn-login">Discover Songs</a>
-    <a th:href="@{/users/profile}" class="btn-nav btn-login">Profile</a>
-    <a th:href="@{/users/logout}" class="btn-nav btn-signup">Logout</a>
-  </div>
-</nav>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">TuneWave</div>
+    <div class="auth-buttons">
+      <a th:href="@{/dashboard/customer}" class="btn-nav btn-login">Dashboard</a>
+      <a th:href="@{/customer/songs}" class="btn-nav btn-login">Discover Songs</a>
+      <a th:href="@{/users/profile}" class="btn-nav btn-login">Profile</a>
+      <a th:href="@{/users/logout}" class="btn-nav btn-signup">Logout</a>
+    </div>
+  </nav>
 
-<div class="container">
-  <div class="content-container">
-    <h1 th:text="${song.name}">Song Details</h1>
-    <p class="welcome-text">Explore the details of this amazing track</p>
+  <div class="container">
+    <div class="content-container">
+      <h1 th:text="${song.name}">Song Details</h1>
+      <p class="welcome-text">Explore the details of this amazing track</p>
 
-    <div class="song-details-card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 th:text="${song.name}">Song Name</h4>
-        <div>
-          <a th:href="@{/customer/songs}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-1"></i>Back to Songs
-          </a>
+      <div class="song-details-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 th:text="${song.name}">Song Name</h4>
+          <div>
+            <a th:href="@{/customer/songs}" class="btn btn-secondary">
+              <i class="fas fa-arrow-left me-1"></i>Back to Songs
+            </a>
+          </div>
         </div>
-      </div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-md-4 text-center mb-4">
-            <div th:if="${song.songImage}">
-              <img th:src="@{${song.songImage}}" alt="Song cover" class="song-cover-image">
-            </div>
-            <div th:unless="${song.songImage}">
-              <div class="placeholder-container">
-                <div class="text-muted">
-                  <i class="fas fa-music fa-5x mb-3" style="color: rgba(255, 255, 255, 0.3);"></i>
-                  <p style="color: #b0b0b0;">No image available</p>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4 text-center mb-4">
+              <div th:if="${song.songImage}">
+                <img th:src="@{${song.songImage}}" alt="Song cover" class="song-cover-image">
+              </div>
+              <div th:unless="${song.songImage}">
+                <div class="placeholder-container">
+                  <div class="text-muted">
+                    <i class="fas fa-music fa-5x mb-3" style="color: rgba(255, 255, 255, 0.3);"></i>
+                    <p style="color: #b0b0b0;">No image available</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="col-md-8">
-            <table class="table">
-              <tr>
-                <th>Song Name:</th>
-                <td th:text="${song.name}">-</td>
-              </tr>
-              <tr>
-                <th>Genre:</th>
-                <td><span class="badge bg-primary" th:text="${song.genre}">-</span></td>
-              </tr>
-              <tr>
-                <th>Price:</th>
-                <td><span class="badge bg-success">LKR <span th:text="${#numbers.formatDecimal(song.price, 1, 2)}">0.00</span></span></td>
-              </tr>
-              <tr>
-                <th>Upload Date:</th>
-                <td th:text="${#temporals.format(song.uploadDate, 'dd MMMM yyyy')}">-</td>
-              </tr>
-              <tr>
-                <th>Audio File:</th>
-                <td>
-                  <code th:text="${song.audioFile}">-</code>
-                  <a th:href="@{${song.audioFile}}" class="btn btn-sm btn-outline-primary ms-2" download>
-                    <i class="fas fa-download me-1"></i>Download
-                  </a>
-                </td>
-              </tr>
-              <tr>
-                <th>Preview Clip:</th>
-                <td>
-                  <code th:text="${song.previewClip}">-</code>
-                  <a th:href="@{${song.previewClip}}" class="btn btn-sm btn-outline-secondary ms-2" download>
-                    <i class="fas fa-download me-1"></i>Download
-                  </a>
-                </td>
-              </tr>
-            </table>
+            <div class="col-md-8">
+              <!-- Success Message -->
+              <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i><span th:text="${success}">Success message</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
 
-            <!-- Audio Player -->
-            <div class="audio-section">
-              <h6>Preview:</h6>
-              <audio controls class="w-100">
-                <source th:src="@{${song.previewClip}}" type="audio/mpeg">
-                Your browser does not support the audio element.
-              </audio>
-            </div>
+              <!-- Error Message -->
+              <div th:if="${param.error}" class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i><span th:text="${param.error}">Error message</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
 
-            <!-- Purchase Button -->
-            <div class="mt-4 text-center">
-              <form th:action="@{/customer/songs/{id}/purchase(id=${song.id})}" method="post" class="d-inline-block">
-                <button type="submit" class="btn btn-warning" style="padding: 12px 30px;">
-                  <i class="fas fa-shopping-cart me-2"></i>Purchase Song
-                </button>
-              </form>
+              <table class="table">
+                <tr>
+                  <th>Song Name:</th>
+                  <td th:text="${song.name}">-</td>
+                </tr>
+                <tr>
+                  <th>Artist:</th>
+                  <td th:text="${song.artist != null ? song.artist.stageName : 'Unknown'}">-</td>
+                </tr>
+                <tr>
+                  <th>Genre:</th>
+                  <td><span class="badge bg-primary" th:text="${song.genre}">-</span></td>
+                </tr>
+                <tr>
+                  <th>Price:</th>
+                  <td><span class="badge bg-success">LKR <span
+                        th:text="${#numbers.formatDecimal(song.price, 1, 2)}">0.00</span></span></td>
+                </tr>
+                <tr>
+                  <th>Upload Date:</th>
+                  <td th:text="${#temporals.format(song.uploadDate, 'dd MMMM yyyy')}">-</td>
+                </tr>
+                <tr>
+                  <th>Status:</th>
+                  <td>
+                    <span th:if="${hasPurchased}" class="badge bg-success">
+                      <i class="fas fa-check-circle me-1"></i>Purchased
+                    </span>
+                    <span th:unless="${hasPurchased}" class="badge bg-warning">
+                      <i class="fas fa-lock me-1"></i>Not Purchased
+                    </span>
+                  </td>
+                </tr>
+                <!-- Show Audio Download only if purchased -->
+                <tr th:if="${hasPurchased}">
+                  <th>Audio File:</th>
+                  <td>
+                    <a th:href="@{${song.audioFile}}" class="btn btn-sm btn-success" download>
+                      <i class="fas fa-download me-1"></i>Download Full Song
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Preview Clip:</th>
+                  <td>
+                    <audio controls class="w-100" style="max-width: 300px;">
+                      <source th:src="@{${song.previewClip}}" type="audio/mpeg">
+                      Your browser does not support the audio element.
+                    </audio>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Audio Player -->
+              <div class="audio-section">
+                <h6>
+                  <span th:if="${hasPurchased}">Full Audio:</span>
+                  <span th:unless="${hasPurchased}">Preview (Purchase to unlock full song):</span>
+                </h6>
+                <audio controls class="w-100">
+                  <source th:src="@{${song.previewClip}}" type="audio/mpeg">
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+
+              <!-- Purchase Button (only show if not purchased) -->
+              <div th:unless="${hasPurchased}" class="mt-4 text-center">
+                <form th:action="@{/customer/songs/{id}/purchase(id=${song.id})}" method="post" class="d-inline-block">
+                  <button type="submit" class="btn btn-warning btn-lg" style="padding: 12px 40px;">
+                    <i class="fas fa-shopping-cart me-2"></i>Purchase Song - LKR <span
+                      th:text="${#numbers.formatDecimal(song.price, 1, 2)}">0.00</span>
+                  </button>
+                </form>
+              </div>
+
+              <!-- Purchased Badge (show if purchased) -->
+              <div th:if="${hasPurchased}" class="mt-4 text-center">
+                <div class="alert alert-success d-inline-block" style="padding: 15px 30px;">
+                  <i class="fas fa-check-circle fa-2x me-2"></i>
+                  <strong>You own this song!</strong> Download it anytime from above.
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // Add any interactive functionality here
-  document.addEventListener('DOMContentLoaded', function() {
-    // Add hover effects for the main card
-    const card = document.querySelector('.song-details-card');
-    card.addEventListener('mouseenter', function() {
-      this.style.transform = 'translateY(-5px)';
-    });
-    card.addEventListener('mouseleave', function() {
-      this.style.transform = 'translateY(0)';
-    });
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Add any interactive functionality here
+    document.addEventListener('DOMContentLoaded', function () {
+      // Add hover effects for the main card
+      const card = document.querySelector('.song-details-card');
+      card.addEventListener('mouseenter', function () {
+        this.style.transform = 'translateY(-5px)';
+      });
+      card.addEventListener('mouseleave', function () {
+        this.style.transform = 'translateY(0)';
+      });
 
-    // Enhance audio player appearance
-    const audioPlayer = document.querySelector('audio');
-    if (audioPlayer) {
-      audioPlayer.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
-    }
-  });
-</script>
+      // Enhance audio player appearance
+      const audioPlayer = document.querySelector('audio');
+      if (audioPlayer) {
+        audioPlayer.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
+      }
+    });
+  </script>
 </body>
+
 </html>

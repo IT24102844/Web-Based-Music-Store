@@ -42,5 +42,15 @@ public class UnifiedPaymentService {
     public UnifiedPayment getById(Long id) {
         return unifiedPaymentRepository.findById(id).orElse(null);
     }
-}
 
+    /**
+     * Check if a user has successfully purchased a specific song
+     */
+    public boolean hasUserPurchasedSong(User user, Long songId) {
+        if (user == null || songId == null) {
+            return false;
+        }
+        return unifiedPaymentRepository.existsByUserAndItemTypeAndItemIdAndStatus(
+                user, "SONG", songId, "SUCCESS");
+    }
+}

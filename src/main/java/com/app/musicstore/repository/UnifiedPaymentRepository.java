@@ -13,5 +13,7 @@ public interface UnifiedPaymentRepository extends JpaRepository<UnifiedPayment, 
     List<UnifiedPayment> findByUserOrderByCreatedAtDesc(User user);
 
     Optional<UnifiedPayment> findByTransactionId(String transactionId);
-}
 
+    // Check if user has purchased a specific item
+    boolean existsByUserAndItemTypeAndItemIdAndStatus(User user, String itemType, Long itemId, String status);
+}

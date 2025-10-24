@@ -615,14 +615,10 @@
         <li><a href="#">Courses</a></li>
         <li><a href="/events">Events</a></li>
         <li><a href="#">Instruments</a></li>
-        <li><a href="#">About</a></li>
+        <li><a href="/users/logout">Logout</a></li>
     </ul>
     <div class="auth-buttons">
         <div th:if="${currentUser != null}" class="user-info">
-            <span class="user-email">
-                <i class="fas fa-user me-1"></i>
-                <span th:text="${currentUser.email}">user@example.com</span>
-            </span>
             <a class="logout-btn" th:href="@{/users/logout}">
                 <i class="fas fa-sign-out-alt me-1"></i>Logout
             </a>

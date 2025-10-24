@@ -4,6 +4,7 @@ import com.app.musicstore.model.Song;
 import com.app.musicstore.model.User;
 import com.app.musicstore.security.CustomUserDetails;
 import com.app.musicstore.service.SongService;
+import com.app.musicstore.service.UnifiedPaymentService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -18,9 +19,11 @@ import java.util.Optional;
 public class CustomerSongController {
 
     private final SongService songService;
+    private final UnifiedPaymentService unifiedPaymentService;
 
-    public CustomerSongController(SongService songService) {
+    public CustomerSongController(SongService songService, UnifiedPaymentService unifiedPaymentService) {
         this.songService = songService;
+        this.unifiedPaymentService = unifiedPaymentService;
     }
 
     // Helper method to get authenticated user
@@ -74,7 +77,11 @@ public class CustomerSongController {
 
     // View Song Details (for customers)
     @GetMapping("/songs/{id}")
-    public String viewSongDetails(@PathVariable Long id, Model model) {
+    public String viewSongDetails(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long unifiedPaymentId,
+            @RequestParam(required = false) String success,
+            Model model) {
         User currentUser = getAuthenticatedUser();
         if (currentUser == null) {
             return "redirect:/users/login";
@@ -91,8 +98,18 @@ public class CustomerSongController {
             return "redirect:/customer/songs?error=Artist information not available for this song";
         }
 
+        // Check if user has purchased this song
+        boolean hasPurchased = unifiedPaymentService.hasUserPurchasedSong(currentUser, id);
+
         model.addAttribute("song", songObj);
         model.addAttribute("user", currentUser);
+        model.addAttribute("hasPurchased", hasPurchased);
+
+        // Show success message after payment
+        if (unifiedPaymentId != null || success != null) {
+            model.addAttribute("success", "Payment successful! You can now download the song.");
+        }
+
         return "customer-songs-details";
     }
 
@@ -110,16 +127,26 @@ public class CustomerSongController {
         }
         Song song = songOpt.get();
 
+        // Check if already purchased
+        if (unifiedPaymentService.hasUserPurchasedSong(currentUser, id)) {
+            return "redirect:/customer/songs/" + id + "?error=You have already purchased this song";
+        }
+
         String itemType = "SONG";
         Long itemId = song.getId();
         String itemName = song.getName();
         Double amount = song.getPrice() != null ? song.getPrice() : 0.0;
 
-        String url = String.format("redirect:/payments/checkout?itemType=%s&itemId=%d&itemName=%s&amount=%s",
+        // Set success redirect to come back to song details page
+        String successRedirect = "/customer/songs/" + id;
+
+        String url = String.format(
+                "redirect:/payments/checkout?itemType=%s&itemId=%d&itemName=%s&amount=%s&successRedirect=%s",
                 java.net.URLEncoder.encode(itemType, java.nio.charset.StandardCharsets.UTF_8),
                 itemId,
                 java.net.URLEncoder.encode(itemName, java.nio.charset.StandardCharsets.UTF_8),
-                java.net.URLEncoder.encode(String.valueOf(amount), java.nio.charset.StandardCharsets.UTF_8));
+                java.net.URLEncoder.encode(String.valueOf(amount), java.nio.charset.StandardCharsets.UTF_8),
+                java.net.URLEncoder.encode(successRedirect, java.nio.charset.StandardCharsets.UTF_8));
         return url;
     }
 }

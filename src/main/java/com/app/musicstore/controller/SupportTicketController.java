@@ -92,9 +92,9 @@ public class SupportTicketController {
     // Admin updates ticket status
     @PostMapping("/admin/update-status/{id}")
     public String updateTicketStatus(@PathVariable Long id,
-                                     @RequestParam TicketStatus status,
-                                     @RequestParam(required = false) String adminResponse,
-                                     RedirectAttributes redirectAttributes) {
+            @RequestParam TicketStatus status,
+            @RequestParam(required = false) String adminResponse,
+            RedirectAttributes redirectAttributes) {
         User admin = getAuthenticatedUser();
         if (admin == null || admin.getRole() != com.app.musicstore.model.Role.ADMIN) {
             return "redirect:/users/login";
@@ -112,7 +112,7 @@ public class SupportTicketController {
 
     // Admin views ticket details
     @GetMapping("/admin/details/{id}")
-    public String viewTicketDetails(@PathVariable Long id, Model model) {
+    public String viewTicketDetails(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         User admin = getAuthenticatedUser();
         if (admin == null || admin.getRole() != com.app.musicstore.model.Role.ADMIN) {
             return "redirect:/users/login";
@@ -120,11 +120,13 @@ public class SupportTicketController {
 
         Optional<SupportTicket> ticket = supportTicketService.getTicketById(id);
         if (ticket.isPresent()) {
-            model.addAttribute("ticket", ticket.get());
+            model.addAttribute("supportTicket", ticket.get()); // Fixed: changed from "ticket" to "supportTicket"
             model.addAttribute("statuses", TicketStatus.values());
             return "ticket-details";
         } else {
-            return "redirect:/tickets/admin?error=Ticket not found";
+            redirectAttributes.addFlashAttribute("error",
+                    "Ticket #" + id + " not found. It may have been deleted when the user account was removed.");
+            return "redirect:/tickets/admin";
         }
     }
 

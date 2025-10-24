@@ -61,7 +61,8 @@ public class SellerController {
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         Long sellerId = user.getUserId();
 
@@ -69,10 +70,10 @@ public class SellerController {
         model.addAttribute("totalProducts", productService.countProductsBySellerId(sellerId));
         model.addAttribute("pendingOrders", orderService.countOrdersByStatusAndSellerId("PENDING", sellerId));
         model.addAttribute("shipmentsInTransit", orderService.countOrdersByStatusAndSellerId("SHIPPED", sellerId));
-        
+
         double totalSales = transactionService.getCompletedEarningsBySellerId(sellerId);
         model.addAttribute("totalSales", String.format("$%.2f", totalSales));
-        
+
         // Get review statistics
         ReviewService.ReviewStats reviewStats = reviewService.getReviewStatsBySellerId(sellerId);
         model.addAttribute("averageRating", String.format("%.1f / 5", reviewStats.getAverageRating()));
@@ -85,7 +86,8 @@ public class SellerController {
     @GetMapping("/settings")
     public String settings(Model model, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         // Get seller-specific data if user is an InstrumentSeller
         if (user instanceof InstrumentSeller) {
@@ -95,51 +97,52 @@ public class SellerController {
         } else {
             model.addAttribute("seller", user);
         }
-        
+
         model.addAttribute("user", user);
         return "seller_settings";
     }
 
     @PostMapping("/updateSettings")
     public String updateSettings(@RequestParam(required = false) String name,
-                                @RequestParam(required = false) String email,
-                                @RequestParam(required = false) String phoneNo,
-                                @RequestParam(required = false) String address,
-                                @RequestParam(required = false) String storeName,
-                                @RequestParam(required = false) String location,
-                                @RequestParam(required = false) String storeAddress,
-                                @RequestParam(required = false) String paymentMethod,
-                                @RequestParam(required = false) String currentPassword,
-                                @RequestParam(required = false) String newPassword,
-                                @RequestParam(required = false) MultipartFile profileImage,
-                                Authentication authentication) {
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String phoneNo,
+            @RequestParam(required = false) String address,
+            @RequestParam(required = false) String storeName,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String storeAddress,
+            @RequestParam(required = false) String paymentMethod,
+            @RequestParam(required = false) String currentPassword,
+            @RequestParam(required = false) String newPassword,
+            @RequestParam(required = false) MultipartFile profileImage,
+            Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         try {
             // Create a new user object with updated fields to avoid JPA issues
             User updatedUser = new User();
             updatedUser.setUserId(user.getUserId());
-            
+
             // Update basic profile information
             if (name != null && !name.trim().isEmpty()) {
                 updatedUser.setName(name);
             } else {
                 updatedUser.setName(user.getName());
             }
-            
+
             if (email != null && !email.trim().isEmpty()) {
                 updatedUser.setEmail(email);
             } else {
                 updatedUser.setEmail(user.getEmail());
             }
-            
+
             if (phoneNo != null && !phoneNo.trim().isEmpty()) {
                 updatedUser.setPhoneNo(phoneNo);
             } else {
                 updatedUser.setPhoneNo(user.getPhoneNo());
             }
-            
+
             if (address != null && !address.trim().isEmpty()) {
                 updatedUser.setAddress(address);
             } else {
@@ -150,7 +153,7 @@ public class SellerController {
             if (user instanceof InstrumentSeller) {
                 InstrumentSeller existingSeller = (InstrumentSeller) user;
                 InstrumentSeller updatedSeller = new InstrumentSeller();
-                
+
                 // Copy existing seller fields
                 updatedSeller.setUserId(existingSeller.getUserId());
                 updatedSeller.setName(updatedUser.getName());
@@ -160,41 +163,42 @@ public class SellerController {
                 updatedSeller.setRole(existingSeller.getRole());
                 updatedSeller.setStatus(existingSeller.getStatus());
                 updatedSeller.setCreatedAt(existingSeller.getCreatedAt());
-                
+
                 // Update seller-specific fields
                 if (storeName != null && !storeName.trim().isEmpty()) {
                     updatedSeller.setStoreName(storeName);
                 } else {
                     updatedSeller.setStoreName(existingSeller.getStoreName());
                 }
-                
+
                 if (location != null && !location.trim().isEmpty()) {
                     updatedSeller.setStoreLocation(location);
                 } else {
                     updatedSeller.setStoreLocation(existingSeller.getStoreLocation());
                 }
-                
+
                 if (storeAddress != null && !storeAddress.trim().isEmpty()) {
                     updatedSeller.setStoreAddress(storeAddress);
                 } else {
                     updatedSeller.setStoreAddress(existingSeller.getStoreAddress());
                 }
-                
+
                 if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
                     updatedSeller.setPaymentMethod(paymentMethod);
                 } else {
                     updatedSeller.setPaymentMethod(existingSeller.getPaymentMethod());
                 }
-                
+
                 // Handle profile image upload
                 if (profileImage != null && !profileImage.isEmpty()) {
                     try {
                         // Validate profile image
-                        ImageValidationUtil.ValidationResult imageValidation = ImageValidationUtil.validateImageFile(profileImage, true);
+                        ImageValidationUtil.ValidationResult imageValidation = ImageValidationUtil
+                                .validateImageFile(profileImage, true);
                         if (!imageValidation.isValid()) {
                             return "redirect:/seller/settings?error=" + imageValidation.getErrorMessage();
                         }
-                        
+
                         String imagePath = saveProfileImage(profileImage);
                         updatedSeller.setProfileImagePath(imagePath);
                     } catch (IOException e) {
@@ -203,13 +207,14 @@ public class SellerController {
                 } else {
                     updatedSeller.setProfileImagePath(existingSeller.getProfileImagePath());
                 }
-                
+
                 updatedUser = updatedSeller;
             }
 
-            // Update password if provided; otherwise ensure we don't pass the existing encoded password for re-encoding
-            if (newPassword != null && !newPassword.trim().isEmpty() && 
-                currentPassword != null && !currentPassword.trim().isEmpty()) {
+            // Update password if provided; otherwise ensure we don't pass the existing
+            // encoded password for re-encoding
+            if (newPassword != null && !newPassword.trim().isEmpty() &&
+                    currentPassword != null && !currentPassword.trim().isEmpty()) {
                 // Verify current password using raw currentPassword
                 if (userService.login(user.getEmail(), currentPassword).isPresent()) {
                     updatedUser.setPassword(newPassword); // pass raw new password; service will encode
@@ -217,7 +222,8 @@ public class SellerController {
                     return "redirect:/seller/settings?error=Current password is incorrect";
                 }
             } else {
-                // Avoid double-encoding by not sending an already-encoded password back to service
+                // Avoid double-encoding by not sending an already-encoded password back to
+                // service
                 updatedUser.setPassword(null);
             }
 
@@ -232,7 +238,8 @@ public class SellerController {
     @GetMapping("/orders")
     public String orders(Model model, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         List<Order> orders = orderService.getOrdersBySellerId(user.getUserId());
         model.addAttribute("orders", orders);
@@ -243,7 +250,8 @@ public class SellerController {
     @PostMapping("/orders/ship/{id}")
     public String shipOrder(@PathVariable Long id, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
         Optional<Order> orderOpt = orderService.getOrderById(id);
         if (orderOpt.isEmpty() || !orderOpt.get().getSellerId().equals(user.getUserId())) {
             return "redirect:/seller/orders?error=Order not found";
@@ -264,7 +272,8 @@ public class SellerController {
     @PostMapping("/orders/refund/{id}")
     public String refundOrder(@PathVariable Long id, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
         Optional<Order> orderOpt = orderService.getOrderById(id);
         if (orderOpt.isEmpty() || !orderOpt.get().getSellerId().equals(user.getUserId())) {
             return "redirect:/seller/orders?error=Order not found";
@@ -289,35 +298,38 @@ public class SellerController {
     @GetMapping("/products")
     public String products(Model model, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         System.out.println("=== PRODUCTS DEBUG ===");
         System.out.println("User ID: " + user.getUserId());
         System.out.println("User Name: " + user.getName());
         System.out.println("User Role: " + user.getRole());
-        
+
         // Debug: Check all products in database
         List<Product> allProducts = productService.getAllProducts();
         System.out.println("Total products in database: " + (allProducts != null ? allProducts.size() : 0));
         if (allProducts != null && !allProducts.isEmpty()) {
             for (Product product : allProducts) {
-                System.out.println("All Products - Name: " + product.getName() + " (ID: " + product.getId() + ", Seller ID: " + product.getSellerId() + ")");
+                System.out.println("All Products - Name: " + product.getName() + " (ID: " + product.getId()
+                        + ", Seller ID: " + product.getSellerId() + ")");
             }
         } else {
             System.out.println("ERROR: No products found in database at all!");
         }
-        
+
         List<Product> products = productService.getProductsBySellerId(user.getUserId());
         System.out.println("Found products count: " + (products != null ? products.size() : 0));
-        
+
         if (products != null && !products.isEmpty()) {
             for (Product product : products) {
-                System.out.println("Product: " + product.getName() + " (ID: " + product.getId() + ", Seller ID: " + product.getSellerId() + ")");
+                System.out.println("Product: " + product.getName() + " (ID: " + product.getId() + ", Seller ID: "
+                        + product.getSellerId() + ")");
             }
         } else {
             System.out.println("No products found for seller ID: " + user.getUserId());
         }
-        
+
         model.addAttribute("products", products);
         model.addAttribute("user", user);
         return "seller_products";
@@ -326,7 +338,8 @@ public class SellerController {
     @GetMapping("/products/available")
     public String availableProducts(Model model, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         List<Product> products = productService.getAvailableProductsBySellerId(user.getUserId());
         model.addAttribute("products", products);
@@ -337,7 +350,8 @@ public class SellerController {
     @GetMapping("/products/add")
     public String addProductForm(Model model, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         model.addAttribute("user", user);
         model.addAttribute("product", new Product());
@@ -346,26 +360,28 @@ public class SellerController {
 
     @PostMapping("/products/add")
     public String addProduct(@RequestParam("name") String name,
-                           @RequestParam("description") String description,
-                           @RequestParam(value = "specifications", required = false, defaultValue = "") String specifications,
-                           @RequestParam("price") double price,
-                           @RequestParam("stock") int stock,
-                           @RequestParam("instrumentType") String instrumentType,
-                           @RequestParam("images") List<MultipartFile> imageFiles,
-                           Authentication authentication) {
+            @RequestParam("description") String description,
+            @RequestParam(value = "specifications", required = false, defaultValue = "") String specifications,
+            @RequestParam("price") double price,
+            @RequestParam("stock") int stock,
+            @RequestParam("instrumentType") String instrumentType,
+            @RequestParam("images") List<MultipartFile> imageFiles,
+            Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         try {
             System.out.println("Adding product: " + name);
             System.out.println("Image files count: " + (imageFiles != null ? imageFiles.size() : 0));
-            
+
             // Validate image files before processing
-            ImageValidationUtil.ValidationResult imageValidation = ImageValidationUtil.validateImageFiles(imageFiles, false, 10);
+            ImageValidationUtil.ValidationResult imageValidation = ImageValidationUtil.validateImageFiles(imageFiles,
+                    false, 10);
             if (!imageValidation.isValid()) {
                 return "redirect:/seller/products/add?error=" + imageValidation.getErrorMessage();
             }
-            
+
             // Create Product object manually
             Product product = new Product();
             product.setName(name);
@@ -375,7 +391,7 @@ public class SellerController {
             product.setStock(stock);
             product.setInstrumentType(instrumentType);
             product.setSellerId(user.getUserId());
-            
+
             Product savedProduct = productService.addProduct(product, imageFiles);
             System.out.println("Product saved with ID: " + savedProduct.getId());
             return "redirect:/seller/products?success=Product added successfully";
@@ -393,7 +409,8 @@ public class SellerController {
     @GetMapping("/products/edit/{id}")
     public String editProductForm(@PathVariable Long id, Model model, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         Optional<Product> product = productService.getProductById(id);
         if (product.isPresent() && product.get().getSellerId().equals(user.getUserId())) {
@@ -406,17 +423,18 @@ public class SellerController {
 
     @PostMapping("/products/edit/{id}")
     public String updateProduct(@PathVariable Long id,
-                                @RequestParam("name") String name,
-                                @RequestParam("description") String description,
-                                @RequestParam(value = "specifications", required = false, defaultValue = "") String specifications,
-                                @RequestParam("price") double price,
-                                @RequestParam("stock") int stock,
-                                @RequestParam("instrumentType") String instrumentType,
-                                @RequestParam(value = "images", required = false) List<MultipartFile> newImageFiles,
-                                @RequestParam(value = "primaryImageId", required = false) Long primaryImageId,
-                                Authentication authentication) {
+            @RequestParam("name") String name,
+            @RequestParam("description") String description,
+            @RequestParam(value = "specifications", required = false, defaultValue = "") String specifications,
+            @RequestParam("price") double price,
+            @RequestParam("stock") int stock,
+            @RequestParam("instrumentType") String instrumentType,
+            @RequestParam(value = "images", required = false) List<MultipartFile> newImageFiles,
+            @RequestParam(value = "primaryImageId", required = false) Long primaryImageId,
+            Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         try {
             System.out.println("=== UPDATE PRODUCT DEBUG ===");
@@ -427,15 +445,16 @@ public class SellerController {
             System.out.println("Updated product stock: " + stock);
             System.out.println("Updated product instrument type: " + instrumentType);
             System.out.println("New image files count: " + (newImageFiles != null ? newImageFiles.size() : 0));
-            
+
             // Validate new image files if provided
             if (newImageFiles != null && !newImageFiles.isEmpty()) {
-                ImageValidationUtil.ValidationResult imageValidation = ImageValidationUtil.validateImageFiles(newImageFiles, false, 10);
+                ImageValidationUtil.ValidationResult imageValidation = ImageValidationUtil
+                        .validateImageFiles(newImageFiles, false, 10);
                 if (!imageValidation.isValid()) {
                     return "redirect:/seller/products/edit/" + id + "?error=" + imageValidation.getErrorMessage();
                 }
             }
-            
+
             // Create updated Product object manually
             Product updatedProduct = new Product();
             updatedProduct.setName(name);
@@ -444,17 +463,18 @@ public class SellerController {
             updatedProduct.setPrice(price);
             updatedProduct.setStock(stock);
             updatedProduct.setInstrumentType(instrumentType);
-            
+
             System.out.println("Calling productService.updateProductWithImages...");
             Product savedProduct = productService.updateProductWithImages(id, updatedProduct, newImageFiles);
-            System.out.println("Product updated successfully, ID: " + (savedProduct != null ? savedProduct.getId() : "null"));
-            
+            System.out.println(
+                    "Product updated successfully, ID: " + (savedProduct != null ? savedProduct.getId() : "null"));
+
             // Handle primary image selection
             if (primaryImageId != null && primaryImageId > 0) {
                 System.out.println("Setting primary image ID: " + primaryImageId);
                 productService.setPrimaryImage(id, primaryImageId);
             }
-            
+
             return "redirect:/seller/products?success=Product updated successfully";
         } catch (IOException e) {
             System.err.println("Error updating product: " + e.getMessage());
@@ -489,7 +509,8 @@ public class SellerController {
     @GetMapping("/products/delete/{id}")
     public String deleteProduct(@PathVariable Long id, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         Optional<Product> product = productService.getProductById(id);
         if (product.isPresent() && product.get().getSellerId().equals(user.getUserId())) {
@@ -504,7 +525,8 @@ public class SellerController {
     @ResponseBody
     public String setPrimaryImage(@PathVariable Long imageId, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         try {
             // Get the product ID from the image
@@ -521,7 +543,8 @@ public class SellerController {
     @ResponseBody
     public String deleteImage(@PathVariable Long imageId, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         try {
             productService.deleteImage(imageId);
@@ -535,7 +558,8 @@ public class SellerController {
     @GetMapping("/account")
     public String account(Model model, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         Long sellerId = user.getUserId();
         List<Transaction> transactions = transactionService.getTransactionsBySellerId(sellerId);
@@ -552,7 +576,8 @@ public class SellerController {
     @PostMapping("/withdraw")
     public String withdraw(@RequestParam double amount, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         Long sellerId = user.getUserId();
         double balance = transactionService.getCompletedEarningsBySellerId(sellerId);
@@ -569,15 +594,16 @@ public class SellerController {
     @GetMapping("/reviews")
     public String reviews(Model model, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         Long sellerId = user.getUserId();
         System.out.println("=== SELLER REVIEWS CONTROLLER DEBUG ===");
         System.out.println("Seller ID: " + sellerId);
-        
+
         List<Review> reviews = reviewService.getApprovedReviewsBySellerId(sellerId);
         System.out.println("Reviews found: " + (reviews != null ? reviews.size() : "NULL"));
-        
+
         ReviewService.ReviewStats reviewStats = reviewService.getReviewStatsBySellerId(sellerId);
         System.out.println("ReviewStats object: " + (reviewStats != null ? "Created" : "NULL"));
         if (reviewStats != null) {
@@ -595,7 +621,8 @@ public class SellerController {
     @GetMapping("/reviews/product/{productId}")
     public String productReviews(@PathVariable Long productId, Model model, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         // Verify the product belongs to this seller
         Optional<Product> product = productService.getProductById(productId);
@@ -618,7 +645,8 @@ public class SellerController {
     @PostMapping("/reviews/{reviewId}/approve")
     public String approveReview(@PathVariable Long reviewId, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         reviewService.approveReview(reviewId);
         return "redirect:/seller/reviews?success=Review approved successfully";
@@ -627,7 +655,8 @@ public class SellerController {
     @PostMapping("/reviews/{reviewId}/reject")
     public String rejectReview(@PathVariable Long reviewId, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         reviewService.rejectReview(reviewId);
         return "redirect:/seller/reviews?success=Review rejected successfully";
@@ -636,7 +665,8 @@ public class SellerController {
     @GetMapping("/reviews/{reviewId}/delete")
     public String deleteReview(@PathVariable Long reviewId, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         reviewService.deleteReview(reviewId);
         return "redirect:/seller/reviews?success=Review deleted successfully";
@@ -646,42 +676,43 @@ public class SellerController {
     @PostMapping("/deleteAccount")
     public String deleteAccount(Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (!isSeller(user)) return "redirect:/users/login?error=Please log in as a seller";
+        if (!isSeller(user))
+            return "redirect:/users/login?error=Please log in as a seller";
 
         try {
             Long sellerId = user.getUserId();
-            
+
             // Delete all seller-related data
             // 1. Delete all products and their images
             List<Product> products = productService.getProductsBySellerId(sellerId);
             for (Product product : products) {
                 productService.deleteProduct(product.getId());
             }
-            
+
             // 2. Delete all orders related to this seller
             List<Order> orders = orderService.getOrdersBySellerId(sellerId);
             for (Order order : orders) {
                 orderService.deleteOrder(order.getId());
             }
-            
+
             // 3. Delete all transactions
             List<Transaction> transactions = transactionService.getTransactionsBySellerId(sellerId);
             for (Transaction transaction : transactions) {
                 transactionService.deleteTransaction(transaction.getId());
             }
-            
+
             // 4. Delete all reviews for this seller's products
             List<Review> reviews = reviewService.getReviewsBySellerId(sellerId);
             for (Review review : reviews) {
                 reviewService.deleteReview(review.getId());
             }
-            
-            // 5. Finally, delete the user account completely
-            userService.hardDeleteUser(sellerId);
-            
+
+            // 5. Finally, delete the user account completely (hard delete)
+            userService.deleteUser(sellerId);
+
             // Redirect to login with success message
             return "redirect:/users/login?success=Account deleted successfully";
-            
+
         } catch (Exception e) {
             return "redirect:/seller/settings?error=Error deleting account: " + e.getMessage();
         }
@@ -700,8 +731,9 @@ public class SellerController {
         if (originalFileName == null || originalFileName.isEmpty()) {
             originalFileName = "profile";
         }
-        String fileExtension = originalFileName.contains(".") ? 
-            originalFileName.substring(originalFileName.lastIndexOf(".")) : ".jpg";
+        String fileExtension = originalFileName.contains(".")
+                ? originalFileName.substring(originalFileName.lastIndexOf("."))
+                : ".jpg";
         String fileName = "profile_" + UUID.randomUUID().toString() + fileExtension;
 
         // Save file

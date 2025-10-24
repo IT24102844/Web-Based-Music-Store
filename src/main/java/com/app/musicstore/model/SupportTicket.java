@@ -12,7 +12,7 @@ public class SupportTicket {
     private Long ticketId;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "userId", nullable = true) // Allow orphaned tickets for audit trail
     private User user;
 
     @Enumerated(EnumType.STRING)
@@ -51,10 +51,18 @@ public class SupportTicket {
     }
 
     // Getters and Setters
-    public Long getTicketId() { return ticketId; }
-    public void setTicketId(Long ticketId) { this.ticketId = ticketId; }
+    public Long getTicketId() {
+        return ticketId;
+    }
 
-    public User getUser() { return user; }
+    public void setTicketId(Long ticketId) {
+        this.ticketId = ticketId;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
     public void setUser(User user) {
         this.user = user;
 
@@ -62,31 +70,65 @@ public class SupportTicket {
             this.userRole = user.getRole();
         }
     }
-    public Role getUserRole() { return userRole; }
-    public void setUserRole(Role userRole) { this.userRole = userRole; }
 
-    public String getComplaintId() { return complaintId; }
-    public void setComplaintId(String complaintId) { this.complaintId = complaintId; }
+    public Role getUserRole() {
+        return userRole;
+    }
 
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
+    public void setUserRole(Role userRole) {
+        this.userRole = userRole;
+    }
 
-    public TicketStatus getStatus() { return status; }
+    public String getComplaintId() {
+        return complaintId;
+    }
+
+    public void setComplaintId(String complaintId) {
+        this.complaintId = complaintId;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public TicketStatus getStatus() {
+        return status;
+    }
+
     public void setStatus(TicketStatus status) {
         this.status = status;
         this.updatedAt = LocalDateTime.now();
     }
 
-    public String getAdminResponse() { return adminResponse; }
-    public void setAdminResponse(String adminResponse) { this.adminResponse = adminResponse; }
+    public String getAdminResponse() {
+        return adminResponse;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setAdminResponse(String adminResponse) {
+        this.adminResponse = adminResponse;
+    }
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 
     private String generateComplaintId() {
-        return "TKT-" + System.currentTimeMillis() + "-" + (int)(Math.random() * 1000);
+        return "TKT-" + System.currentTimeMillis() + "-" + (int) (Math.random() * 1000);
     }
 }

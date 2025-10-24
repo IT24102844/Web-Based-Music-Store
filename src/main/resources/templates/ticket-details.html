@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+
 <head>
   <title>Ticket Details - Tune Wave</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -32,9 +32,9 @@
       width: 100%;
       height: 100%;
       background-image:
-              radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-              radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-              radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
       background-size: 50px 50px, 80px 80px, 120px 120px;
       pointer-events: none;
       z-index: 1;
@@ -84,9 +84,12 @@
     }
 
     @keyframes textShimmer {
-      0%, 100% {
+
+      0%,
+      100% {
         background-position: 0% 50%;
       }
+
       50% {
         background-position: 100% 50%;
       }
@@ -153,7 +156,8 @@
       margin-bottom: 8px;
     }
 
-    .form-control, .form-select {
+    .form-control,
+    .form-select {
       background: rgba(255, 255, 255, 0.07);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 10px;
@@ -161,7 +165,8 @@
       padding: 12px 15px;
     }
 
-    .form-control:focus, .form-select:focus {
+    .form-control:focus,
+    .form-select:focus {
       background: rgba(255, 255, 255, 0.1);
       border-color: #00d4ff;
       color: #e0e0e0;
@@ -321,102 +326,104 @@
     }
   </style>
 </head>
+
 <body>
-<!-- Navbar -->
-<nav class="navbar">
-  <div class="logo">TuneWave</div>
-  <div class="auth-buttons">
-    <a th:href="@{/users/logout}" class="btn-nav btn-login">Logout</a>
-    <a th:href="@{/dashboard/admin}" class="btn-nav btn-signup">⬅ Back</a>
-  </div>
-</nav>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">TuneWave</div>
+    <div class="auth-buttons">
+      <a th:href="@{/users/logout}" class="btn-nav btn-login">Logout</a>
+      <a th:href="@{/dashboard/admin}" class="btn-nav btn-signup">⬅ Back</a>
+    </div>
+  </nav>
 
-<div class="container">
-  <div class="content-container">
-    <h2 class="mb-4">Ticket Details</h2>
+  <div class="container">
+    <div class="content-container">
+      <h2 class="mb-4">Ticket Details</h2>
 
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+      <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+      <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <div th:if="${supportTicket}" class="card">
-      <div class="card-header">
-        <h5>Complaint ID: <span th:text="${supportTicket.complaintId}"></span></h5>
-      </div>
-      <div class="card-body">
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <strong>User:</strong> <span th:text="${supportTicket.user.name}"></span>
-          </div>
-          <div class="col-md-6">
-            <strong>Email:</strong> <span th:text="${supportTicket.user.email}"></span>
-          </div>
+      <div th:if="${supportTicket}" class="card">
+        <div class="card-header">
+          <h5>Complaint ID: <span th:text="${supportTicket.complaintId}"></span></h5>
         </div>
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <strong>Role:</strong> <span th:text="${supportTicket.userRole}"></span>
-          </div>
-          <div class="col-md-6">
-            <strong>Status:</strong>
-            <span th:switch="${supportTicket.status}">
-                            <span th:case="RESOLVED" class="badge bg-success" th:text="${supportTicket.status}"></span>
-                            <span th:case="PENDING" class="badge bg-warning" th:text="${supportTicket.status}"></span>
-                            <span th:case="NOT_RESOLVED" class="badge bg-danger" th:text="${supportTicket.status}"></span>
-                            <span th:case="IN_PROGRESS" class="badge bg-info" th:text="${supportTicket.status}"></span>
-                            <span th:case="CLOSED" class="badge bg-secondary" th:text="${supportTicket.status}"></span>
-                            <span th:case="*" class="badge bg-secondary" th:text="${supportTicket.status}"></span>
-                        </span>
-          </div>
-        </div>
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <strong>Created:</strong> <span th:text="${#temporals.format(supportTicket.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
-          </div>
-          <div class="col-md-6">
-            <strong>Last Updated:</strong> <span th:text="${#temporals.format(supportTicket.updatedAt, 'yyyy-MM-dd HH:mm')}"></span>
-          </div>
-        </div>
-        <div class="mb-3">
-          <strong>Message:</strong>
-          <p class="border p-3 rounded" th:text="${supportTicket.message}"></p>
-        </div>
-        <div class="mb-3" th:if="${supportTicket.adminResponse}">
-          <strong>Admin Response:</strong>
-          <p class="border p-3 rounded bg-light" th:text="${supportTicket.adminResponse}"></p>
-        </div>
-
-        <form th:action="@{/supportTickets/admin/update-status/{id}(id=${supportTicket.ticketId})}" method="post" class="mt-4">
-          <div class="row">
-            <div class="col-md-4">
-              <label for="status" class="form-label">Update Status:</label>
-              <select class="form-select" id="status" name="status" required>
-                <option th:each="status : ${T(com.app.musicstore.model.TicketStatus).values()}"
-                        th:value="${status}"
-                        th:text="${status}"
-                        th:selected="${status == supportTicket.status}">
-                </option>
-              </select>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>User:</strong> <span th:text="${supportTicket.user.name}"></span>
             </div>
             <div class="col-md-6">
-              <label for="adminResponse" class="form-label">Admin Response:</label>
-              <textarea class="form-control" id="adminResponse" name="adminResponse"
-                        rows="3" placeholder="Enter your response..."
-                        th:value="${supportTicket.adminResponse}"></textarea>
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-              <button type="submit" class="btn btn-primary w-100">Update</button>
+              <strong>Email:</strong> <span th:text="${supportTicket.user.email}"></span>
             </div>
           </div>
-        </form>
-      </div>
-      <div class="card-footer">
-        <a th:href="@{/supportTickets/admin}" class="btn btn-secondary">Back to Tickets</a>
-      </div>
-    </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Role:</strong> <span th:text="${supportTicket.userRole}"></span>
+            </div>
+            <div class="col-md-6">
+              <strong>Status:</strong>
+              <span th:switch="${supportTicket.status}">
+                <span th:case="RESOLVED" class="badge bg-success" th:text="${supportTicket.status}"></span>
+                <span th:case="PENDING" class="badge bg-warning" th:text="${supportTicket.status}"></span>
+                <span th:case="NOT_RESOLVED" class="badge bg-danger" th:text="${supportTicket.status}"></span>
+                <span th:case="IN_PROGRESS" class="badge bg-info" th:text="${supportTicket.status}"></span>
+                <span th:case="CLOSED" class="badge bg-secondary" th:text="${supportTicket.status}"></span>
+                <span th:case="*" class="badge bg-secondary" th:text="${supportTicket.status}"></span>
+              </span>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Created:</strong> <span
+                th:text="${#temporals.format(supportTicket.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+            </div>
+            <div class="col-md-6">
+              <strong>Last Updated:</strong> <span
+                th:text="${#temporals.format(supportTicket.updatedAt, 'yyyy-MM-dd HH:mm')}"></span>
+            </div>
+          </div>
+          <div class="mb-3">
+            <strong>Message:</strong>
+            <p class="border p-3 rounded" th:text="${supportTicket.message}"></p>
+          </div>
+          <div class="mb-3" th:if="${supportTicket.adminResponse}">
+            <strong>Admin Response:</strong>
+            <p class="border p-3 rounded bg-light" th:text="${supportTicket.adminResponse}"></p>
+          </div>
 
-    <div th:unless="${supportTicket}" class="alert alert-danger">
-      Ticket not found.
+          <form th:action="@{/tickets/admin/update-status/{id}(id=${supportTicket.ticketId})}" method="post"
+            class="mt-4">
+            <div class="row">
+              <div class="col-md-4">
+                <label for="status" class="form-label">Update Status:</label>
+                <select class="form-select" id="status" name="status" required>
+                  <option th:each="status : ${T(com.app.musicstore.model.TicketStatus).values()}" th:value="${status}"
+                    th:text="${status}" th:selected="${status == supportTicket.status}">
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="adminResponse" class="form-label">Admin Response:</label>
+                <textarea class="form-control" id="adminResponse" name="adminResponse" rows="3"
+                  placeholder="Enter your response..." th:value="${supportTicket.adminResponse}"></textarea>
+              </div>
+              <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Update</button>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="card-footer">
+          <a th:href="@{/tickets/admin}" class="btn btn-secondary">Back to Tickets</a>
+        </div>
+      </div>
+
+      <div th:unless="${supportTicket}" class="alert alert-danger">
+        Ticket not found.
+      </div>
     </div>
   </div>
-</div>
 </body>
+
 </html>

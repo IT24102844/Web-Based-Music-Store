@@ -29,12 +29,22 @@ public class UserService {
     private final CourseSellerService courseSellerService;
     private final InstrumentSellerService instrumentSellerService;
 
+    // Repositories for cascade deletion
+    private final com.app.musicstore.repository.UnifiedPaymentRepository unifiedPaymentRepository;
+    private final com.app.musicstore.repository.SupportTicketRepository supportTicketRepository;
+    private final com.app.musicstore.repository.TicketRepository ticketRepository;
+    private final com.app.musicstore.repository.PaymentRepository paymentRepository;
+
     public UserService(UserRepository userRepository,
-                       BCryptPasswordEncoder passwordEncoder,
-                       ArtistService artistService,
-                       CourseSellerService courseSellerService,
-                       InstrumentSellerService instrumentSellerService,
-                       CustomerService customerService) {
+            BCryptPasswordEncoder passwordEncoder,
+            ArtistService artistService,
+            CourseSellerService courseSellerService,
+            InstrumentSellerService instrumentSellerService,
+            CustomerService customerService,
+            com.app.musicstore.repository.UnifiedPaymentRepository unifiedPaymentRepository,
+            com.app.musicstore.repository.SupportTicketRepository supportTicketRepository,
+            com.app.musicstore.repository.TicketRepository ticketRepository,
+            com.app.musicstore.repository.PaymentRepository paymentRepository) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -42,11 +52,15 @@ public class UserService {
         this.customerService = customerService;
         this.courseSellerService = courseSellerService;
         this.instrumentSellerService = instrumentSellerService;
+        this.unifiedPaymentRepository = unifiedPaymentRepository;
+        this.supportTicketRepository = supportTicketRepository;
+        this.ticketRepository = ticketRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     // Basic registration (no extra details)
     public User registerUser(User user) {
-        userRepository.findByEmail(user.getEmail()).ifPresent(u -> {
+        userRepository.findByEmail(user.getEmail()).ifPresent(existingUser -> {
             throw new IllegalArgumentException("Email already exists");
         });
 
@@ -72,7 +86,7 @@ public class UserService {
                 } else {
                     // Remove inactive user before re-registering
                     System.out.println("Found inactive user with email: " + user.getEmail() + ", deleting...");
-                    hardDeleteUser(existing.getUserId());
+                    deleteUser(existing.getUserId());
                 }
             }
 
@@ -197,34 +211,98 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    /**
+     * Delete user (Hard Delete with cascade)
+     * Permanently removes user and all associated data
+     * 
+     * @param userId The ID of the user to delete
+     */
+    @Transactional
     public void deleteUser(Long userId) {
-        var user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setStatus(Status.INACTIVE);
-        userRepository.save(user);
-    }
-
-    public void hardDeleteUser(Long userId) {
-        System.out.println("Starting hard delete for user ID: " + userId);
+        System.out.println("🗑️ Starting deletion for user ID: " + userId);
 
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         System.out.println("Found user: " + user.getEmail() + " with role: " + user.getRole());
 
-        switch (user.getRole()) {
-            case ARTIST -> artistService.findByUserId(userId)
-                    .ifPresent(artist -> artistService.deleteById(artist.getUserId()));
-            case CUSTOMER -> customerService.findByUserId(userId)
-                    .ifPresent(customer -> customerService.deleteById(customer.getUserId()));
-            case COURSE_SELLER -> courseSellerService.findByUserId(userId)
-                    .ifPresent(seller -> courseSellerService.deleteById(seller.getUserId()));
-            case ITEM_SELLER -> instrumentSellerService.findByUserId(userId)
-                    .ifPresent(seller -> instrumentSellerService.deleteById(seller.getUserId()));
-        }
+        try {
+            // Step 1: Delete all foreign key related data first to avoid constraint
+            // violations
+            System.out.println("Step 1: Deleting foreign key related data...");
 
-        userRepository.deleteById(userId);
-        System.out.println("Hard delete completed for user: " + userId);
+            // Delete unified payments (songs, courses, instruments, events purchased)
+            var unifiedPayments = unifiedPaymentRepository.findByUserOrderByCreatedAtDesc(user);
+            if (!unifiedPayments.isEmpty()) {
+                System.out.println("   - Deleting " + unifiedPayments.size() + " unified payments");
+                unifiedPaymentRepository.deleteAll(unifiedPayments);
+            }
+
+            // Support tickets are preserved for audit trail (user reference will be null)
+            var supportTickets = supportTicketRepository.findByUserOrderByCreatedAtDesc(user);
+            if (!supportTickets.isEmpty()) {
+                System.out.println("   - Preserving " + supportTickets.size()
+                        + " support tickets (setting user to null for audit trail)");
+                // Set user to null instead of deleting tickets
+                supportTickets.forEach(ticket -> {
+                    ticket.setUser(null);
+                    supportTicketRepository.save(ticket);
+                });
+            }
+
+            // Delete event tickets
+            var eventTickets = ticketRepository.findByUser(user);
+            if (!eventTickets.isEmpty()) {
+                System.out.println("   - Deleting " + eventTickets.size() + " event tickets");
+                ticketRepository.deleteAll(eventTickets);
+            }
+
+            // Delete event payments
+            var payments = paymentRepository.findByUser(user);
+            if (!payments.isEmpty()) {
+                System.out.println("   - Deleting " + payments.size() + " event payments");
+                paymentRepository.deleteAll(payments);
+            }
+
+            System.out.println("   ✓ Foreign key data cleared");
+
+            // Step 2: Delete role-specific data
+            System.out.println("Step 2: Deleting role-specific data...");
+            switch (user.getRole()) {
+                case ARTIST -> {
+                    System.out.println("   - Deleting Artist data");
+                    artistService.findByUserId(userId)
+                            .ifPresent(artist -> artistService.deleteById(artist.getUserId()));
+                }
+                case CUSTOMER -> {
+                    System.out.println("   - Deleting Customer data");
+                    customerService.findByUserId(userId)
+                            .ifPresent(customer -> customerService.deleteById(customer.getUserId()));
+                }
+                case COURSE_SELLER -> {
+                    System.out.println("   - Deleting CourseSeller data");
+                    courseSellerService.findByUserId(userId)
+                            .ifPresent(seller -> courseSellerService.deleteById(seller.getUserId()));
+                }
+                case ITEM_SELLER -> {
+                    System.out.println("   - Deleting InstrumentSeller data");
+                    instrumentSellerService.findByUserId(userId)
+                            .ifPresent(seller -> instrumentSellerService.deleteById(seller.getUserId()));
+                }
+                case ADMIN -> System.out.println("   - Admin user - no role-specific data");
+            }
+            System.out.println("   ✓ Role-specific data deleted");
+
+            // Step 3: Delete the user record
+            System.out.println("Step 3: Deleting user record...");
+            userRepository.deleteById(userId);
+            System.out.println("✅ User deletion completed successfully for: " + userId);
+
+        } catch (Exception e) {
+            System.err.println("❌ Error during user deletion: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to delete user: " + e.getMessage(), e);
+        }
     }
 
     public void changeUserRole(Long userId, String newRole) {

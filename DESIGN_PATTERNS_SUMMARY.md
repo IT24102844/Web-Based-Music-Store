@@ -265,7 +265,7 @@ switch (user.getRole()) {
 - **Create**: `registerUser()`, `registerUserWithDetails()`
 - **Read**: `getUserById()`, `getAllUsers()`, `login()`
 - **Update**: `updateUser()`, `changeUserRole()`, `changeUserStatus()`
-- **Delete**: `deleteUser()` (soft delete), `hardDeleteUser()` (cascade delete)
+- **Delete**: `deleteUser()` (hard delete with cascade - permanently removes user and all associated data)
 
 ### **Validations**:
 ```java
@@ -284,9 +284,10 @@ private String password;
 
 **Business Validations**:
 - Email uniqueness check
-- Cannot delete self
-- Cannot delete last admin
+- Cannot delete self (admin)
+- Cannot delete last admin user
 - Password encryption (BCrypt)
+- Cascade deletion of role-specific data (Artist/Customer/Seller records)
 
 ---
 

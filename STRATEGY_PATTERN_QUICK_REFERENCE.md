@@ -75,16 +75,20 @@ public class NewPaymentStrategy implements PaymentStrategy {
 ## 🎤 Viva Answer Templates
 
 ### **Q: What is Strategy Pattern?**
-> "It's a behavioral design pattern that defines a family of algorithms, encapsulates each one, and makes them interchangeable. In our project, we use it for payment processing where users can choose between Credit Card, Debit Card, Wallet, or Cash on Delivery."
+> "It's a behavioral design pattern that defines a family of algorithms, encapsulates each one, and makes them interchangeable.
+> In our project, we use it for payment processing where users can choose between Credit Card, Debit Card, Wallet, or Cash on Delivery."
 
 ### **Q: Why not use if-else statements?**
-> "If-else violates the Open/Closed Principle. Every time we add a new payment method, we'd have to modify the main method. With Strategy Pattern, we just create a new class without touching existing code. It's also more testable and maintainable."
+> "If-else violates the Open/Closed Principle. Every time we add a new payment method, we'd have to modify the main method. 
+> With Strategy Pattern, we just create a new class without touching existing code. It's also more testable and maintainable."
 
 ### **Q: How does Spring help?**
-> "Spring automatically injects all PaymentStrategy beans into our PaymentContext using a Map. We just annotate strategies with @Component and Spring handles the registration."
+> "Spring automatically injects all PaymentStrategy beans into our PaymentContext using a Map. 
+> We just annotate strategies with @Component and Spring handles the registration."
 
 ### **Q: Show me the code flow**
-> "Sure! When a user pays: PaymentController receives the payment method → calls UnifiedPaymentService → which uses PaymentContext → PaymentContext selects the right strategy (e.g., WalletPaymentStrategy) → Strategy processes the payment → Result returned."
+> "Sure! When a user pays: PaymentController receives the payment method → calls UnifiedPaymentService → which uses PaymentContext → PaymentContext selects the right strategy 
+> (e.g., WalletPaymentStrategy) → Strategy processes the payment → Result returned."
 
 ### **Q: What are the benefits?**
 > "1) Follows SOLID principles, 2) Easy to add new payment methods, 3) Each payment method is independently testable, 4) Runtime flexibility, 5) Clear separation of concerns."

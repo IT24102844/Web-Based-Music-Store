@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Enrollments - Course Seller</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="data:,">
+
+    <style>
+        /* === YOUR PROVIDED STYLE (slightly adapted for this page) === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 100px auto;
+            padding: 20px;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-family: 'Monospace', monospace;
+            font-size: 28px;
+            font-weight: 600;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #00d4ff;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00d4ff, #0099cc);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Cards & Tables */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+
+        .card h3, .card h5 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #e0e0e0;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            color: #00d4ff;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .bg-success { background: #28a745; color: white; }
+        .bg-primary { background: #007bff; color: white; }
+        .bg-warning { background: #ffc107; color: #000; }
+        .bg-secondary { background: #6c757d; color: white; }
+
+        .alert {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+
+        .text-center { text-align: center; }
+        .text-muted { color: #aaa; }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+        }
+        .btn-outline-secondary {
+            border: 1px solid #00d4ff;
+            color: #00d4ff;
+        }
+        .btn:hover { opacity: 0.85; }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="logo">Tune Wave</div>
+    <ul class="nav-links">
+        <li><a th:href="@{/dashboard/course-seller}">Dashboard</a></li>
+        <li><a th:href="@{/course-seller/courses}">My Courses</a></li>
+        <li><a th:href="@{/course-seller/courses/create}">Create Course</a></li>
+        <li><a th:href="@{/course-seller/courses/enrollments}" style="color:#00d4ff;">Enrollments</a></li>
+        <li><a th:href="@{/users/edit-profile}">Profile</a></li>
+        <li><a th:href="@{/users/logout}" style="color:#ff4d4d;">Logout</a></li>
+    </ul>
+</nav>
+
+<!-- Main Content -->
+<div class="container">
+    <div class="card">
+        <h3><i class="fas fa-users me-2"></i>Course Enrollments</h3>
+
+        <div th:if="${param.success}" class="alert">
+            <span th:text="${param.success}">Success message</span>
+        </div>
+
+        <div th:if="${enrollments != null and !enrollments.empty}" class="table-responsive">
+            <table>
+                <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Email</th>
+                    <th>Course</th>
+                    <th>Price</th>
+                    <th>Enrollment Date</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="enrollment : ${enrollments}">
+                    <td th:text="${enrollment.customer?.name}">Student Name</td>
+                    <td th:text="${enrollment.customer?.email}">student@email.com</td>
+                    <td th:text="${enrollment.course?.title}">Course Title</td>
+                    <td>LKR <span th:text="${#numbers.formatDecimal(enrollment.course?.price, 1, 2)}">0.00</span></td>
+                    <td th:text="${#temporals.format(enrollment.enrollmentDate, 'MMM dd, yyyy HH:mm')}">Date</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${enrollment.status == 'ACTIVE' ? 'bg-success' : (enrollment.status == 'COMPLETED' ? 'bg-primary' : (enrollment.status == 'CANCELLED' ? 'bg-warning' : 'bg-secondary'))}"
+                              th:text="${enrollment.status}">Status</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${enrollments == null or enrollments.empty}" class="text-center py-5">
+            <i class="fas fa-users fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">No Enrollments Yet</h4>
+            <p class="text-muted">Students haven't enrolled in any of your courses yet.</p>
+            <div class="mt-4">
+                <a th:href="@{/course-seller/courses/create}" class="btn btn-primary me-2">
+                    <i class="fas fa-plus-circle me-2"></i>Create a Course
+                </a>
+                <a th:href="@{/course-seller/courses}" class="btn btn-outline-secondary">
+                    <i class="fas fa-book me-2"></i>View Your Courses
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div th:if="${enrollments != null and !enrollments.empty}" class="card">
+        <h5><i class="fas fa-chart-pie me-2"></i>Enrollment Statistics</h5>
+        <div class="row text-center" style="display:flex; gap:20px; justify-content:center;">
+            <div class="col-md-3 mb-3" style="flex:1;">
+                <div class="border rounded p-3 bg-primary text-white">
+                    <h3 th:text="${enrollments.size()}">0</h3>
+                    <p>Total Enrollments</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3" style="flex:1;">
+                <div class="border rounded p-3 bg-success text-white">
+                    <h3 th:text="${enrollments.?[status == 'ACTIVE'].size()}">0</h3>
+                    <p>Active Students</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3" style="flex:1;">
+                <div class="border rounded p-3 bg-info text-white">
+                    <h3 th:text="${enrollments.?[status == 'COMPLETED'].size()}">0</h3>
+                    <p>Completed</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3" style="flex:1;">
+                <div class="border rounded p-3 bg-warning text-white">
+                    <h3 th:text="${enrollments.?[status == 'CANCELLED'].size()}">0</h3>
+                    <p>Cancelled</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

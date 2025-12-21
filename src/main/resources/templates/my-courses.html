@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Courses - Music Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #e0e0e0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px, 120px 120px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container-fluid {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: 100vh;
+            color: white;
+            padding: 20px 0;
+        }
+
+        .sidebar .nav-link {
+            color: #e0e0e0;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 5px 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 1px solid transparent;
+        }
+
+        .sidebar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #00d4ff;
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .sidebar .nav-link.active {
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .sidebar .text-center h4 {
+            color: #00d4ff;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .sidebar .text-center small {
+            color: #b0b0b0;
+        }
+
+        /* Main Content */
+        main {
+            padding: 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .border-bottom {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        h1, h2, h5 {
+            color: #ffffff;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .course-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-header {
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px 15px 0 0 !important;
+            padding: 20px;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        .card-footer {
+            background: rgba(255, 255, 255, 0.03);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0 0 15px 15px !important;
+            padding: 20px;
+        }
+
+        /* Statistics Cards */
+        .border.rounded {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            transition: all 0.3s ease;
+        }
+
+        .border.rounded:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(0, 212, 255, 0.3) !important;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .bg-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc) !important;
+        }
+
+        .bg-success {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d) !important;
+        }
+
+        .bg-info {
+            background: linear-gradient(135deg, #45b7d1, #96c93d) !important;
+        }
+
+        .bg-warning {
+            background: linear-gradient(135deg, #ffd166, #ff9a3c) !important;
+        }
+
+        /* Badges */
+        .badge {
+            border-radius: 20px;
+            padding: 8px 12px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .bg-success {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d) !important;
+        }
+
+        .bg-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc) !important;
+        }
+
+        .bg-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52) !important;
+        }
+
+        /* Progress Bar */
+        .progress {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        /* Buttons */
+        .btn {
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-outline-success {
+            color: #4ecdc4;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            background: transparent;
+        }
+
+        .btn-outline-success:hover {
+            background: rgba(78, 205, 196, 0.1);
+            border-color: #4ecdc4;
+            color: #4ecdc4;
+        }
+
+        .btn-outline-info {
+            color: #45b7d1;
+            border: 1px solid rgba(69, 183, 209, 0.3);
+            background: transparent;
+        }
+
+        .btn-outline-info:hover {
+            background: rgba(69, 183, 209, 0.1);
+            border-color: #45b7d1;
+            color: #45b7d1;
+        }
+
+        .btn-outline-danger {
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            background: transparent;
+        }
+
+        .btn-outline-danger:hover {
+            background: rgba(255, 107, 107, 0.1);
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-group .btn {
+            border-radius: 20px;
+            margin: 0 2px;
+        }
+
+        /* Alerts */
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.1);
+            color: #4ecdc4;
+            border-left: 4px solid #4ecdc4;
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            color: #ff6b6b;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        /* Text Colors */
+        .text-muted {
+            color: #b0b0b0 !important;
+        }
+
+        .text-decoration-none {
+            color: #00d4ff;
+            transition: color 0.3s ease;
+        }
+
+        .text-decoration-none:hover {
+            color: #4ecdc4;
+        }
+
+        /* Modal */
+        .modal-content {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: #e0e0e0;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                min-height: auto;
+                width: 100%;
+            }
+
+            main {
+                padding: 15px;
+            }
+
+            .card-body {
+                padding: 20px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn-group .btn {
+                margin: 2px 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+            <div class="position-sticky pt-3">
+                <div class="text-center mb-4">
+                    <h4>Music Store</h4>
+                    <small>Customer Portal</small>
+                </div>
+
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/dashboard/customer}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/customer/courses}">
+                            <i class="fas fa-book me-2"></i>Browse Courses
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="@{/customer/courses/my-courses}">
+                            <i class="fas fa-graduation-cap me-2"></i>My Courses
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/users/edit-profile}">
+                            <i class="fas fa-user-edit me-2"></i>Update Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/tickets/create}">
+                            <i class="fas fa-headset me-2"></i>Help & Support
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" th:href="@{/users/logout}">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div
+                    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-graduation-cap me-2"></i>My Courses
+                </h1>
+                <a th:href="@{/customer/courses}" class="btn btn-primary">
+                    <i class="fas fa-plus-circle me-1"></i>Browse More Courses
+                </a>
+            </div>
+
+            <!-- Alert Messages -->
+            <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${param.success}">Success message</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${param.error}">Error message</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Courses List -->
+            <div th:if="${enrollments != null and !enrollments.isEmpty()}">
+                <!-- Simple Statistics -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-3">
+                                        <div class="border rounded p-3 bg-primary text-white">
+                                            <h3 th:text="${enrollments.size()}">0</h3>
+                                            <p class="mb-0">Total Courses</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="border rounded p-3 bg-success text-white">
+                                            <h3 th:text="${activeCount}">0</h3>
+                                            <p class="mb-0">In Progress</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="border rounded p-3 bg-info text-white">
+                                            <h3 th:text="${completedCount}">0</h3>
+                                            <p class="mb-0">Completed</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="border rounded p-3 bg-warning text-white">
+                                            <h3 th:text="${cancelledCount}">0</h3>
+                                            <p class="mb-0">Cancelled</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Cards -->
+                <div class="row">
+                    <div class="col-md-6 mb-4" th:each="enrollment : ${enrollments}">
+                        <div class="card course-card h-100">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h5 class="card-title mb-0" th:text="${enrollment.course?.title}">Course Title
+                                    </h5>
+                                    <span class="badge status-badge" th:class="${enrollment.status?.name() == 'ACTIVE'} ? 'bg-success' :
+                                          (${enrollment.status?.name() == 'COMPLETED'} ? 'bg-primary' : 'bg-danger')"
+                                          th:text="${enrollment.status}">Status</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text text-muted" th:text="${enrollment.course?.description}">
+                                    Course description...
+                                </p>
+
+                                <div class="mb-3">
+                                    <strong>Instructor:</strong>
+                                    <span th:text="${enrollment.course?.courseSeller?.name}">Instructor Name</span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <strong>Enrolled:</strong>
+                                    <span
+                                            th:text="${#temporals.format(enrollment.enrollmentDate, 'MMM dd, yyyy')}">Date</span>
+                                </div>
+
+                                <!-- Progress Bar -->
+                                <div class="mb-3">
+                                    <label class="form-label">Progress</label>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar"
+                                             th:class="${enrollment.status?.name() == 'COMPLETED'} ? 'bg-success' : 'bg-primary'"
+                                             th:style="'width:' + (${enrollment.status?.name() == 'COMPLETED'} ? 100 : 25) + '%'"
+                                             aria-valuemin="0" aria-valuemax="100">
+                                                <span
+                                                        th:text="${enrollment.status?.name() == 'COMPLETED'} ? '100%' : '25%'"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- If enrollment has a course file -->
+                                <div class="course-meta"
+                                     th:if="${enrollment.course != null and enrollment.course.fileName != null}">
+                                    <small class="text-muted">
+                                        <i class="fas fa-file-alt me-1"></i>
+                                        Course:
+                                        <a th:href="@{/files/view/{filename}(filename=${enrollment.course.fileName})}"
+                                           class="text-decoration-none" th:text="${enrollment.course.fileName}"
+                                           target="_blank">
+                                            View PDF
+                                        </a>
+                                    </small>
+                                </div>
+
+                                <!-- If course does NOT have a file -->
+                                <div class="course-meta"
+                                     th:if="${enrollment.course == null or enrollment.course.fileName == null}">
+                                    <small class="text-muted">
+                                        <i class="fas fa-file-alt me-1"></i>
+                                        Course: No file uploaded
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="card-footer">
+                                <div class="btn-group w-100">
+                                    <a th:if="${enrollment.course != null and enrollment.course.fileName != null}"
+                                       th:href="@{/files/download/{filename}(filename=${enrollment.course.fileName})}"
+                                       class="btn btn-primary" download>
+                                        <i class="fas fa-download me-1"></i> Download PDF
+                                    </a>
+
+                                    <!-- Feedback Button for Active Enrollments -->
+                                    <th:block
+                                            th:if="${enrollment.status?.name() == 'ACTIVE' and enrollment.course != null}">
+                                        <a th:href="@{/customer/courses/feedback/{id}(id=${enrollment.course.courseId})}"
+                                           class="btn btn-outline-success">
+                                            <i class="fas fa-star me-1"></i> Leave Feedback
+                                        </a>
+                                    </th:block>
+
+                                    <!-- If no file is available, show disabled button -->
+                                    <button
+                                            th:if="${enrollment.course == null or enrollment.course.fileName == null}"
+                                            class="btn btn-secondary" disabled>
+                                        <i class="fas fa-download me-1"></i> No File Available
+                                    </button>
+
+                                    <!-- Details -->
+                                    <button class="btn btn-outline-info">
+                                        <i class="fas fa-info-circle me-1"></i>Details
+                                    </button>
+
+                                    <!-- Cancel / Re-enroll -->
+                                    <th:block th:if="${enrollment.status?.name() == 'ACTIVE'}">
+                                        <button class="btn btn-outline-danger" data-bs-toggle="modal"
+                                                data-bs-target="#cancelModal"
+                                                th:attr="data-bs-enrollmentid=${enrollment.enrollmentId}, data-bs-coursetitle=${enrollment.course?.title}">
+                                            <i class="fas fa-times me-1"></i>Cancel
+                                        </button>
+                                    </th:block>
+
+                                    <th:block th:if="${enrollment.status?.name() == 'CANCELLED'}">
+                                        <button class="btn btn-outline-success" data-bs-toggle="modal"
+                                                data-bs-target="#reenrollModal"
+                                                th:attr="data-bs-enrollmentid=${enrollment.enrollmentId}, data-bs-coursetitle=${enrollment.course?.title}">
+                                            <i class="fas fa-undo me-1"></i>Re-enroll
+                                        </button>
+                                    </th:block>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Enrollments -->
+            <div th:if="${enrollments == null or enrollments.isEmpty()}" class="text-center py-5">
+                <i class="fas fa-graduation-cap fa-5x text-muted mb-4"></i>
+                <h3 class="text-muted">No Course Enrollments</h3>
+                <p class="text-muted mb-4">You haven't enrolled in any courses yet. Start your learning journey
+                    today!</p>
+                <a th:href="@{/customer/courses}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-book me-2"></i>Browse Available Courses
+                </a>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Cancel Enrollment Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancel Enrollment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to cancel your enrollment in "<strong id="courseTitle"></strong>"?</p>
+                <p class="text-danger"><small>This action cannot be undone.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Enrollment</button>
+                <a id="cancelConfirmBtn" class="btn btn-danger">Cancel Enrollment</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Re-enroll Modal -->
+<div class="modal fade" id="reenrollModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Re-enroll in Course</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Do you want to re-enroll in "<strong id="reenrollCourseTitle"></strong>"?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a id="reenrollConfirmBtn" class="btn btn-success">Re-enroll</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    var cancelModal = document.getElementById('cancelModal');
+    cancelModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var enrollmentId = button.getAttribute('data-bs-enrollmentid');
+        var courseTitle = button.getAttribute('data-bs-coursetitle');
+        document.getElementById('courseTitle').textContent = courseTitle;
+        document.getElementById('cancelConfirmBtn').href = '/customer/courses/cancel-enrollment/' + enrollmentId;
+    });
+
+    var reenrollModal = document.getElementById('reenrollModal');
+    reenrollModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var enrollmentId = button.getAttribute('data-bs-enrollmentid');
+        var courseTitle = button.getAttribute('data-bs-coursetitle');
+        document.getElementById('reenrollCourseTitle').textContent = courseTitle;
+        document.getElementById('reenrollConfirmBtn').href = '/customer/courses/reenroll/' + enrollmentId;
+    });
+</script>
+
+</body>
+
+</html>

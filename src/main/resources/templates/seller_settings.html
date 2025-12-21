@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Settings - TuneWave</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #ffffff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            padding-top: 100px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px, 120px 120px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-family: 'Monospace', monospace;
+            font-size: 28px;
+            font-weight: 600;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #00d4ff;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00d4ff, #0099cc);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* User info styling */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-email {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-email i {
+            color: #00d4ff;
+        }
+
+        .seller-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .seller-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        .seller-links a:hover {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        /* Logout Button Specific Styling */
+        .logout-btn {
+            background: rgba(255, 71, 87, 0.2);
+            border: 1px solid rgba(255, 71, 87, 0.4);
+            color: #ff6b81 !important;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 71, 87, 0.3);
+            border-color: #ff4757;
+            color: #ff4757 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+        }
+
+        /* Page Title */
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00d4ff, #ffffff, #00d4ff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: textShimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes textShimmer {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .page-subtitle {
+            color: #b0b0b0;
+            margin-bottom: 30px;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .card-header {
+            background: rgba(0, 212, 255, 0.15) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+        }
+
+        .card-body {
+            padding: 30px;
+            color: #ffffff;
+        }
+
+        .card-title {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .card-text {
+            color: #b0b0b0;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            color: #ffffff;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #ffffff;
+            padding: 12px 16px;
+            width: 100%;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-control::placeholder {
+            color: #b0b0b0;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            border: none;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            color: white;
+        }
+
+        /* Tabs */
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #b0b0b0;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .tab-button.active {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+
+        .tab-button:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Image Preview */
+        .image-preview-container {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            width: auto;
+            height: auto;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            object-fit: cover;
+        }
+
+        .current-image {
+            max-width: 150px;
+            max-height: 150px;
+            width: auto;
+            height: auto;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            object-fit: cover;
+            margin-top: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Alerts */
+        .alert {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: #ffffff;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            border-color: rgba(46, 213, 115, 0.3);
+            background: rgba(46, 213, 115, 0.1);
+        }
+
+        .alert-error {
+            border-color: rgba(255, 71, 87, 0.3);
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        /* Content Container */
+        .content-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                width: 95%;
+                padding: 12px 20px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .content-container {
+                padding: 30px 20px;
+            }
+
+            .auth-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .user-info {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .seller-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .user-email {
+                font-size: 0.9rem;
+                padding: 6px 12px;
+            }
+
+            .logout-btn {
+                font-size: 0.9rem;
+                padding: 6px 12px;
+            }
+
+            .tab-buttons {
+                flex-direction: column;
+            }
+
+            .tab-button {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<!-- Navigation -->
+<nav class="navbar">
+    <div class="logo">TuneWave</div>
+    <ul class="nav-links">
+        <li><a th:href="@{/seller/dashboard}">Home</a></li>
+        <li><a th:href="@{/seller/settings}">Settings</a></li>
+        <li><a th:href="@{/seller/orders}">Orders</a></li>
+        <li><a th:href="@{/seller/products}">Products</a></li>
+        <li><a th:href="@{/seller/reviews}">Reviews</a></li>
+        <li><a th:href="@{/seller/account}">Account</a></li>
+        <li><a th:href="@{/users/logout}" class="logout">Logout</a></li>
+    </ul>
+    <div class="auth-buttons">
+        <div th:if="${currentUser != null}" class="user-info">
+            <span class="user-email">
+                <i class="fas fa-user me-1"></i>
+                <span th:text="${currentUser.email}">user@example.com</span>
+            </span>
+            <div th:if="${currentUser.role == 'SELLER'}" class="seller-links">
+                <a href="/seller/products">My Products</a>
+                <a href="/seller/orders">Manage Orders</a>
+            </div>
+            <a class="logout-btn" href="/users/logout">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="content-container">
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <h1 class="page-title">Seller Settings</h1>
+            <p class="page-subtitle">Manage your profile, business information, and payment preferences</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Tab Navigation -->
+        <div class="card">
+            <div class="card-body">
+                <div class="tab-buttons">
+                    <button class="tab-button active" onclick="switchTab('profile')" data-tab="profile">
+                        <i class="fas fa-user me-2"></i>Profile Settings
+                    </button>
+                    <button class="tab-button" onclick="switchTab('business')" data-tab="business">
+                        <i class="fas fa-store me-2"></i>Business Settings
+                    </button>
+                    <button class="tab-button" onclick="switchTab('payment')" data-tab="payment">
+                        <i class="fas fa-credit-card me-2"></i>Payment Preferences
+                    </button>
+                    <button class="tab-button" onclick="switchTab('security')" data-tab="security">
+                        <i class="fas fa-shield-alt me-2"></i>Security
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Settings Tab -->
+        <div id="profile-tab" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0"><i class="fas fa-user me-2"></i>Profile Settings</h3>
+                </div>
+                <div class="card-body">
+                    <form id="profileForm" th:action="@{/seller/updateSettings}" method="post" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label" for="name">Full Name *</label>
+                                    <input type="text" id="name" name="name" th:value="${seller.name}"
+                                           class="form-control" placeholder="Enter your full name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label" for="email">Email Address *</label>
+                                    <input type="email" id="email" name="email" th:value="${seller.email}"
+                                           class="form-control" placeholder="Enter your email address" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label" for="phoneNo">Contact Number</label>
+                                    <input type="tel" id="phoneNo" name="phoneNo" th:value="${seller.phoneNo}"
+                                           class="form-control" placeholder="Enter your phone number">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label" for="address">Personal Address</label>
+                                    <textarea id="address" name="address" rows="3" class="form-control"
+                                              placeholder="Enter your personal address" th:text="${seller.address}"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="profileImage">Profile Image</label>
+                            <input type="file" id="profileImage" name="profileImage" class="form-control"
+                                   accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" onchange="previewImage(this)">
+                            <small style="color: #b0b0b0; font-size: 0.875rem;">
+                                Upload a profile image (JPG, PNG, GIF, WEBP). Max 5MB. Recommended size: 200x200px.
+                            </small>
+                            <div id="profileImageError" style="color: #ff4757; font-size: 0.875rem; margin-top: 4px; display: none;"></div>
+                            <div class="image-preview-container">
+                                <img id="imagePreview" class="image-preview hidden" alt="Image Preview">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Current Profile Image</label>
+                            <div>
+                                <img th:if="${profileImagePath}" th:src="'/uploads/profile/' + ${profileImagePath}"
+                                     alt="Current Profile Image" class="current-image"
+                                     onerror="this.style.display='none'">
+                                <span th:unless="${profileImagePath}" class="text-muted">No profile image set</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Save Profile Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Settings Tab -->
+        <div id="business-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0"><i class="fas fa-store me-2"></i>Business Settings</h3>
+                </div>
+                <div class="card-body">
+                    <form id="businessForm" th:action="@{/seller/updateSettings}" method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label" for="storeName">Store Name *</label>
+                                    <input type="text" id="storeName" name="storeName" th:value="${seller.storeName}"
+                                           class="form-control" placeholder="Enter your store name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label" for="location">Business Location</label>
+                                    <input type="text" id="location" name="location" th:value="${seller.storeLocation}"
+                                           class="form-control" placeholder="Enter your business location">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="storeAddress">Store Address</label>
+                            <textarea id="storeAddress" name="storeAddress" rows="3" class="form-control"
+                                      placeholder="Enter your store address" th:text="${seller.storeAddress}"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Save Business Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Preferences Tab -->
+        <div id="payment-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0"><i class="fas fa-credit-card me-2"></i>Payment Preferences</h3>
+                </div>
+                <div class="card-body">
+                    <form id="paymentForm" th:action="@{/seller/updateSettings}" method="post">
+                        <div class="form-group">
+                            <label class="form-label" for="paymentMethod">Preferred Payment Method *</label>
+                            <select id="paymentMethod" name="paymentMethod" class="form-control" required>
+                                <option value="">Select payment method...</option>
+                                <option value="paypal" th:selected="${seller.paymentMethod == 'paypal'}">PayPal</option>
+                                <option value="stripe" th:selected="${seller.paymentMethod == 'stripe'}">Stripe</option>
+                                <option value="bank_transfer" th:selected="${seller.paymentMethod == 'bank_transfer'}">Bank Transfer</option>
+                                <option value="cash" th:selected="${seller.paymentMethod == 'cash'}">Cash on Delivery</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Payment Instructions</label>
+                            <div style="background: rgba(255, 255, 255, 0.05); padding: 16px; border-radius: 10px; font-size: 0.9rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                <p th:if="${seller.paymentMethod == 'paypal'}">Please ensure your PayPal email is verified and matches your account email.</p>
+                                <p th:if="${seller.paymentMethod == 'stripe'}">Stripe payments will be processed automatically. Ensure your Stripe account is connected.</p>
+                                <p th:if="${seller.paymentMethod == 'bank_transfer'}">Bank transfer details will be shared with customers upon order confirmation.</p>
+                                <p th:if="${seller.paymentMethod == 'cash'}">Cash payments will be collected during product delivery.</p>
+                                <p th:unless="${seller.paymentMethod}">Select a payment method to see specific instructions.</p>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Save Payment Preferences
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Tab -->
+        <div id="security-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0"><i class="fas fa-shield-alt me-2"></i>Security Settings</h3>
+                </div>
+                <div class="card-body">
+                    <form id="securityForm" th:action="@{/seller/updateSettings}" method="post">
+                        <div class="form-group">
+                            <label class="form-label" for="currentPassword">Current Password *</label>
+                            <input type="password" id="currentPassword" name="currentPassword"
+                                   class="form-control" placeholder="Enter your current password" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="newPassword">New Password *</label>
+                            <input type="password" id="newPassword" name="newPassword"
+                                   class="form-control" placeholder="Enter new password" required>
+                            <small style="color: #b0b0b0; font-size: 0.85rem;">Password must be at least 6 characters long</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="confirmPassword">Confirm New Password *</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword"
+                                   class="form-control" placeholder="Confirm new password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Update Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3 class="card-title mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Account Actions</h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button type="button" class="btn btn-danger" onclick="deleteAccount()">
+                            <i class="fas fa-trash me-1"></i>Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Tab Switching Function
+    function switchTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        // Remove active class from all buttons
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('active');
+        });
+
+        // Show selected tab content
+        document.getElementById(tabName + '-tab').classList.add('active');
+
+        // Add active class to clicked button
+        event.target.classList.add('active');
+    }
+
+    // Profile image validation constants
+    const MAX_PROFILE_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+    const ALLOWED_PROFILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
+    // Profile image validation functions
+    function validateProfileImage(file) {
+        const errors = [];
+
+        // Check file type
+        if (!ALLOWED_PROFILE_TYPES.includes(file.type.toLowerCase())) {
+            errors.push(`Invalid file type. Allowed: JPG, PNG, GIF, WEBP`);
+        }
+
+        // Check file size
+        if (file.size > MAX_PROFILE_IMAGE_SIZE) {
+            errors.push(`File is too large. Maximum size: 5MB`);
+        }
+
+        // Check if file is empty
+        if (file.size === 0) {
+            errors.push(`File is empty`);
+        }
+
+        return errors;
+    }
+
+    function showProfileImageError(message) {
+        const errorDiv = document.getElementById('profileImageError');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+
+    function hideProfileImageError() {
+        const errorDiv = document.getElementById('profileImageError');
+        errorDiv.style.display = 'none';
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Enhanced Image Preview Function with Validation
+    function previewImage(input) {
+        const preview = document.getElementById('imagePreview');
+        hideProfileImageError();
+
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+
+            // Validate the file
+            const errors = validateProfileImage(file);
+            if (errors.length > 0) {
+                showProfileImageError(errors.join('; '));
+                // Clear the file input
+                input.value = '';
+                preview.classList.add('hidden');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                preview.title = `${file.name} (${formatFileSize(file.size)})`;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.classList.add('hidden');
+        }
+    }
+
+    // Form Validation
+    function validateForm(formId) {
+        const form = document.getElementById(formId);
+        const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+
+        let isValid = true;
+        inputs.forEach(input => {
+            if (!input.value.trim()) {
+                input.style.borderColor = '#ff4757';
+                isValid = false;
+            } else {
+                input.style.borderColor = '';
+            }
+        });
+
+        // Password confirmation check for security form
+        if (formId === 'securityForm') {
+            const newPassword = document.getElementById('newPassword');
+            const confirmPassword = document.getElementById('confirmPassword');
+
+            if (newPassword.value !== confirmPassword.value) {
+                confirmPassword.style.borderColor = '#ff4757';
+                isValid = false;
+            } else if (newPassword.value.length < 6) {
+                newPassword.style.borderColor = '#ff4757';
+                isValid = false;
+            }
+        }
+
+        return isValid;
+    }
+
+    // Attach form validation to form submissions
+    document.addEventListener('DOMContentLoaded', function() {
+        const forms = ['profileForm', 'businessForm', 'paymentForm', 'securityForm'];
+        forms.forEach(formId => {
+            const form = document.getElementById(formId);
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    if (!validateForm(formId)) {
+                        e.preventDefault();
+                        alert('Please fill in all required fields correctly.');
+                    }
+                });
+            }
+        });
+
+        // Add hover effects for cards
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    });
+
+    // Account Actions
+    function deleteAccount() {
+        const warningDialog = document.createElement('div');
+        warningDialog.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+        `;
+
+        const dialogContent = document.createElement('div');
+        dialogContent.style.cssText = `
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            text-align: center;
+            color: white;
+        `;
+
+        dialogContent.innerHTML = `
+            <h3 style="color: #ff4757; margin-bottom: 15px;"><i class="fas fa-exclamation-triangle me-2"></i>Delete Account</h3>
+            <p style="margin-bottom: 20px; color: #b0b0b0;">
+                <strong>WARNING:</strong> This will permanently delete your account and ALL associated data including:
+            </p>
+            <ul style="text-align: left; margin-bottom: 20px; color: #b0b0b0;">
+                <li>Your profile and settings</li>
+                <li>All your products and images</li>
+                <li>Order history and transactions</li>
+                <li>Reviews and ratings</li>
+            </ul>
+            <p style="color: #ff4757; font-weight: bold; margin-bottom: 20px;">
+                This action CANNOT be undone!
+            </p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button id="cancelDelete" class="btn btn-secondary">
+                    Cancel
+                </button>
+                <button id="confirmDelete" class="btn btn-danger">
+                    Delete Account
+                </button>
+            </div>
+        `;
+
+        warningDialog.appendChild(dialogContent);
+        document.body.appendChild(warningDialog);
+
+        // Handle cancel
+        document.getElementById('cancelDelete').onclick = function() {
+            document.body.removeChild(warningDialog);
+        };
+
+        // Handle confirm delete
+        document.getElementById('confirmDelete').onclick = function() {
+            document.body.removeChild(warningDialog);
+            // Submit the delete request
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/seller/deleteAccount';
+            document.body.appendChild(form);
+            form.submit();
+        };
+
+        // Close dialog when clicking outside
+        warningDialog.onclick = function(e) {
+            if (e.target === warningDialog) {
+                document.body.removeChild(warningDialog);
+            }
+        };
+    }
+
+    // Initialize first tab as active
+    document.addEventListener('DOMContentLoaded', function() {
+        switchTab('profile');
+    });
+</script>
+</body>
+</html>

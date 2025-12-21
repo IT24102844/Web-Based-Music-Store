@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - TuneWave</title>
+    <link th:href="@{/css/seller-theme.css}" rel="stylesheet">
+</head>
+<body>
+<div class="dashboard-container">
+    <nav class="sidebar">
+        <h2>🎵 TuneWave</h2>
+        <ul>
+            <li><a th:href="@{/buyer/dashboard}">Shop</a></li>
+        </ul>
+    </nav>
+    <main class="main-content">
+        <div class="header">
+            <h1>Checkout</h1>
+            <p th:text="${#lists.size(items)} + ' items selected'">0 items selected</p>
+        </div>
+
+        <div class="card" th:if="${items != null}">
+            <div th:each="item : ${items}" style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #eee;">
+                <div>
+                    <div style="font-weight:600;" th:text="${item.name}">Product</div>
+                    <div style="color:#64748b;" th:text="${item.instrumentType}">Type</div>
+                </div>
+                <div style="font-weight:700; color:#059669;" th:text="'LKR ' + ${#numbers.formatDecimal(item.price, 1, 2)}">LKR 0.00</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding-top:12px; margin-top:12px;">
+                <div style="font-weight:600;">Total</div>
+                <div style="font-weight:800; color:#059669;" th:text="'LKR ' + ${#numbers.formatDecimal(total, 1, 2)}">LKR 0.00</div>
+            </div>
+        </div>
+
+        <form th:action="@{/buyer/pay}" method="post" style="margin-top:16px;">
+            <button type="submit" class="btn btn-primary">Proceed to Pay</button>
+            <a th:href="@{/buyer/products}" class="btn btn-secondary" style="margin-left:8px;">Back to Products</a>
+        </form>
+    </main>
+  </div>
+
+  <script>
+    // theme preference
+    if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+    }
+  </script>
+</body>
+</html>
+
+

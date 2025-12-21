@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${course.courseId != null} ? 'Edit Course' : 'Create Course'">Create Course</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* === Global === */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0%,100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 120px auto;
+            padding: 20px;
+        }
+
+        /* === Navbar === */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1200px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .logo {
+            font-family: 'Monospace', monospace;
+            font-size: 28px;
+            font-weight: 600;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0,212,255,0.3);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 400;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover { color: #00d4ff; }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px; left: 0;
+            width: 0; height: 2px;
+            background: linear-gradient(90deg, #00d4ff, #0099cc);
+            transition: width 0.3s ease;
+        }
+        .nav-links a:hover::after { width: 100%; }
+
+        /* === Cards === */
+        .card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.4);
+        }
+
+        .card h1 {
+            color: #00d4ff;
+            margin-bottom: 25px;
+            font-size: 2.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card h5 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* === Form Layout === */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .form-main {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .form-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* === Form Elements === */
+        .form-group {
+            position: relative;
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            color: #e0e0e0;
+            font-weight: 500;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 1rem;
+        }
+
+        .form-control, .form-select {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e0e0e0;
+            border-radius: 12px;
+            padding: 14px 16px;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .form-control::placeholder {
+            color: #888;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: rgba(255,255,255,0.08);
+            border-color: #00d4ff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,212,255,0.15);
+            transform: translateY(-1px);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group-text {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e0e0e0;
+            padding: 14px 16px;
+            border-right: none;
+            border-radius: 12px 0 0 12px;
+        }
+
+        .input-group .form-control {
+            border-left: none;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .form-text {
+            color: #b0b0b0;
+            font-size: 0.85rem;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* === File Upload === */
+        .file-upload-container {
+            position: relative;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #b0b0b0;
+        }
+
+        .file-upload-label:hover {
+            border-color: #00d4ff;
+            background: rgba(0,212,255,0.05);
+            color: #00d4ff;
+        }
+
+        .file-upload-label i {
+            margin-right: 8px;
+        }
+
+        /* === Tips Card === */
+        .tips-card {
+            background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(0,154,204,0.08));
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .tips-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .tips-card li {
+            padding: 8px 0;
+            color: #b0b0b0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: color 0.3s ease;
+        }
+
+        .tips-card li:hover {
+            color: #00d4ff;
+        }
+
+        .tips-card li i {
+            color: #00d4ff;
+            width: 16px;
+        }
+
+        /* === Buttons === */
+        .btn {
+            padding: 12px 28px;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,212,255,0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,212,255,0.4);
+            background: linear-gradient(135deg, #00e5ff, #00aadd);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #e0e0e0;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-info {
+            border: 1px solid #00d4ff;
+            color: #00d4ff;
+            background: transparent;
+        }
+
+        .btn-outline-info:hover {
+            background: rgba(0,212,255,0.1);
+            box-shadow: 0 0 15px rgba(0,212,255,0.3);
+            transform: translateY(-1px);
+        }
+
+        .form-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .form-actions .btn {
+            min-width: 140px;
+        }
+
+        /* === Alerts === */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .alert-success {
+            background: rgba(40,167,69,0.15);
+            border-left: 4px solid #28a745;
+            color: #28a745;
+        }
+
+        .alert-danger {
+            background: rgba(220,53,69,0.15);
+            border-left: 4px solid #dc3545;
+            color: #dc3545;
+        }
+
+        /* === Stats === */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            text-align: center;
+        }
+
+        .stats .box {
+            padding: 25px 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .stats .box:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0,212,255,0.3);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .stats h3 {
+            margin-bottom: 8px;
+            font-size: 1.8rem;
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .stats p {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* === Responsive === */
+        @media (max-width: 968px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .form-sidebar {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-wrap: wrap;
+                width: 95%;
+                padding: 12px 20px;
+            }
+
+            .nav-links {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .container {
+                margin: 100px 10px;
+                padding: 15px;
+            }
+
+            .card {
+                padding: 25px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .form-actions .btn {
+                min-width: auto;
+                justify-content: center;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .card h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="logo">TuneWave</div>
+    <ul class="nav-links">
+        <li><a th:href="@{/dashboard/course-seller}">Dashboard</a></li>
+        <li><a th:href="@{/course-seller/courses}">My Courses</a></li>
+        <li><a th:href="@{/course-seller/courses/create}" style="color:#00d4ff;">Create Course</a></li>
+        <li><a th:href="@{/course-seller/courses/enrollments}">Enrollments</a></li>
+        <li><a th:href="@{/users/edit-profile}">Profile</a></li>
+        <li><a th:href="@{/users/logout}" style="color:#ff4d4d;">Logout</a></li>
+    </ul>
+</nav>
+
+<!-- Main -->
+<div class="container">
+
+    <div class="card">
+        <h1>
+            <i class="fas" th:classappend="${course.courseId != null} ? 'fa-edit' : 'fa-plus-circle'"></i>
+            <span th:text="${course.courseId != null} ? 'Edit Course' : 'Create New Course'"></span>
+        </h1>
+
+        <!-- Alerts -->
+        <div th:if="${param.success}" class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${param.success}">Success</span>
+        </div>
+        <div th:if="${param.error}" class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span th:text="${param.error}">Error</span>
+        </div>
+
+        <form th:action="${course.courseId != null} ? @{/course-seller/courses/update/{id}(id=${course.courseId})} : @{/course-seller/courses/create}"
+              method="post" enctype="multipart/form-data">
+            <div class="form-grid">
+                <!-- Main Form Content -->
+                <div class="form-main">
+                    <!-- Title -->
+                    <div class="form-group">
+                        <label for="title" class="form-label">
+                            <i class="fas fa-heading"></i> Course Title *
+                        </label>
+                        <input type="text" id="title" name="title" class="form-control"
+                               th:value="${course.title}" placeholder="Enter a compelling course title" required>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle"></i>
+                             A clear and descriptive title that attracts students
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-align-left"></i> Course Description *
+                        </label>
+                        <textarea id="description" name="description" class="form-control" rows="6"
+                                  th:text="${course.description}"
+                                  placeholder="Describe what students will learn, prerequisites, and course outcomes..."
+                                  required></textarea>
+                        <div class="form-text">
+                            <i class="fas fa-lightbulb"></i>
+                             Detailed descriptions help students understand the course value
+                        </div>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-file-upload"></i> Course Content *
+                        </label>
+                        <div class="file-upload-container">
+                            <label for="formFile" class="file-upload-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span th:text="${course.courseId != null} ? 'Choose new course file (optional)' : 'Choose course file (required)'"></span>
+                            </label>
+                            <input class="form-control" type="file" id="formFile" name="file"
+                                   style="display: none;"
+                                   th:attr="required=${course.courseId == null}">
+                        </div>
+                        <div class="form-text">
+                            <i class="fas fa-shield-alt"></i>
+                             Supported formats: PDF, ZIP, MP4, DOCX (Max: 100MB)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="form-sidebar">
+                    <!-- Price -->
+                    <div class="form-group">
+                        <label for="price" class="form-label">
+                            <i class="fas fa-tag"></i> Price (LKR) *
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-dollar-sign"></i>
+                            </span>
+                            <input type="number" id="price" name="price" class="form-control"
+                                   th:value="${course.price}" step="0.01" min="0"
+                                   placeholder="0.00" required>
+                        </div>
+                        <div class="form-text">
+                            <i class="fas fa-gift"></i>
+                             Set competitive pricing (use 0 for free courses)
+                        </div>
+                    </div>
+
+                    <!-- Tips Card -->
+                    <div class="tips-card">
+                        <h5><i class="fas fa-lightbulb"></i>Course Creation Tips</h5>
+                        <ul>
+                            <li><i class="fas fa-check"></i>Use clear, descriptive titles</li>
+                            <li><i class="fas fa-check"></i>Write detailed descriptions</li>
+                            <li><i class="fas fa-check"></i>Set competitive pricing</li>
+                            <li><i class="fas fa-check"></i>Update content regularly</li>
+                            <li><i class="fas fa-check"></i>Include practical examples</li>
+                            <li><i class="fas fa-check"></i>Add engaging visuals</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas" th:classappend="${course.courseId != null} ? 'fa-save' : 'fa-plus-circle'"></i>
+                    <span th:text="${course.courseId != null} ? 'Update Course' : 'Create Course'"></span>
+                </button>
+                <a th:href="@{/dashboard/course-seller}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>Cancel
+                </a>
+                <div th:if="${course.courseId != null}" style="margin-left: auto;">
+                    <a th:href="@{/course-seller/courses/enrollments}" class="btn btn-outline-info">
+                        <i class="fas fa-users"></i>View Enrollments
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Stats -->
+    <div th:if="${course.courseId != null}" class="card">
+        <h5><i class="fas fa-chart-bar"></i>Course Performance</h5>
+        <div class="stats">
+            <div class="box">
+                <h3 th:text="${course.enrollments?.size() ?: 0}">0</h3>
+                <p>Total Enrollments</p>
+            </div>
+            <div class="box">
+                <h3><span th:text="${#numbers.formatDecimal((course.enrollments?.size() ?: 0) * course.price, 1, 2)}">0.00</span> LKR</h3>
+                <p>Total Revenue</p>
+            </div>
+            <div class="box">
+                <h3 th:text="${#temporals.format(course.createdAt, 'MMM dd, yyyy')}">Date</h3>
+                <p>Created Date</p>
+            </div>
+            <div class="box">
+                <h3 th:text="${#temporals.format(course.updatedAt, 'MMM dd, yyyy')}">Date</h3>
+                <p>Last Updated</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // File upload styling
+    document.getElementById('formFile').addEventListener('change', function(e) {
+        const label = document.querySelector('.file-upload-label');
+        if (this.files.length > 0) {
+            label.innerHTML = `<i class="fas fa-file-check"></i> ${this.files[0].name}`;
+            label.style.borderColor = '#00d4ff';
+            label.style.background = 'rgba(0,212,255,0.1)';
+            label.style.color = '#00d4ff';
+        } else {
+            label.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Choose course file`;
+            label.style.borderColor = 'rgba(255,255,255,0.2)';
+            label.style.background = 'rgba(255,255,255,0.05)';
+            label.style.color = '#b0b0b0';
+        }
+    });
+</script>
+</body>
+</html>

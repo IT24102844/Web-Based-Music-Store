@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Song - TuneWave</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    /* All the same styles from the song details page */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      color: #e0e0e0;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      padding-top: 100px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+              radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+              radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+              radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+      background-size: 50px 50px, 80px 80px, 120px 120px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+
+    .content-container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #00d4ff, #ffffff, #00d4ff);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: textShimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes textShimmer {
+      0%, 100% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+
+    .welcome-text {
+      color: #b0b0b0;
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 1200px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo {
+      font-family: 'Monospace', monospace;
+      font-size: 28px;
+      font-weight: 600;
+      color: #00d4ff;
+      text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .btn-nav {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 25px;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .btn-login {
+      background: transparent;
+      color: #e0e0e0;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-login:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #00d4ff;
+      color: #00d0ff;
+    }
+
+    .btn-signup {
+      background: transparent;
+      border: 1px solid rgba(255, 71, 87, 0.3);
+      color: #ff6b81;
+    }
+
+    .btn-signup:hover {
+      background: rgba(255, 71, 87, 0.1);
+      border-color: #ff4757;
+      color: #ff4757;
+    }
+
+    /* Form Card */
+    .form-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .form-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(0, 212, 255, 0.3);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-header {
+      background: rgba(0, 212, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 20px 30px;
+    }
+
+    .card-header h3 {
+      color: #ffffff;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .card-body {
+      padding: 30px;
+    }
+
+    /* Form Styling */
+    .form-label {
+      color: #b0b0b0;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .form-label.required::after {
+      content: " *";
+      color: #ff6b6b;
+    }
+
+    .form-control {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e0e0e0;
+      border-radius: 10px;
+      padding: 12px 15px;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(0, 212, 255, 0.5);
+      color: #e0e0e0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+    }
+
+    .form-control::placeholder {
+      color: #b0b0b0;
+    }
+
+    .form-control-file {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 12px 15px;
+      color: #e0e0e0;
+    }
+
+    /* Alert Styling */
+    .alert {
+      border-radius: 12px;
+      border: none;
+      backdrop-filter: blur(10px);
+    }
+
+    .alert-success {
+      background: rgba(40, 167, 69, 0.2);
+      color: #28a745;
+      border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .alert-danger {
+      background: rgba(220, 53, 69, 0.2);
+      color: #dc3545;
+      border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-close {
+      filter: invert(1);
+    }
+
+    /* Button Styling */
+    .btn {
+      border-radius: 10px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      padding: 12px 25px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ffc107, #fd7e14);
+      border: none;
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+      color: #000;
+    }
+
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #e0e0e0;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+    }
+
+    /* Form Text */
+    .form-text {
+      color: #b0b0b0;
+      font-size: 0.85rem;
+    }
+
+    /* Error Styling */
+    .is-invalid {
+      border-color: #dc3545 !important;
+    }
+
+    .invalid-feedback {
+      display: block;
+      color: #dc3545;
+      font-size: 0.875em;
+      margin-top: 0.25rem;
+    }
+
+    .field-error {
+      color: #dc3545;
+      font-size: 0.875em;
+      margin-top: 0.25rem;
+      display: none;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .navbar {
+        width: 95%;
+        padding: 12px 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .container {
+        padding: 20px;
+      }
+
+      .content-container {
+        padding: 30px 20px;
+      }
+
+      .card-body {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="logo">TuneWave</div>
+  <div class="auth-buttons">
+    <a th:href="@{/artist/events}" class="btn-nav btn-login">My Events</a>
+    <a th:href="@{/artist/event/new}" class="btn-nav btn-login">Create Event</a>
+    <a th:href="@{/artist/songs}" class="btn-nav btn-login">My Songs</a>
+    <a th:href="@{/users/profile}" class="btn-nav btn-login">Profile</a>
+    <a th:href="@{/users/logout}" class="btn-nav btn-signup">Logout</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="content-container">
+    <h1>Upload New Song</h1>
+    <p class="welcome-text">Share your music with the world</p>
+
+    <div class="form-card">
+      <div class="card-header">
+        <h3 class="card-title mb-0"><i class="fas fa-upload me-2"></i>Upload New Song</h3>
+      </div>
+      <div class="card-body">
+        <!-- Success Message -->
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+          <span th:text="${param.success}">Success message</span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+          <span th:text="${error}">Error message</span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <form th:action="@{/artist/songs/upload}" method="post" enctype="multipart/form-data" id="uploadForm">
+          <!-- Song Name -->
+          <div class="mb-3">
+            <label for="name" class="form-label required">Song Name</label>
+            <input type="text" class="form-control" id="name" name="name"
+                   placeholder="Enter song name">
+            <div class="field-error" id="nameError"></div>
+          </div>
+
+          <!-- Genre -->
+          <div class="mb-3">
+            <label for="genre" class="form-label required">Genre</label>
+            <input type="text" class="form-control" id="genre" name="genre"
+                   placeholder="e.g., Pop, Rock, Jazz">
+            <div class="field-error" id="genreError"></div>
+            <div class="form-text">Enter the music genre</div>
+          </div>
+
+          <!-- Price -->
+          <div class="mb-3">
+            <label for="price" class="form-label required">Price (LKR)</label>
+            <input type="number" class="form-control" id="price" name="price"
+                   step="0.01" min="0" placeholder="0.00">
+            <div class="field-error" id="priceError"></div>
+          </div>
+
+          <!-- Audio File -->
+          <div class="mb-3">
+            <label for="audioFile" class="form-label required">Audio File</label>
+            <input type="file" class="form-control" id="audioFile" name="audioFile"
+                   accept="audio/*">
+            <div class="field-error" id="audioFileError"></div>
+            <div class="form-text">Supported formats: MP3, WAV, FLAC, AAC (Max 100MB)</div>
+          </div>
+
+          <!-- Preview Clip -->
+          <div class="mb-3">
+            <label for="previewClip" class="form-label required">Preview Clip</label>
+            <input type="file" class="form-control" id="previewClip" name="previewClip"
+                   accept="audio/*">
+            <div class="field-error" id="previewClipError"></div>
+            <div class="form-text">Short preview clip for customers (Max 50MB)</div>
+          </div>
+
+          <!-- Song Image -->
+          <div class="mb-3">
+            <label for="songImage" class="form-label required">Song Image</label>
+            <input type="file" class="form-control" id="songImage" name="songImage"
+                   accept="image/*">
+            <div class="field-error" id="songImageError"></div>
+            <div class="form-text">Cover art or image representing the song (Max 10MB)</div>
+          </div>
+
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a th:href="@{/dashboard/artist}" class="btn btn-secondary me-md-2">
+              <i class="fas fa-times me-1"></i>Cancel
+            </a>
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              <i class="fas fa-upload me-1"></i>Upload Song
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // All the original JavaScript validation code preserved
+  document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevent form submission initially
+
+    // Clear previous errors
+    clearAllErrors();
+
+    let isValid = true;
+
+    // Validate Song Name
+    const name = document.getElementById('name').value.trim();
+    if (!name) {
+      showFieldError('nameError', 'Please enter a song name');
+      isValid = false;
+    }
+
+    // Validate Genre
+    const genre = document.getElementById('genre').value.trim();
+    if (!genre) {
+      showFieldError('genreError', 'Please enter a genre');
+      isValid = false;
+    }
+
+    // Validate Price
+    const price = document.getElementById('price').value;
+    if (!price || price < 0) {
+      showFieldError('priceError', 'Please enter a valid price');
+      isValid = false;
+    }
+
+    // Validate Audio File
+    const audioFile = document.getElementById('audioFile').files[0];
+    if (!audioFile) {
+      showFieldError('audioFileError', 'Please upload an audio file');
+      isValid = false;
+    } else if (audioFile.size > 100 * 1024 * 1024) {
+      showFieldError('audioFileError', 'Audio file size must be less than 100MB');
+      isValid = false;
+    }
+
+    // Validate Preview Clip
+    const previewClip = document.getElementById('previewClip').files[0];
+    if (!previewClip) {
+      showFieldError('previewClipError', 'Please upload a preview clip');
+      isValid = false;
+    } else if (previewClip.size > 50 * 1024 * 1024) {
+      showFieldError('previewClipError', 'Preview clip size must be less than 50MB');
+      isValid = false;
+    }
+
+    // Validate Song Image
+    const songImage = document.getElementById('songImage').files[0];
+    if (!songImage) {
+      showFieldError('songImageError', 'Please upload a song image');
+      isValid = false;
+    } else if (songImage.size > 10 * 1024 * 1024) {
+      showFieldError('songImageError', 'Song image size must be less than 10MB');
+      isValid = false;
+    }
+
+    // If valid, submit the form
+    if (isValid) {
+      this.submit();
+    }
+  });
+
+  function showFieldError(fieldId, message) {
+    const errorElement = document.getElementById(fieldId);
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+
+    // Add red border to the input field
+    const fieldName = fieldId.replace('Error', '');
+    const inputField = document.getElementById(fieldName);
+    if (inputField) {
+      inputField.classList.add('is-invalid');
+    }
+  }
+
+  function clearAllErrors() {
+    // Clear all error messages
+    const errorElements = document.querySelectorAll('.field-error');
+    errorElements.forEach(element => {
+      element.textContent = '';
+      element.style.display = 'none';
+    });
+
+    // Remove red borders from all fields
+    const inputFields = document.querySelectorAll('.is-invalid');
+    inputFields.forEach(field => {
+      field.classList.remove('is-invalid');
+    });
+  }
+
+  // Clear individual errors when user starts typing or selecting files
+  document.getElementById('name').addEventListener('input', function() {
+    clearFieldError('nameError', 'name');
+  });
+
+  document.getElementById('genre').addEventListener('input', function() {
+    clearFieldError('genreError', 'genre');
+  });
+
+  document.getElementById('price').addEventListener('input', function() {
+    clearFieldError('priceError', 'price');
+  });
+
+  document.getElementById('audioFile').addEventListener('change', function() {
+    clearFieldError('audioFileError', 'audioFile');
+  });
+
+  document.getElementById('previewClip').addEventListener('change', function() {
+    clearFieldError('previewClipError', 'previewClip');
+  });
+
+  document.getElementById('songImage').addEventListener('change', function() {
+    clearFieldError('songImageError', 'songImage');
+  });
+
+  function clearFieldError(errorId, fieldId) {
+    const errorElement = document.getElementById(errorId);
+    const inputField = document.getElementById(fieldId);
+
+    if (errorElement) {
+      errorElement.textContent = '';
+      errorElement.style.display = 'none';
+    }
+
+    if (inputField) {
+      inputField.classList.remove('is-invalid');
+    }
+  }
+
+  // Add hover effects for the form card
+  document.addEventListener('DOMContentLoaded', function() {
+    const card = document.querySelector('.form-card');
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-5px)';
+    });
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0)';
+    });
+  });
+</script>
+</body>
+</html>

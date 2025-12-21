@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discover Songs - TuneWave</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #e0e0e0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            padding-top: 100px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px, 120px 120px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .content-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00d4ff, #ffffff, #00d4ff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: textShimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes textShimmer {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .welcome-text {
+            color: #b0b0b0;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-family: 'Monospace', monospace;
+            font-size: 28px;
+            font-weight: 600;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-nav {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-login {
+            background: transparent;
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #00d4ff;
+            color: #00d0ff;
+        }
+
+        .btn-signup {
+            background: transparent;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            color: #ff6b81;
+        }
+
+        .btn-signup:hover {
+            background: rgba(255, 71, 87, 0.1);
+            border-color: #ff4757;
+            color: #ff4757;
+        }
+
+        /* Search and Filter Section */
+        .filter-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 15px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 212, 255, 0.5);
+            color: #000000;
+            box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: #b0b0b0;
+        }
+
+        .input-group-text {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #b0b0b0;
+            border-radius: 10px 0 0 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        /* Song Cards */
+        .song-card {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+
+            /*backdrop-filter: blur(20px);*/
+            /*box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);*/
+            /*margin-bottom: 20px;*/
+        }
+
+        .song-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 12px 40px rgba(0, 212, 255, 0.2);
+        }
+
+        .song-image-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .song-list-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 12px;
+            /*border-radius: 15px 15px 0 0;*/
+
+            /*height: 100%;*/
+
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .placeholder-image {
+            width: 100%;
+            /*height: 100%;*/
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 156, 204, 0.1));
+            /*border-radius: 15px 15px 0 0;*/
+
+            height: 150px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .genre-badge {
+            background: rgba(0, 212, 255, 0.8);
+            color: white;
+            font-size: 0.7em;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .card-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .title-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 0;
+            flex: 1;
+            margin-right: 10px;
+            height: auto;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .card-text {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            flex-grow: 1;
+        }
+
+        .price-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .price-tag {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2ed573
+        }
+
+        .artist-name {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .upload-date {
+            color: #b0b0b0;
+            font-size: 0.8rem;
+            text-align: right;
+            margin-bottom: 10px;
+        }
+
+        .btn-outline-primary {
+            border: 1px solid rgba(0, 212, 255, 0.5);
+            color: #00d4ff;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-primary:hover {
+            transform: translateY(-2px);
+            background: rgba(0, 212, 255, 0.1);
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+
+        .btn-success {
+            border-radius: 8px;
+            transition: all 0.3s ease;
+
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            border: none;
+            color: #000;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        /* Alerts */
+        .alert {
+            border-radius: 12px;
+            border: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #b0b0b0;
+        }
+
+        .no-results i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.1);
+        }
+
+        .no-results h3 {
+            color: #b0b0b0;
+            margin-bottom: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                width: 95%;
+                padding: 12px 20px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .content-container {
+                padding: 30px 20px;
+            }
+
+            .filter-section {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .song-card {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="logo">TuneWave</div>
+    <div class="auth-buttons">
+        <a th:href="@{/dashboard/customer}" class="btn-nav btn-login">Dashboard</a>
+        <a th:href="@{/users/logout}" class="btn-nav btn-signup">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="content-container">
+        <h1>Discover Songs</h1>
+        <p class="welcome-text">Explore our collection of premium music from talented artists worldwide</p>
+
+        <!-- Search and Filter Section -->
+        <div class="filter-section">
+            <form th:action="@{/customer/songs}" method="get" class="row g-3">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" name="search" class="form-control"
+                               th:value="${searchQuery}" placeholder="Search by song name...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select name="genre" class="form-select">
+                        <option value="">All Genres</option>
+                        <option th:each="genre : ${genres}"
+                                th:value="${genre}"
+                                th:text="${genre}"
+                                th:selected="${selectedGenre == genre}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-1"></i>Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
+            <span th:text="${param.success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show">
+            <span th:text="${param.error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Songs Grid -->
+        <div class="row">
+            <div th:each="song : ${songs}" class="col-lg-4 col-md-6 mb-4">
+                <div class="card song-card h-100">
+                    <div class="song-image-container">
+                        <!-- Song Image -->
+                        <div th:if="${song.songImage}">
+                            <img th:src="@{${song.songImage}}" alt="Song cover" class="song-list-image">
+                        </div>
+                        <div th:unless="${song.songImage}">
+                            <div class="placeholder-image">
+                                <i class="fas fa-music fa-3x text-muted"></i>
+                            </div>
+                        </div>
+<!--                        <span class="genre-badge" th:text="${song.genre}">Genre</span>-->
+                    </div>
+
+                    <div class="card-body d-flex flex-column">
+                        <div class="title-container">
+                            <h5 class="card-title" th:text="${song.name}">Song Name</h5>
+                            <span class="genre-badge" th:text="${song.genre}">Genre</span>
+                        </div>
+
+                        <p class="card-text flex-grow-1">
+                            <small>
+                                By <span class="artist-name" th:text="${song.artist?.stageName != null} ? ${song.artist.stageName} : 'Unknown Artist'">Artist Name</span>
+                            </small>
+                        </p>
+
+                        <div class="mt-auto">
+                            <div class="price-container">
+                                <span class="price-tag">LKR <span th:text="${#numbers.formatDecimal(song.price, 1, 2)}">0.00</span></span>
+                            </div>
+                            <div class="upload-date">
+                                Uploaded: <span th:text="${#temporals.format(song.uploadDate, 'dd MMM yyyy')}">Date</span>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a th:href="@{/customer/songs/{id}(id=${song.id})}"
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-info-circle me-1"></i>View Details
+                                </a>
+                                <form th:action="@{/customer/songs/{id}/purchase(id=${song.id})}" method="post" class="d-grid">
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="fas fa-shopping-cart me-1"></i>Purchase
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Results Message -->
+        <div th:if="${#lists.isEmpty(songs)}" class="no-results">
+            <i class="fas fa-music"></i>
+            <h3>No Songs Found</h3>
+            <p th:if="${searchQuery}">
+                No results for "<span th:text="${searchQuery}"></span>"
+                <span th:if="${selectedGenre}"> in <span th:text="${selectedGenre}"></span> genre</span>
+            </p>
+            <p th:unless="${searchQuery}">
+                No songs available at the moment. Check back later!
+            </p>
+            <a th:href="@{/customer/songs}" class="btn btn-primary mt-3">
+                <i class="fas fa-redo me-1"></i>View All Songs
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Add any interactive functionality here
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add hover effects for cards
+        const cards = document.querySelectorAll('.song-card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    });
+</script>
+</body>
+</html>
